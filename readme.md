@@ -5,7 +5,7 @@
 # Git-Based Semantic Versioning
 
 This action produces a [semantic version](https://semver.org) for a repository
-using the repositories git history.
+using the repository's git history.
 
 # Usage
 
@@ -14,7 +14,7 @@ using the repositories git history.
 ```yaml
 - uses: paulhatch/semantic-version@v1
   with:
-    #
+    # The main branch to count commits on
     main_branch: "master"
     # The release branch pattern which be be used as a prefix for release branches
     release_branch: "release"
