@@ -1,0 +1,35 @@
+{
+  "name": "semantic-version",
+  "version": "1.0.0",
+  "description": "Semantic Version GitHub Action",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint index.js",
+    "package": "ncc build index.js -o dist",
+    "test": "eslint index.js && jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulhatch/semantic-version.git"
+  },
+  "keywords": [
+    "GitHub",
+    "Actions",
+    "JavaScript"
+  ],
+  "author": "Paul Hatcherian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulhatch/semantic-version/issues"
+  },
+  "homepage": "https://github.com/paulhatch/semantic-version#readme",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/exec": "^1.0.1"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^6.3.0",
+    "jest": "^24.9.0"
+  }
+}

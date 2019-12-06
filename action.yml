@@ -1,0 +1,37 @@
+name: "Semantic Version"
+description: "Determines version of a repo"
+branding:
+  icon: "layers"
+  color: "blue"
+inputs:
+  main_branch:
+    description: "main branch"
+    required: true
+    default: "master"
+  release_branch:
+    description: "the release branch pattern which be be used as a prefix for release branches"
+    required: true
+    default: "release"
+  major_pattern:
+    description: "a string which, if present in a git commit, indicates that a change represents a major (breaking) change"
+    required: true
+    default: "(MAJOR)"
+  minor_pattern:
+    description: "a string which, if present in a git commit, indicates that a change represents a minor (feature) change"
+    required: true
+    default: "(MINOR)"
+
+outputs:
+  major:
+    description: "Current major number"
+  minor:
+    description: "Current minor number"
+  patch:
+    description: "Current patch number"
+  increment:
+    description: "An additional value indicating the number of commits for the current version"
+  version:
+    description: "The version result, in the format {major}.{minor}.{patch}"
+runs:
+  using: "node12"
+  main: "dist/index.js"
