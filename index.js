@@ -4,9 +4,10 @@ const eol = require('os').EOL;
 
 const cmd = async (command, ...args) => {
   let output = '';
-  const options = {};
+  const options = {
+    silent: true
+  };
   options.listeners = {
-    silent: true,
     stdout: (data) => { output += data.toString(); }
   };
   await exec.exec(command, args, options)
