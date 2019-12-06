@@ -54,18 +54,18 @@ async function run() {
     let history = (await cmd('git', 'log', '--pretty="%s"', root, mainBranch)).split(eol);
 
     patch++;
-    var increment = history.length;
+    var increment = history.length - 1;
     for (var i = 0; i < history.length; i++) {
       if (history[i].indexOf(majorPattern) !== -1) {
         major++;
         minor = 0;
         patch = 0;
-        increment = i + 1;
+        increment = i;
         break;
       } else if (history[i].indexOf(minorPattern) !== -1) {
         minor++;
         patch = 0;
-        increment = i + 1;
+        increment = i;
         break;
       }
     }
