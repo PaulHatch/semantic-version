@@ -4,14 +4,14 @@ branding:
   icon: "layers"
   color: "blue"
 inputs:
-  main_branch:
-    description: "main branch"
+  branch:
+    description: "The branch name"
     required: true
     default: "master"
-  release_branch:
-    description: "the release branch pattern which be be used as a prefix for release branches"
+  tag_prefix:
+    description: "The prefix to use to identify tags"
     required: true
-    default: "release"
+    default: "v"
   major_pattern:
     description: "a string which, if present in a git commit, indicates that a change represents a major (breaking) change"
     required: true
