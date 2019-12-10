@@ -46,25 +46,29 @@ async function run() {
     const releasePattern = `refs/tags/${tagPrefix}*`;
     let major = 0, minor = 0, patch = 0, increment = 0;
 
+    let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
+
+    if (lastCommitAll === '') {
+      // empty repo
+      setOutput('0', '0', '0', '0');
+      return;
+    }
+
+    let commit = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+
     let tag = (await cmd(
       'git',
       `for-each-ref`,
       `--format='%(refname:short)'`,
       `--sort=-committerdate`,
+      `--no-contains`, commit,
       releasePattern
     )).split(eol)[0].trim().replace(/'/g, "");
 
     let root;
     if (tag === '') {
-      const isEmpty = (await cmd('git', `status`)).includes('No commits yet');
-      if (isEmpty) {
-        // empty repo
-        setOutput('0', '0', '0', '0');
-        return;
-      } else {
-        // no release tags yet, use the initial commit as the root
-        root = '';
-      }
+      // no release tags yet, use the initial commit as the root
+      root = '';
     } else {
       // parse the version tag
       let tagParts = tag.split('/');

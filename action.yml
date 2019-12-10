@@ -1,5 +1,5 @@
-name: "Semantic Version"
-description: "Determines version of a repo"
+name: "Git Semantic Version"
+description: "Determines version of a repo based on git history"
 branding:
   icon: "layers"
   color: "blue"

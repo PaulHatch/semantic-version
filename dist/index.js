@@ -652,6 +652,22 @@ const cmd = async (command, ...args) => {
   return output;
 };
 
+const setOutput = (major, minor, patch, increment) => {
+  const format = core.getInput('format', { required: true });
+  var version = format
+    .replace('${major}', major)
+    .replace('${minor}', minor)
+    .replace('${patch}', patch)
+    .replace('${increment}', increment);
+
+  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
+  core.setOutput("version", version);
+  core.setOutput("major", major.toString());
+  core.setOutput("minor", minor.toString());
+  core.setOutput("patch", patch.toString());
+  core.setOutput("increment", increment.toString());
+};
+
 async function run() {
   try {
     const remote = await cmd('git', 'remote');
@@ -666,30 +682,29 @@ async function run() {
     const releasePattern = `refs/tags/${tagPrefix}*`;
     let major = 0, minor = 0, patch = 0, increment = 0;
 
+    let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
+
+    if (lastCommitAll === '') {
+      // empty repo
+      setOutput('0', '0', '0', '0');
+      return;
+    }
+
+    let commit = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+
     let tag = (await cmd(
       'git',
       `for-each-ref`,
       `--format='%(refname:short)'`,
       `--sort=-committerdate`,
+      `--no-contains`, commit,
       releasePattern
     )).split(eol)[0].trim().replace(/'/g, "");
 
     let root;
     if (tag === '') {
-      const isEmpty = (await cmd('git', `status`)).includes('No commits yet');
-      if (isEmpty) {
-        // empty repo
-        core.info('Version is 0.0.0+0');
-        core.setOutput("version", '0.0.0+0');
-        core.setOutput("major", '0');
-        core.setOutput("minor", '0');
-        core.setOutput("patch", '0');
-        core.setOutput("increment", '0');
-        return;
-      } else {
-        // no release tags yet, use the initial commit as the root
-        root = '';
-      }
+      // no release tags yet, use the initial commit as the root
+      root = '';
     } else {
       // parse the version tag
       let tagParts = tag.split('/');
@@ -741,13 +756,7 @@ async function run() {
       patch++;
     }
 
-    let version = `${major}.${minor}.${patch}`;
-    core.info(`Version is ${version}+${increment}`);
-    core.setOutput("version", version);
-    core.setOutput("major", major.toString());
-    core.setOutput("minor", minor.toString());
-    core.setOutput("patch", patch.toString());
-    core.setOutput("increment", increment.toString());
+    setOutput(major, minor, patch, increment);
 
   } catch (error) {
     core.error(error);

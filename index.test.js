@@ -74,6 +74,19 @@ test('Repository with commits shows increment', () => {
     repo.clean();
 });
 
+test('Tagging does not break version', () => {
+    const repo = createTestRepo(); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit(`Second Commit`); // 0.0.1+1
+    repo.exec('git tag v0.0.1')
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 0.0.1+1');
+
+    repo.clean();
+});
+
 test('Minor update bumps minor version and resets increment', () => {
     const repo = createTestRepo(); // 0.0.0+0
 
@@ -126,7 +139,7 @@ test('Minor commits after a major commit are ignored', () => {
     repo.clean();
 });
 
-test('Release branches start new version', () => {
+test('Tags start new version', () => {
     const repo = createTestRepo(); // 0.0.0+0
 
     repo.makeCommit('Initial Commit'); // 0.0.1+0
@@ -180,32 +193,6 @@ test('Tags on branches are used', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 0.0.2+0');
-
-    repo.clean();
-});
-
-test('Merged tags do not affect version', () => {
-
-    // This test checks that merges are counted correctly
-    //  master    o--o--o--o---o <- expecting v0.0.2+1
-    //                   \    /
-    //  release           o--o <- taged v0.0.1
-
-
-    const repo = createTestRepo(); // 0.0.0+0
-
-    repo.makeCommit('Initial Commit'); // 0.0.1+0
-    repo.makeCommit('Second Commit'); // 0.0.1+1
-    repo.makeCommit('Third Commit'); // 0.1.1+2
-    repo.exec('git checkout -b release/0.0.1')
-    repo.makeCommit('Fourth Commit'); // 0.1.1+3
-    repo.exec('git tag v0.0.1');
-    repo.exec('git checkout master');
-    repo.makeCommit('Fifth Commit'); // 0.0.2+1
-    repo.exec('git merge release/0.0.1');
-    const result = repo.runAction();
-
-    expect(result).toMatch('Version is 0.0.2+1');
 
     repo.clean();
 });
