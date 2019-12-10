@@ -16,6 +16,22 @@ const cmd = async (command, ...args) => {
   return output;
 };
 
+const setOutput = (major, minor, patch, increment) => {
+  const format = core.getInput('format', { required: true });
+  var version = format
+    .replace('${major}', major)
+    .replace('${minor}', minor)
+    .replace('${patch}', patch)
+    .replace('${increment}', increment);
+
+  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
+  core.setOutput("version", version);
+  core.setOutput("major", major.toString());
+  core.setOutput("minor", minor.toString());
+  core.setOutput("patch", patch.toString());
+  core.setOutput("increment", increment.toString());
+};
+
 async function run() {
   try {
     const remote = await cmd('git', 'remote');
@@ -43,12 +59,7 @@ async function run() {
       const isEmpty = (await cmd('git', `status`)).includes('No commits yet');
       if (isEmpty) {
         // empty repo
-        core.info('Version is 0.0.0+0');
-        core.setOutput("version", '0.0.0+0');
-        core.setOutput("major", '0');
-        core.setOutput("minor", '0');
-        core.setOutput("patch", '0');
-        core.setOutput("increment", '0');
+        setOutput('0', '0', '0', '0');
         return;
       } else {
         // no release tags yet, use the initial commit as the root
@@ -105,13 +116,7 @@ async function run() {
       patch++;
     }
 
-    let version = `${major}.${minor}.${patch}`;
-    core.info(`Version is ${version}+${increment}`);
-    core.setOutput("version", version);
-    core.setOutput("major", major.toString());
-    core.setOutput("minor", minor.toString());
-    core.setOutput("patch", patch.toString());
-    core.setOutput("increment", increment.toString());
+    setOutput(major, minor, patch, increment);
 
   } catch (error) {
     core.error(error);

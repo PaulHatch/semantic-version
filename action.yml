@@ -20,6 +20,10 @@ inputs:
     description: "a string which, if present in a git commit, indicates that a change represents a minor (feature) change"
     required: true
     default: "(MINOR)"
+  format:
+    description: "Pattern to use when formatting output version"
+    required: true
+    default: "${major}.${minor}.${patch}"
 
 outputs:
   major:

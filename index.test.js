@@ -7,16 +7,26 @@ process.env['INPUT_BRANCH'] = "master";
 process.env['INPUT_TAG_PREFIX'] = "v";
 process.env['INPUT_MAJOR_PATTERN'] = "(MAJOR)";
 process.env['INPUT_MINOR_PATTERN'] = "(MINOR)";
+process.env['INPUT_FORMAT'] = "${major}.${minor}.${patch}";
 
 // Creates a randomly named git repository and returns a function to execute commands in it
-const createTestRepo = () => {
+const createTestRepo = (inputs) => {
     const repoDirectory = `/tmp/test${Math.random().toString(36).substring(2, 15)}`;
     cp.execSync(`mkdir ${repoDirectory} && git init ${repoDirectory}`);
-    // Configure up git user
-    cp.execSync(`git config user.name "Test User"`)
-    cp.execSync(`git config user.email "test@example.com"`);
 
-    const run = (command) => execute(repoDirectory, command);
+    let env = {};
+    if (inputs !== undefined) {
+        for (let key in inputs) {
+            env[`INPUT_${key.toUpperCase()}`] = inputs[key];
+        }
+    }
+
+    const run = (command) => execute(repoDirectory, command, env);
+
+    // Configure up git user
+    run(`git config user.name "Test User"`);
+    run(`git config user.email "test@example.com"`);
+
     let i = 1;
 
     return {
@@ -32,9 +42,9 @@ const createTestRepo = () => {
 };
 
 // Executes a set of commands in the specified directory
-const execute = (workingDirectory, command) => {
+const execute = (workingDirectory, command, env) => {
     try {
-        return String(cp.execSync(command, { env: process.env, cwd: workingDirectory }));
+        return String(cp.execSync(command, { env: { ...process.env, ...env }, cwd: workingDirectory }));
     }
     catch (e) {
         console.error(String(e.stdout));
@@ -239,6 +249,19 @@ test('Version tags do not require all three version numbers', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 1.0.1+0');
+
+    repo.clean();
+});
+
+test('Format input is respected', () => {
+    const repo = createTestRepo({ format: 'M${major}m${minor}p${patch}i${increment}' }); // M0m0p0i0
+
+    repo.makeCommit('Initial Commit'); // M1m2p3i0
+    repo.exec('git tag v1.2.3');
+    repo.makeCommit(`Second Commit`); // M1m2p4i0
+    const result = repo.runAction();
+
+    expect(result).toMatch('M1m2p4i0');
 
     repo.clean();
 })
