@@ -50,7 +50,7 @@ test('Empty repository version is correct', () => {
     expect(result).toMatch('Version is 0.0.0+0');
 
     repo.clean();
-})
+});
 
 test('Repository with commits shows increment', () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -62,7 +62,7 @@ test('Repository with commits shows increment', () => {
     expect(result).toMatch('Version is 0.0.1+1');
 
     repo.clean();
-})
+});
 
 test('Minor update bumps minor version and resets increment', () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -102,7 +102,6 @@ test('Multiple major commits are idempotent', () => {
 
     repo.clean();
 });
-
 
 test('Minor commits after a major commit are ignored', () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -230,3 +229,16 @@ test('Merged tags do not affect version', () => {
 
     repo.clean();
 });
+
+test('Version tags do not require all three version numbers', () => {
+    const repo = createTestRepo(); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit (MAJOR)'); // 1.0.0+0
+    repo.exec('git tag v1');
+    repo.makeCommit(`Second Commit`); // 1.0.1+0
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 1.0.1+0');
+
+    repo.clean();
+})

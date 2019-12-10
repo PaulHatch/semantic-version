@@ -62,8 +62,8 @@ async function run() {
         .split('.');
 
       major = parseInt(versionValues[0]);
-      minor = parseInt(versionValues[1]);
-      patch = parseInt(versionValues[2]);
+      minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
+      patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
 
       if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
         throw `Invalid tag ${tag}`;
