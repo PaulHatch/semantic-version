@@ -30,4 +30,6 @@ message alters the type of change the next version will represent.
     major_pattern: "(MAJOR)"
     # Same as above except indicating a minor change
     minor_pattern: "(MINOR)"
+    # A string to determine the format of the version output
+    format: "${major}.${minor}.${patch}-prerelease.${increment}"
 ```
