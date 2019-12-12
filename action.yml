@@ -10,7 +10,7 @@ inputs:
     default: "master"
   tag_prefix:
     description: "The prefix to use to identify tags"
-    required: true
+    required: false
     default: "v"
   major_pattern:
     description: "a string which, if present in a git commit, indicates that a change represents a major (breaking) change"

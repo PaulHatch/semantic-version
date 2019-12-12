@@ -251,4 +251,17 @@ test('Format input is respected', () => {
     expect(result).toMatch('M1m2p4i0');
 
     repo.clean();
-})
+});
+
+test('Version prefixes are not required/can be empty', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit(`Second Commit`); // 0.0.2
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 0.0.2');
+
+    repo.clean();
+});

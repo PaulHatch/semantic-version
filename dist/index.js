@@ -674,7 +674,7 @@ async function run() {
     const remoteExists = remote !== '';
     const remotePrefix = remoteExists ? 'origin/' : '';
 
-    const tagPrefix = core.getInput('tag_prefix', { required: true });
+    const tagPrefix = core.getInput('tag_prefix') || '';
     const branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
