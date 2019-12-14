@@ -67,6 +67,9 @@ async function run() {
 
     let root;
     if (tag === '') {
+      if (remoteExists) {
+        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+      }
       // no release tags yet, use the initial commit as the root
       root = '';
     } else {
