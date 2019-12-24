@@ -170,7 +170,7 @@ test('Version pulled from last release branch', () => {
     repo.clean();
 });
 
-
+/* Removed for now
 test('Tags on branches are used', () => {
 
     // This test checks that tags are counted correctly even if they are not on
@@ -196,6 +196,7 @@ test('Tags on branches are used', () => {
 
     repo.clean();
 });
+*/
 
 test('Merged tags do not affect version', () => {
 
@@ -262,6 +263,25 @@ test('Version prefixes are not required/can be empty', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 0.0.2');
+
+    repo.clean();
+});
+
+test('Tag order comes from commit order, not tag create order', () => {
+    const repo = createTestRepo(); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit'); // 0.0.1+1
+    repo.makeCommit('Third Commit'); // 0.0.1+2
+    repo.exec('git tag v2.0.0');
+    repo.exec('sleep 2');
+    repo.exec('git tag v1.0.0 HEAD~1');
+    repo.makeCommit('Fourth Commit'); // 0.0.1+2
+
+    const result = repo.runAction();
+
+
+    expect(result).toMatch('Version is 2.0.1+0');
 
     repo.clean();
 });

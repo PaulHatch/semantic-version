@@ -661,6 +661,7 @@ const setOutput = (major, minor, patch, increment) => {
     .replace('${increment}', increment);
 
   core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
+  core.info(`To create a release for this `)
   core.setOutput("version", version);
   core.setOutput("major", major.toString());
   core.setOutput("minor", minor.toString());
@@ -679,7 +680,7 @@ async function run() {
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
 
-    const releasePattern = `refs/tags/${tagPrefix}*`;
+    const releasePattern = `${tagPrefix}*`;
     let major = 0, minor = 0, patch = 0, increment = 0;
 
     let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
@@ -690,19 +691,28 @@ async function run() {
       return;
     }
 
-    let commit = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+    //let commit = (await cmd('git', 'rev-parse', 'HEAD')).trim();
 
-    let tag = (await cmd(
-      'git',
-      `for-each-ref`,
-      `--format='%(refname:short)'`,
-      `--sort=-committerdate`,
-      `--no-contains`, commit,
-      releasePattern
-    )).split(eol)[0].trim().replace(/'/g, "");
+    let tag = '';
+    try {
+      tag = (await cmd(
+        'git',
+        `describe`,
+        `--tags`,
+        `--abbrev=0`,
+        `--match=${releasePattern}`,
+        `${branch}~1`
+      )).trim();
+    }
+    catch (err) {
+      tag = '';
+    }
 
     let root;
     if (tag === '') {
+      if (remoteExists) {
+        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+      }
       // no release tags yet, use the initial commit as the root
       root = '';
     } else {
