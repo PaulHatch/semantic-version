@@ -24,7 +24,9 @@ inputs:
     description: "Pattern to use when formatting output version"
     required: true
     default: "${major}.${minor}.${patch}"
-
+  change_path:
+    description: "Path to check for changes. If any changes are detected in the path the 'changed' output will true. Enter multiple paths separated by spaces."
+    required: false
 outputs:
   major:
     description: "Current major number"
@@ -36,6 +38,8 @@ outputs:
     description: "An additional value indicating the number of commits for the current version"
   version:
     description: "The version result, in the format {major}.{minor}.{patch}"
+  changed:
+    description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be false."
 runs:
   using: "node12"
   main: "dist/index.js"

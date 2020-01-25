@@ -16,7 +16,7 @@ const cmd = async (command, ...args) => {
   return output;
 };
 
-const setOutput = (major, minor, patch, increment) => {
+const setOutput = (major, minor, patch, increment, changed) => {
   const format = core.getInput('format', { required: true });
   var version = format
     .replace('${major}', major)
@@ -31,6 +31,7 @@ const setOutput = (major, minor, patch, increment) => {
   core.setOutput("minor", minor.toString());
   core.setOutput("patch", patch.toString());
   core.setOutput("increment", increment.toString());
+  core.setOutput("changed", changed.toString());
 };
 
 async function run() {
@@ -43,15 +44,18 @@ async function run() {
     const branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
+    const changePath = core.getInput('change_path') || '';
 
     const releasePattern = `${tagPrefix}*`;
     let major = 0, minor = 0, patch = 0, increment = 0;
+    let changed = true;
+
 
     let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
 
     if (lastCommitAll === '') {
       // empty repo
-      setOutput('0', '0', '0', '0');
+      setOutput('0', '0', '0', '0', changed);
       return;
     }
 
@@ -105,6 +109,12 @@ async function run() {
       '--author-date-order',
       root === '' ? branch : `${root}..${branch}`);
 
+    if (changePath !== '') {
+      const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
+
+      changed = changedFiles.length > 0;
+    }
+
     let history = log
       .trim()
       .split(eol)
@@ -130,7 +140,7 @@ async function run() {
       patch++;
     }
 
-    setOutput(major, minor, patch, increment);
+    setOutput(major, minor, patch, increment, changed);
 
   } catch (error) {
     core.error(error);

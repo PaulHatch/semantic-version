@@ -14,14 +14,14 @@ const createTestRepo = (inputs) => {
     const repoDirectory = `/tmp/test${Math.random().toString(36).substring(2, 15)}`;
     cp.execSync(`mkdir ${repoDirectory} && git init ${repoDirectory}`);
 
-    let env = {};
-    if (inputs !== undefined) {
-        for (let key in inputs) {
-            env[`INPUT_${key.toUpperCase()}`] = inputs[key];
+    const run = (command, extraInputs) => {
+        const allInputs = Object.assign({}, inputs, extraInputs);
+        let env = {};
+        for (let key in allInputs) {
+            env[`INPUT_${key.toUpperCase()}`] = allInputs[key];
         }
+        return execute(repoDirectory, command, env);
     }
-
-    const run = (command) => execute(repoDirectory, command, env);
 
     // Configure up git user
     run(`git config user.name "Test User"`);
@@ -31,12 +31,12 @@ const createTestRepo = (inputs) => {
 
     return {
         clean: () => execute('/tmp', `rm -rf ${repoDirectory}`),
-        makeCommit: (msg) => {
-            run(`touch test${i++}`);
+        makeCommit: (msg, path) => {
+            run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
             run(`git add --all`);
             run(`git commit -m '${msg}'`);
         },
-        runAction: () => run(`node ${path.join(__dirname, 'index.js')}`),
+        runAction: (inputs) => run(`node ${path.join(__dirname, 'index.js')}`, inputs),
         exec: run
     };
 };
@@ -282,6 +282,93 @@ test('Tag order comes from commit order, not tag create order', () => {
 
 
     expect(result).toMatch('Version is 2.0.1+0');
+
+    repo.clean();
+});
+
+
+test('Change detection is true by default', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit(`Second Commit`); // 0.0.2
+    const result = repo.runAction();
+
+    expect(result).toMatch('::set-output name=changed,::true');
+
+    repo.clean();
+});
+
+test('Change detection is true by default', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit(`Second Commit`); // 0.0.2
+    const result = repo.runAction({});
+
+    expect(result).toMatch('::set-output name=changed,::true');
+
+    repo.clean();
+});
+
+test('Changes to monitored path is true when change is in path', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.exec('mkdir project1');
+    repo.makeCommit(`Second Commit`, 'project1'); // 0.0.2
+    const result = repo.runAction({ change_path: "project1" });
+
+    expect(result).toMatch('::set-output name=changed,::true');
+
+    repo.clean();
+});
+
+test('Changes to monitored path is false when changes are not in path', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.exec('mkdir project1');
+    repo.exec('mkdir project2');
+    repo.makeCommit(`Second Commit`, 'project2'); // 0.0.2
+    const result = repo.runAction({ change_path: "project1" });
+
+    expect(result).toMatch('::set-output name=changed,::false');
+
+    repo.clean();
+});
+
+test('Changes to multiple monitored path is true when change is in path', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.exec('mkdir project1');
+    repo.exec('mkdir project2');
+    repo.makeCommit(`Second Commit`, 'project2'); // 0.0.2
+    const result = repo.runAction({ change_path: "./project1 ./project2" });
+
+    expect(result).toMatch('::set-output name=changed,::true');
+
+    repo.clean();
+});
+
+test('Changes to multiple monitored path is false when change is not in path', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.exec('mkdir project1');
+    repo.exec('mkdir project2');
+    repo.exec('mkdir project3');
+    repo.makeCommit(`Second Commit`, 'project3'); // 0.0.2
+    const result = repo.runAction({ change_path: "project1 project2" });
+
+    expect(result).toMatch('::set-output name=changed,::false');
 
     repo.clean();
 });
