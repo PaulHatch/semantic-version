@@ -1,4 +1,4 @@
-name: "test-local"
+name: "Test and Run"
 on:
   pull_request:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: NPM Install
         run: npm ci
       - name: Test
-        run: git config --global user.name "Test User" && git config --global user.email "test@example.com" && npm test
+        run: npm test
       - name: Package
         run: npm run package
       - name: Run Action
