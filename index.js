@@ -18,7 +18,7 @@ const cmd = async (command, ...args) => {
   return output;
 };
 
-const setOutput = (major, minor, patch, increment, changed) => {
+const setOutput = (major, minor, patch, increment, changed, branch) => {
   const format = core.getInput('format', { required: true });
   var version = format
     .replace('${major}', major)
@@ -29,11 +29,10 @@ const setOutput = (major, minor, patch, increment, changed) => {
   const tag = tagPrefix + version;
 
   const repository = process.env.GITHUB_REPOSITORY;
-  const branch = process.env.GITHUB_REF;
 
   core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
   if (repository !== undefined) {
-    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch}`);
+    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.trim()}`);
   }
   core.setOutput("version", version);
   core.setOutput("major", major.toString());
@@ -63,7 +62,7 @@ async function run() {
 
     if (lastCommitAll === '') {
       // empty repo
-      setOutput('0', '0', '0', '0', changed);
+      setOutput('0', '0', '0', '0', changed, branch);
       return;
     }
 
@@ -148,7 +147,7 @@ async function run() {
       patch++;
     }
 
-    setOutput(major, minor, patch, increment, changed);
+    setOutput(major, minor, patch, increment, changed, branch);
 
   } catch (error) {
     core.error(error);
