@@ -638,6 +638,8 @@ const core = __webpack_require__(470);
 const exec = __webpack_require__(986);
 const eol = __webpack_require__(87).EOL;
 
+const tagPrefix = core.getInput('tag_prefix') || '';
+
 const cmd = async (command, ...args) => {
   let output = '';
   const options = {
@@ -660,8 +662,15 @@ const setOutput = (major, minor, patch, increment, changed) => {
     .replace('${patch}', patch)
     .replace('${increment}', increment);
 
+  const tag = tagPrefix + version;
+
+  const repository = process.env.GITHUB_REPOSITORY;
+  const branch = process.env.GITHUB_REF;
+
   core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
-  core.info(`To create a release for this `)
+  if (repository !== undefined) {
+    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch}`);
+  }
   core.setOutput("version", version);
   core.setOutput("major", major.toString());
   core.setOutput("minor", minor.toString());
@@ -676,7 +685,6 @@ async function run() {
     const remoteExists = remote !== '';
     const remotePrefix = remoteExists ? 'origin/' : '';
 
-    const tagPrefix = core.getInput('tag_prefix') || '';
     const branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
