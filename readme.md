@@ -32,4 +32,6 @@ message alters the type of change the next version will represent.
     minor_pattern: "(MINOR)"
     # A string to determine the format of the version output
     format: "${major}.${minor}.${patch}-prerelease.${increment}"
+    # Path to check for changes. If any changes are detected in the path the 'changed' output will true. Enter multiple paths separated by spaces.
+    change_path: "src/my-service"
 ```
