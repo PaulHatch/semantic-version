@@ -1,4 +1,4 @@
-name: "Test and Run"
+name: "Build"
 on:
   pull_request:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: "Test and Run"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
