@@ -24,13 +24,13 @@
   },
   "homepage": "https://github.com/paulhatch/semantic-version#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1",
-    "@actions/exec": "^1.0.1"
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.3"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
-    "eslint": "^6.3.0",
-    "eslint-plugin-jest": "^23.1.1",
+    "eslint": "^6.8.0",
+    "eslint-plugin-jest": "^23.8.2",
     "jest": "^24.9.0"
   }
 }

@@ -295,7 +295,7 @@ test('Change detection is true by default', () => {
     repo.makeCommit(`Second Commit`); // 0.0.2
     const result = repo.runAction();
 
-    expect(result).toMatch('::set-output name=changed,::true');
+    expect(result).toMatch('::set-output name=changed::true');
 
     repo.clean();
 });
@@ -308,7 +308,7 @@ test('Change detection is true by default', () => {
     repo.makeCommit(`Second Commit`); // 0.0.2
     const result = repo.runAction({});
 
-    expect(result).toMatch('::set-output name=changed,::true');
+    expect(result).toMatch('::set-output name=changed::true');
 
     repo.clean();
 });
@@ -322,7 +322,7 @@ test('Changes to monitored path is true when change is in path', () => {
     repo.makeCommit(`Second Commit`, 'project1'); // 0.0.2
     const result = repo.runAction({ change_path: "project1" });
 
-    expect(result).toMatch('::set-output name=changed,::true');
+    expect(result).toMatch('::set-output name=changed::true');
 
     repo.clean();
 });
@@ -337,7 +337,7 @@ test('Changes to monitored path is false when changes are not in path', () => {
     repo.makeCommit(`Second Commit`, 'project2'); // 0.0.2
     const result = repo.runAction({ change_path: "project1" });
 
-    expect(result).toMatch('::set-output name=changed,::false');
+    expect(result).toMatch('::set-output name=changed::false');
 
     repo.clean();
 });
@@ -352,7 +352,7 @@ test('Changes to multiple monitored path is true when change is in path', () => 
     repo.makeCommit(`Second Commit`, 'project2'); // 0.0.2
     const result = repo.runAction({ change_path: "./project1 ./project2" });
 
-    expect(result).toMatch('::set-output name=changed,::true');
+    expect(result).toMatch('::set-output name=changed::true');
 
     repo.clean();
 });
@@ -368,7 +368,7 @@ test('Changes to multiple monitored path is false when change is not in path', (
     repo.makeCommit(`Second Commit`, 'project3'); // 0.0.2
     const result = repo.runAction({ change_path: "project1 project2" });
 
-    expect(result).toMatch('::set-output name=changed,::false');
+    expect(result).toMatch('::set-output name=changed::false');
 
     repo.clean();
 });
