@@ -18,7 +18,7 @@ message alters the type of change the next version will represent.
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v1-beta
+- uses: paulhatch/semantic-version@v2.1.1
   with:
     # The branch to count commits on
     branch: "master"
