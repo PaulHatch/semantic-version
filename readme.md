@@ -1,6 +1,4 @@
-<p align="center">
-  <a href="https://github.com/paulhatch/semantic-version"><img alt="GitHub Actions status" src="https://github.com/paulhatch/semantic-version/workflows/test-local/badge.svg"></a>
-</p>
+![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
 # Git-Based Semantic Versioning
 
