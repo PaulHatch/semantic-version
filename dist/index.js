@@ -951,26 +951,36 @@ const eol = __webpack_require__(87).EOL;
 const tagPrefix = core.getInput('tag_prefix') || '';
 
 const cmd = async (command, ...args) => {
-  let output = '';
+  let output = '', errors = '';
   const options = {
     silent: true
   };
   options.listeners = {
-    stdout: (data) => { output += data.toString(); }
+    stdout: (data) => { output += data.toString(); },
+    stderr: (data) => { errors += data.toString(); }
   };
 
   await exec.exec(command, args, options)
-    .catch(err => { core.error(`${command} ${args.join(' ')} failed: ${err}`); throw err; });
+    .catch(err => { core.warning(`${command} ${args.join(' ')} failed: ${err}`); });
+
+  if (errors !== '') {
+    core.warning(errors);
+  }
+
   return output;
 };
 
-const setOutput = (major, minor, patch, increment, changed, branch) => {
+const setOutput = (major, minor, patch, increment, changed, branch, namespace) => {
   const format = core.getInput('format', { required: true });
   var version = format
     .replace('${major}', major)
     .replace('${minor}', minor)
     .replace('${patch}', patch)
     .replace('${increment}', increment);
+
+  if (namespace !== '') {
+    version += `-${namespace}`
+  }
 
   const tag = tagPrefix + version;
 
@@ -998,17 +1008,17 @@ async function run() {
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
     const changePath = core.getInput('change_path') || '';
+    const namespace = core.getInput('namespace') || '';
 
-    const releasePattern = `${tagPrefix}*`;
+    const releasePattern = namespace === '' ? `${tagPrefix}*[0-9.]` : `${tagPrefix}*[0-9.]-${namespace}`;
     let major = 0, minor = 0, patch = 0, increment = 0;
     let changed = true;
-
 
     let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
 
     if (lastCommitAll === '') {
       // empty repo
-      setOutput('0', '0', '0', '0', changed, branch);
+      setOutput('0', '0', '0', '0', changed, branch, namespace);
       return;
     }
 
@@ -1041,6 +1051,7 @@ async function run() {
       let tagParts = tag.split('/');
       let versionValues = tagParts[tagParts.length - 1]
         .substr(tagPrefix.length)
+        .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
         .split('.');
 
       major = parseInt(versionValues[0]);
@@ -1048,23 +1059,27 @@ async function run() {
       patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
 
       if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-        throw `Invalid tag ${tag}`;
+        core.setFailed(`Invalid tag ${tag} (${versionValues})`);
+        return;
       }
 
       root = await cmd('git', `merge-base`, tag, branch);
     }
     root = root.trim();
 
-    const log = await cmd(
-      'git',
-      'log',
-      '--pretty="%s"',
-      '--author-date-order',
-      root === '' ? branch : `${root}..${branch}`);
+    var logCommand = `git log --pretty="%s" --author-date-order ${(root === '' ? branch : `${root}..${branch}`)}`;
 
     if (changePath !== '') {
-      const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
+      logCommand += ` -- ${changePath}`;
+    }
 
+    const log = await cmd(logCommand);
+
+    core.info("LOG:\n" + log)
+
+
+    if (changePath !== '') {
+      const changedFiles = await cmd(`git diff --name-only ${(root === '' ? branch : `${root}..${branch}`)} -- ${changePath}`);
       changed = changedFiles.length > 0;
     }
 
@@ -1093,7 +1108,7 @@ async function run() {
       patch++;
     }
 
-    setOutput(major, minor, patch, increment, changed, branch);
+    setOutput(major, minor, patch, increment, changed, branch, namespace);
 
   } catch (error) {
     core.error(error);
