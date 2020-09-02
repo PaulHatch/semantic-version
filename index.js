@@ -129,9 +129,6 @@ async function run() {
 
     const log = await cmd(logCommand);
 
-    core.info("LOG:\n" + log)
-
-
     if (changePath !== '') {
       const changedFiles = await cmd(`git diff --name-only ${(root === '' ? branch : `${root}..${branch}`)} -- ${changePath}`);
       changed = changedFiles.length > 0;
