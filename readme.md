@@ -18,18 +18,62 @@ message alters the type of change the next version will represent.
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v2.1.1
+- uses: paulhatch/semantic-version@v3.0.0
   with:
     # The branch to count commits on
     branch: "master"
     # The prefix to use to identify tags
     tag_prefix: "v"
-    # A string which, if present in a git commit, indicates that a change represents a major (breaking) change
+    # A string which, if present in a git commit, indicates that a change represents a
+    # major (breaking) change
     major_pattern: "(MAJOR)"
     # Same as above except indicating a minor change
     minor_pattern: "(MINOR)"
     # A string to determine the format of the version output
     format: "${major}.${minor}.${patch}-prerelease.${increment}"
-    # Path to check for changes. If any changes are detected in the path the 'changed' output will true. Enter multiple paths separated by spaces.
+    # Optional path to check for changes. If any changes are detected in the path the
+    # 'changed' output will true. Enter multiple paths separated by spaces.
     change_path: "src/my-service"
+    # Named version, will be used as suffix for name version tag
+    namespace: project-b
+```
+
+## Using Multiple Versions in the Same Repository
+
+It is possible to create additional versions for multiple project co-existing
+in one repository, for example you may have a Helm chart, database migration,
+or simply be hosting multiple projects in the same repository and want them to
+be versioned independently. There are a few settings that can be used to
+accomplish this:
+
+First, you can set the `change_path` input to specify a path that will be
+inspected for changes. Commits which do no change any files in this path will
+not increase the `increment` output. In addition, if there are no changes in
+a given commit with this path specified, the `changed` value will be false.
+
+Second, the input `namespace` can be set to create an additional named version.
+If this value is set, it will be appended to the end of tags for the version,
+and only tags with this value appended will be considered when determining the
+version.
+
+Finally, set different values for `major_pattern` and `minor_pattern` than the
+other projects in order to be able to mark these commits independently.
+
+To use secondary versions in a workflow, simply create additional steps in a
+job referencing semantic version multiple times. For example:
+
+```yaml
+- name: Application Version
+  id: version
+  uses: paulhatch/semantic-version@v3.0.0
+  with:
+    change_path: "src/service"
+- name: Database Version
+  id: db-version
+  uses: paulhatch/semantic-version@v3.0.0
+  with:
+    major_pattern: "(MAJOR-DB)"
+    minor_pattern: "(MINOR-DB)"
+    change_path: "src/migrations"
+    namespace: db
 ```

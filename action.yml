@@ -27,6 +27,9 @@ inputs:
   change_path:
     description: "Path to check for changes. If any changes are detected in the path the 'changed' output will true. Enter multiple paths separated by spaces."
     required: false
+  namespace:
+    description: "Use to create a named sub-version. This value will be appended to tags created for this version."
+    required: false
 outputs:
   major:
     description: "Current major number"
@@ -39,7 +42,7 @@ outputs:
   version:
     description: "The version result, in the format {major}.{minor}.{patch}"
   changed:
-    description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be false."
+    description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
 runs:
   using: "node12"
   main: "dist/index.js"

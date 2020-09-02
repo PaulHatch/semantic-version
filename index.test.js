@@ -3,11 +3,13 @@ const path = require('path');
 const process = require('process');
 
 // Action input variables
-process.env['INPUT_BRANCH'] = "master";
-process.env['INPUT_TAG_PREFIX'] = "v";
-process.env['INPUT_MAJOR_PATTERN'] = "(MAJOR)";
-process.env['INPUT_MINOR_PATTERN'] = "(MINOR)";
-process.env['INPUT_FORMAT'] = "${major}.${minor}.${patch}";
+const defaultInputs = {
+    branch: "master",
+    tag_prefix: "v",
+    major_pattern: "(MAJOR)",
+    minor_pattern: "(MINOR)",
+    format: "${major}.${minor}.${patch}"
+};
 
 // Creates a randomly named git repository and returns a function to execute commands in it
 const createTestRepo = (inputs) => {
@@ -15,7 +17,7 @@ const createTestRepo = (inputs) => {
     cp.execSync(`mkdir ${repoDirectory} && git init ${repoDirectory}`);
 
     const run = (command, extraInputs) => {
-        const allInputs = Object.assign({}, inputs, extraInputs);
+        const allInputs = Object.assign({ ...defaultInputs }, inputs, extraInputs);
         let env = {};
         for (let key in allInputs) {
             env[`INPUT_${key.toUpperCase()}`] = allInputs[key];
@@ -300,19 +302,6 @@ test('Change detection is true by default', () => {
     repo.clean();
 });
 
-test('Change detection is true by default', () => {
-    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
-
-    repo.makeCommit('Initial Commit'); // 0.0.1
-    repo.exec('git tag 0.0.1');
-    repo.makeCommit(`Second Commit`); // 0.0.2
-    const result = repo.runAction({});
-
-    expect(result).toMatch('::set-output name=changed::true');
-
-    repo.clean();
-});
-
 test('Changes to monitored path is true when change is in path', () => {
     const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
 
@@ -369,6 +358,56 @@ test('Changes to multiple monitored path is false when change is not in path', (
     const result = repo.runAction({ change_path: "project1 project2" });
 
     expect(result).toMatch('::set-output name=changed::false');
+
+    repo.clean();
+});
+
+test('Namespace is tracked separately', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit('Second Commit'); // 0.0.2
+    repo.exec('git tag 0.1.0-subproject');
+    repo.makeCommit('Third Commit'); // 0.0.2 / 0.1.1
+
+    const result = repo.runAction();
+    const subprojectResult = repo.runAction({ namespace: "subproject" });
+
+    expect(result).toMatch('Version is 0.0.2+1');
+    expect(subprojectResult).toMatch('Version is 0.1.1+0');
+
+    repo.clean();
+});
+
+test('Commits outside of path are not counted', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+
+    const result = repo.runAction({ change_path: "project1" });
+
+    expect(result).toMatch('Version is 0.0.1+0');
+
+    repo.clean();
+});
+
+test('Commits inside path are counted', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+    repo.exec('mkdir project1');
+    repo.makeCommit('Fourth Commit', 'project1'); // 0.0.1+0
+    repo.makeCommit('Fifth Commit', 'project1'); // 0.0.1+1
+    repo.makeCommit('Sixth Commit', 'project1'); // 0.0.1+2
+
+    const result = repo.runAction({ change_path: "project1" });
+
+    expect(result).toMatch('Version is 0.0.1+2');
 
     repo.clean();
 });
