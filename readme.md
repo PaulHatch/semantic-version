@@ -18,7 +18,7 @@ message alters the type of change the next version will represent.
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v3.0.0
+- uses: paulhatch/semantic-version@v3
   with:
     # The branch to count commits on
     branch: "master"
@@ -65,12 +65,12 @@ job referencing semantic version multiple times. For example:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v3.0.0
+  uses: paulhatch/semantic-version@v3
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v3.0.0
+  uses: paulhatch/semantic-version@v3
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
