@@ -15,10 +15,10 @@ const cmd = async (command, ...args) => {
   };
 
   await exec.exec(command, args, options)
-    .catch(err => { core.warning(`${command} ${args.join(' ')} failed: ${err}`); });
+    .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
 
   if (errors !== '') {
-    core.warning(errors);
+    core.info(`stderr: ${errors}`);
   }
 
   return output;
