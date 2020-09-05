@@ -331,6 +331,19 @@ test('Changes to monitored path is false when changes are not in path', () => {
     repo.clean();
 });
 
+test('Changes can be detected without tags', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('mkdir project1');
+    repo.makeCommit(`Second Commit`, 'project1'); // 0.0.2
+    const result = repo.runAction({ change_path: "project1" });
+
+    expect(result).toMatch('::set-output name=changed::true');
+
+    repo.clean();
+});
+
 test('Changes to multiple monitored path is true when change is in path', () => {
     const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
 
@@ -339,7 +352,7 @@ test('Changes to multiple monitored path is true when change is in path', () => 
     repo.exec('mkdir project1');
     repo.exec('mkdir project2');
     repo.makeCommit(`Second Commit`, 'project2'); // 0.0.2
-    const result = repo.runAction({ change_path: "./project1 ./project2" });
+    const result = repo.runAction({ change_path: "project1 project2" });
 
     expect(result).toMatch('::set-output name=changed::true');
 

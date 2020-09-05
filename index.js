@@ -145,8 +145,13 @@ async function run() {
     const log = await cmd(logCommand);
 
     if (changePath !== '') {
-      const changedFiles = await cmd(`git diff --name-only ${(root === '' ? branch : `${root}..${branch}`)} -- ${changePath}`);
-      changed = changedFiles.length > 0;
+      if (root === '') {
+        const changedFiles = await cmd(`git log --name-only --oneline ${branch} -- ${changePath}`);
+        changed = changedFiles.length > 0;
+      } else {
+        const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
+        changed = changedFiles.length > 0;
+      }
     }
 
     let history = log
