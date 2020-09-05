@@ -982,20 +982,31 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
     version += `-${namespace}`
   }
 
-  const tag = tagPrefix + version;
+  let tag;
+  if (major === 0 || patch !== 0) {
+    // Always tag pre-release/major version 0 as full version
+    tag = `${tagPrefix}${major}.${minor}.${patch}`;
+  } else if (minor !== 0) {
+    tag = `${tagPrefix}${major}.${minor}`;
+  } else {
+    tag = `${tagPrefix}${major}`;
+  }
 
   const repository = process.env.GITHUB_REPOSITORY;
 
   core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
-  if (repository !== undefined) {
+  if (repository !== undefined && !namespace) {
     core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.split('/').reverse()[0]}`);
   }
+
   core.setOutput("version", version);
   core.setOutput("major", major.toString());
   core.setOutput("minor", minor.toString());
   core.setOutput("patch", patch.toString());
   core.setOutput("increment", increment.toString());
   core.setOutput("changed", changed.toString());
+  core.setOutput("version_tag", tag);
+
 };
 
 async function run() {

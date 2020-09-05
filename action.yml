@@ -13,11 +13,11 @@ inputs:
     required: false
     default: "v"
   major_pattern:
-    description: "a string which, if present in a git commit, indicates that a change represents a major (breaking) change"
+    description: "A string which, if present in a git commit, indicates that a change represents a major (breaking) change"
     required: true
     default: "(MAJOR)"
   minor_pattern:
-    description: "a string which, if present in a git commit, indicates that a change represents a minor (feature) change"
+    description: "A string which, if present in a git commit, indicates that a change represents a minor (feature) change"
     required: true
     default: "(MINOR)"
   format:
@@ -41,6 +41,8 @@ outputs:
     description: "An additional value indicating the number of commits for the current version"
   version:
     description: "The version result, in the format {major}.{minor}.{patch}"
+  version_tag:
+    description: "The version result with trailing zeros removed"
   changed:
     description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
 runs:
