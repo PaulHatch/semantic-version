@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/paulhatch/semantic-version#readme",
   "dependencies": {
-    "@actions/core": "^1.2.3",
+    "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.3"
   },
   "devDependencies": {
