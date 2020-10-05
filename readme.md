@@ -77,3 +77,18 @@ job referencing semantic version multiple times. For example:
     change_path: "src/migrations"
     namespace: db
 ```
+
+## Important Note Regarding the Checkout action
+
+Beginning in v2, `actions/checkout` [does not include tags/history by default](https://github.com/actions/checkout/issues/100).
+This history is required to determine the version correctly. To include the history
+and tags, specify the fetch-depth parameter in your checkout action declaration. Specify
+zero to pull the full history and tags.
+
+```
+  - name: Checkout
+    uses: actions/checkout@v2
+    with:
+      fetch-depth: 0
+```
+
