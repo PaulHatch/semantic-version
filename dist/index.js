@@ -1035,7 +1035,7 @@ const cmd = async (command, ...args) => {
     stderr: (data) => { errors += data.toString(); }
   };
 
-  await exec.exec(command, args, options)
+  await exec.exec(command + args.map(a => ` ${a}`).join(' '), [], options)
     .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
 
   if (errors !== '') {
@@ -1121,7 +1121,7 @@ async function run() {
         `describe`,
         `--tags`,
         `--abbrev=0`,
-        `--match=${releasePattern}`,
+        `--match="${releasePattern}"`,
         `${branch}~1`
       )).trim();
     }
