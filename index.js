@@ -100,7 +100,7 @@ async function run() {
         `describe`,
         `--tags`,
         `--abbrev=0`,
-        `--match="${releasePattern}"`,
+        `--match=${releasePattern}`,
         `${branch}~1`
       )).trim();
     }
