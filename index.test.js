@@ -1,6 +1,8 @@
 const cp = require('child_process');
 const path = require('path');
 const process = require('process');
+const os = require('os');
+const windows = process.platform === "win32";
 
 // Action input variables
 const defaultInputs = {
@@ -13,8 +15,9 @@ const defaultInputs = {
 
 // Creates a randomly named git repository and returns a function to execute commands in it
 const createTestRepo = (inputs) => {
-    const repoDirectory = `/tmp/test${Math.random().toString(36).substring(2, 15)}`;
-    cp.execSync(`mkdir ${repoDirectory} && git init ${repoDirectory}`);
+    const repoDirectory = path.join(os.tmpdir(), `test${Math.random().toString(36).substring(2, 15)}`);
+    cp.execSync(`mkdir ${repoDirectory}`);
+    cp.execSync(`git init ${repoDirectory}`);
 
     const run = (command, extraInputs) => {
         const allInputs = Object.assign({ ...defaultInputs }, inputs, extraInputs);
@@ -32,11 +35,15 @@ const createTestRepo = (inputs) => {
     let i = 1;
 
     return {
-        clean: () => execute('/tmp', `rm -rf ${repoDirectory}`),
+        clean: () => execute(os.tmpdir(), windows ? `rmdir /s /q ${repoDirectory}` : `rm -rf ${repoDirectory}`),
         makeCommit: (msg, path) => {
-            run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
+            if (windows) {
+                run(`fsutil file createnew ${path !== undefined ? path.trim('/') + '/' : ''}test${i++} 0`);
+            } else {
+                run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
+            }
             run(`git add --all`);
-            run(`git commit -m '${msg}'`);
+            run(`git commit -m "${msg}"`);
         },
         runAction: (inputs) => run(`node ${path.join(__dirname, 'index.js')}`, inputs),
         exec: run
@@ -84,7 +91,7 @@ test('Tagging does not break version', () => {
     repo.exec('git tag v0.0.1')
     const result = repo.runAction();
 
-    expect(result).toMatch('Version is 0.0.1+1');
+    expect(result).toMatch('Version is 0.0.1+0');
 
     repo.clean();
 });
@@ -276,7 +283,8 @@ test('Tag order comes from commit order, not tag create order', () => {
     repo.makeCommit('Second Commit'); // 0.0.1+1
     repo.makeCommit('Third Commit'); // 0.0.1+2
     repo.exec('git tag v2.0.0');
-    repo.exec('sleep 2');
+    // Can't timeout in this context on Windows, ping localhost to delay
+    repo.exec(windows ? 'ping 127.0.0.1 -n 2' : 'sleep 2');
     repo.exec('git tag v1.0.0 HEAD~1');
     repo.makeCommit('Fourth Commit'); // 0.0.1+2
 
@@ -421,6 +429,21 @@ test('Commits inside path are counted', () => {
     const result = repo.runAction({ change_path: "project1" });
 
     expect(result).toMatch('Version is 0.0.1+2');
+
+    repo.clean();
+});
+
+test('Current tag is used', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+    repo.exec('git tag 7.6.5');
+
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 7.6.5+0');
 
     repo.clean();
 });
