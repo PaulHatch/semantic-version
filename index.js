@@ -14,7 +14,7 @@ const cmd = async (command, ...args) => {
     stderr: (data) => { errors += data.toString(); }
   };
 
-  await exec.exec(command + args.map(a => ` ${a}`).join(' '), [], options)
+  await exec.exec(command, args, options)
     .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
 
   if (errors !== '') {
