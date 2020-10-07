@@ -1,6 +1,7 @@
 const cp = require('child_process');
 const path = require('path');
 const process = require('process');
+const os = require('os');
 
 // Action input variables
 const defaultInputs = {
@@ -13,7 +14,7 @@ const defaultInputs = {
 
 // Creates a randomly named git repository and returns a function to execute commands in it
 const createTestRepo = (inputs) => {
-    const repoDirectory = `/tmp/test${Math.random().toString(36).substring(2, 15)}`;
+    const repoDirectory = path.join(os.tmpdir(), `test${Math.random().toString(36).substring(2, 15)}`);
     cp.execSync(`mkdir ${repoDirectory}`);
     cp.execSync(`git init ${repoDirectory}`);
 
