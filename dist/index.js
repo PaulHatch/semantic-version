@@ -1141,6 +1141,7 @@ async function run() {
     if (currentTag) {
       [major, minor, patch] = parseVersion(currentTag);
       setOutput(major, minor, patch, 0, false, branch, namespace);
+      return;
     }
 
     let tag = '';
