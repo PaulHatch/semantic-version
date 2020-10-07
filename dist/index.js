@@ -1021,7 +1021,7 @@ exports.issueCommand = issueCommand;
 
 const core = __webpack_require__(470);
 const exec = __webpack_require__(986);
-const eol = __webpack_require__(87).EOL;
+const eol = '\n';
 
 const tagPrefix = core.getInput('tag_prefix') || '';
 const namespace = core.getInput('namespace') || '';

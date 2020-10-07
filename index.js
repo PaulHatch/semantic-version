@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const exec = require("@actions/exec");
-const eol = require('os').EOL;
+const eol = '\n';
 
 const tagPrefix = core.getInput('tag_prefix') || '';
 const namespace = core.getInput('namespace') || '';

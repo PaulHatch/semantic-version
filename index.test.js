@@ -2,6 +2,7 @@ const cp = require('child_process');
 const path = require('path');
 const process = require('process');
 const os = require('os');
+const windows = process.platform === "win32";
 
 // Action input variables
 const defaultInputs = {
@@ -34,9 +35,9 @@ const createTestRepo = (inputs) => {
     let i = 1;
 
     return {
-        clean: () => execute(os.tmpdir(), `rm -rf ${repoDirectory}`),
+        clean: () => execute(os.tmpdir(), windows ? `rmdir /s /q ${repoDirectory}` : `rm -rf ${repoDirectory}`),
         makeCommit: (msg, path) => {
-            if (process.platform === "win32") {
+            if (windows) {
                 run(`fsutil file createnew ${path !== undefined ? path.trim('/') + '/' : ''}test${i++} 0`);
             } else {
                 run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
@@ -282,7 +283,8 @@ test('Tag order comes from commit order, not tag create order', () => {
     repo.makeCommit('Second Commit'); // 0.0.1+1
     repo.makeCommit('Third Commit'); // 0.0.1+2
     repo.exec('git tag v2.0.0');
-    repo.exec('sleep 2');
+    // Can't timeout in this context on Windows, ping localhost to delay
+    repo.exec(windows ? 'ping 127.0.0.1 -n 2' : 'sleep 2');
     repo.exec('git tag v1.0.0 HEAD~1');
     repo.makeCommit('Fourth Commit'); // 0.0.1+2
 
