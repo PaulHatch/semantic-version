@@ -86,7 +86,7 @@ test('Tagging does not break version', () => {
     repo.exec('git tag v0.0.1')
     const result = repo.runAction();
 
-    expect(result).toMatch('Version is 0.0.1+1');
+    expect(result).toMatch('Version is 0.0.1+0');
 
     repo.clean();
 });
@@ -423,6 +423,21 @@ test('Commits inside path are counted', () => {
     const result = repo.runAction({ change_path: "project1" });
 
     expect(result).toMatch('Version is 0.0.1+2');
+
+    repo.clean();
+});
+
+test('Current tag is used', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+    repo.exec('git tag 7.6.5');
+
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 7.6.5+0');
 
     repo.clean();
 });

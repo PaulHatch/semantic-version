@@ -1024,6 +1024,7 @@ const exec = __webpack_require__(986);
 const eol = __webpack_require__(87).EOL;
 
 const tagPrefix = core.getInput('tag_prefix') || '';
+const namespace = core.getInput('namespace') || '';
 
 const cmd = async (command, ...args) => {
   let output = '', errors = '';
@@ -1032,10 +1033,12 @@ const cmd = async (command, ...args) => {
   };
   options.listeners = {
     stdout: (data) => { output += data.toString(); },
-    stderr: (data) => { errors += data.toString(); }
+    stderr: (data) => { errors += data.toString(); },
+    ignoreReturnCode: true,
+    silent: true
   };
 
-  await exec.exec(command + args.map(a => ` ${a}`).join(' '), [], options)
+  await exec.exec(command, args, options)
     .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
 
   if (errors !== '') {
@@ -1088,6 +1091,26 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
 
 };
 
+const parseVersion = (tag) => {
+
+  console.log(tag);
+  let tagParts = tag.split('/');
+  let versionValues = tagParts[tagParts.length - 1]
+    .substr(tagPrefix.length)
+    .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
+    .split('.');
+
+  let major = parseInt(versionValues[0]);
+  let minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
+  let patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
+
+  if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
+    throw `Invalid tag ${tag} (${versionValues})`;
+  }
+
+  return [major, minor, patch];
+};
+
 async function run() {
   try {
     const remote = await cmd('git', 'remote');
@@ -1098,7 +1121,6 @@ async function run() {
     const majorPattern = core.getInput('major_pattern', { required: true });
     const minorPattern = core.getInput('minor_pattern', { required: true });
     const changePath = core.getInput('change_path') || '';
-    const namespace = core.getInput('namespace') || '';
 
     const releasePattern = namespace === '' ? `${tagPrefix}*[0-9.]` : `${tagPrefix}*[0-9.]-${namespace}`;
     let major = 0, minor = 0, patch = 0, increment = 0;
@@ -1112,7 +1134,14 @@ async function run() {
       return;
     }
 
-    //let commit = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+    let currentTag = (await cmd(
+      `git tag --points-at ${branch} ${releasePattern}`
+    )).trim();
+
+    if (currentTag) {
+      [major, minor, patch] = parseVersion(currentTag);
+      setOutput(major, minor, patch, 0, false, branch, namespace);
+    }
 
     let tag = '';
     try {
@@ -1121,7 +1150,7 @@ async function run() {
         `describe`,
         `--tags`,
         `--abbrev=0`,
-        `--match="${releasePattern}"`,
+        `--match=${releasePattern}`,
         `${branch}~1`
       )).trim();
     }
@@ -1138,20 +1167,7 @@ async function run() {
       root = '';
     } else {
       // parse the version tag
-      let tagParts = tag.split('/');
-      let versionValues = tagParts[tagParts.length - 1]
-        .substr(tagPrefix.length)
-        .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
-        .split('.');
-
-      major = parseInt(versionValues[0]);
-      minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
-      patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
-
-      if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-        core.setFailed(`Invalid tag ${tag} (${versionValues})`);
-        return;
-      }
+      [major, minor, patch] = parseVersion(tag);
 
       root = await cmd('git', `merge-base`, tag, branch);
     }
@@ -1209,6 +1225,7 @@ async function run() {
 }
 
 run();
+
 
 
 /***/ }),
