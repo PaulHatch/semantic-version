@@ -12,7 +12,8 @@ const cmd = async (command, ...args) => {
   options.listeners = {
     stdout: (data) => { output += data.toString(); },
     stderr: (data) => { errors += data.toString(); },
-    ignoreReturnCode: true
+    ignoreReturnCode: true,
+    silent: true
   };
 
   await exec.exec(command, args, options)
@@ -104,6 +105,17 @@ async function run() {
         `--match=${releasePattern}`,
         `${branch}~1`
       )).trim();
+
+      if (tag === '') {
+        tag = (await cmd(
+          'git',
+          `tag`,
+          `--list ${releasePattern}`,
+          `--points-at ${branch}`
+        )).trim();
+      }
+
+
     }
     catch (err) {
       tag = '';
