@@ -36,7 +36,11 @@ const createTestRepo = (inputs) => {
     return {
         clean: () => execute(os.tmpdir(), `rm -rf ${repoDirectory}`),
         makeCommit: (msg, path) => {
-            run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
+            if (process.platform === "win32") {
+                run(`fsutil file createnew ${path !== undefined ? path.trim('/') + '/' : ''}test${i++} 0`);
+            } else {
+                run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
+            }
             run(`git add --all`);
             run(`git commit -m "${msg}"`);
         },
