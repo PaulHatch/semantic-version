@@ -38,7 +38,7 @@ const createTestRepo = (inputs) => {
         makeCommit: (msg, path) => {
             run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
             run(`git add --all`);
-            run(`git commit -m '${msg}'`);
+            run(`git commit -m "${msg}"`);
         },
         runAction: (inputs) => run(`node ${path.join(__dirname, 'index.js')}`, inputs),
         exec: run
