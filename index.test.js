@@ -34,7 +34,7 @@ const createTestRepo = (inputs) => {
     let i = 1;
 
     return {
-        clean: () => execute('/tmp', `rm -rf ${repoDirectory}`),
+        clean: () => execute(os.tmpdir(), `rm -rf ${repoDirectory}`),
         makeCommit: (msg, path) => {
             run(`touch ${path !== undefined ? path.trim('/') + '/' : ''}test${i++}`);
             run(`git add --all`);
