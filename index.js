@@ -11,7 +11,8 @@ const cmd = async (command, ...args) => {
   };
   options.listeners = {
     stdout: (data) => { output += data.toString(); },
-    stderr: (data) => { errors += data.toString(); }
+    stderr: (data) => { errors += data.toString(); },
+    ignoreReturnCode: true
   };
 
   await exec.exec(command, args, options)
