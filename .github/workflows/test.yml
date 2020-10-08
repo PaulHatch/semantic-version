@@ -7,26 +7,12 @@ on:
       - "feature/*"
 
 jobs:
-  test-linux:
-    name: "Test and Run, Linux"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: NPM Install
-        run: npm ci
-      - name: Test
-        run: npm test
-      - name: Package
-        run: npm run package
-      - name: Run Action
-        uses: ./
-        id: run
-  test-windows:
-    name: "Test and Run, Windows"
-    runs-on: windows-latest
+  test:
+    name: "Test and Run"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
