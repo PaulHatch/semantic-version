@@ -13,6 +13,51 @@ commit messages are inspected to determine the type of version change the next
 version represents. Including the term `(MAJOR)` or `(MINOR)` in the commit
 message alters the type of change the next version will represent.
 
+# Background
+
+Automatic versioning during a build presents a chicken-and-egg problem--we
+want the version to increase by a single value between each release, but we
+usually do not know at build time whether a new build will be released or not.
+Generally a build is tagged as part of a release step after passing testing and
+other quality controls, so if we want to use the version number in the build
+itself, especially for a build triggered by a commit, we cannot rely on having
+a proper tag for the build. Most CI systems offer a "build number", but this
+does not correspond to our semantic version and relies on the state of the CI
+tool. It is with this in mind that this tool was developed with the following
+goals:
+
+- Allow the version to be injected into the build
+- Derive the version only from the git repository itself
+- Do not require the version to be maintained by hand
+- Resolve the version deterministically for a given commit (see caveats below)
+- Provide an easy mechanism for incrementing major and minor versions by developers
+
+The solution here is to calculate the _implicit_ next version based on the most
+recently tagged version and the commit messages. This is in essence, what this
+tool does. An additional value called the "increment" tracks the number of commits
+since the last version change, allowing preview tags to be created.
+
+![Commits Graph](versioning.drawio.svg?raw=true)
+
+## Major and Minor Versions
+
+The commit messages for the span of commits from the last tag are checked for the
+presence of the designated terms (`(MAJOR)` or `(MINOR)` by default), if a term
+is encountered that commit is treated as the start of a major or minor version
+instead of the default patch level. As with normal commits the implied version
+will only increment by one value since the last tag regardless of how many major
+or minor commits are encountered. Major commits override minor commits, so a set
+of commits containing both will result in a major version increment. 
+
+![Commits Graph](minor.drawio.svg?raw=true)
+
+## A Caveat Regarding Tags
+
+Please note that if a tag is assigned to an older commit, the commits that come
+after it will be given the new new version, for example:
+
+![Commits Graph](tagging.drawio.svg?raw=true)
+
 # Usage
 
 <!-- start usage -->
