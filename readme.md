@@ -32,10 +32,10 @@ goals:
 - Resolve the version deterministically for a given commit (see caveats below)
 - Provide an easy mechanism for incrementing major and minor versions by developers
 
-The solution here is to calculate the _implicit_ next version based on the most
-recently tagged version and the commit messages. This is in essence, what this
-tool does. An additional value called the "increment" tracks the number of commits
-since the last version change, allowing preview tags to be created.
+To solve this problem, this action calculate the _implicit_ next version based on
+the most recently tagged version and the commit messages. An additional value called
+the "increment" tracks the number of commits since the last version change, allowing
+a preview label to be created.
 
 ![Commits Graph](versioning.drawio.svg?raw=true)
 
@@ -54,7 +54,7 @@ of commits containing both will result in a major version increment.
 ## A Caveat Regarding Tags
 
 Please note that if a tag is assigned to an older commit, the commits that come
-after it will be given the new new version, for example:
+after it will be given the new version, for example:
 
 ![Commits Graph](tagging.drawio.svg?raw=true)
 
@@ -63,7 +63,7 @@ after it will be given the new new version, for example:
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v3
+- uses: paulhatch/semantic-version@v3.1.2
   with:
     # The branch to count commits on
     branch: "master"
@@ -110,12 +110,12 @@ job referencing semantic version multiple times. For example:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v3
+  uses: paulhatch/semantic-version@v3.1.2
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v3
+  uses: paulhatch/semantic-version@v3.1.2
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
