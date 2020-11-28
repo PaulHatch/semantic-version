@@ -32,10 +32,10 @@ goals:
 - Resolve the version deterministically for a given commit (see caveats below)
 - Provide an easy mechanism for incrementing major and minor versions by developers
 
-To solve this problem, this action calculate the _implicit_ next version based on
+To solve this problem, this action calculates the next _implied_ version based on
 the most recently tagged version and the commit messages. An additional value called
-the "increment" tracks the number of commits since the last version change, allowing
-a preview label to be created.
+the "increment" tracks the count of commits since the last version change, allowing
+a label to be created to mark pre-release.
 
 ![Commits Graph](versioning.drawio.svg?raw=true)
 
@@ -51,10 +51,11 @@ of commits containing both will result in a major version increment.
 
 ![Commits Graph](minor.drawio.svg?raw=true)
 
-## A Caveat Regarding Tags
+## A Note Regarding Tags
 
-Please note that if a tag is assigned to an older commit, the commits that come
-after it will be given the new version, for example:
+Adding a tag to an older commit changes the implicit version of commits since the
+tagged commit. If a tag is assigned to an older commit, the commits that come after
+it will be given the new version if the build were to be retriggered, for example:
 
 ![Commits Graph](tagging.drawio.svg?raw=true)
 
