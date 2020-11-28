@@ -66,8 +66,6 @@ it will be given the new version if the build were to be retriggered, for exampl
 ```yaml
 - uses: paulhatch/semantic-version@v3.1.2
   with:
-    # The branch to count commits on
-    branch: "master"
     # The prefix to use to identify tags
     tag_prefix: "v"
     # A string which, if present in a git commit, indicates that a change represents a
