@@ -35,7 +35,7 @@ goals:
 To solve this problem, this action calculates the next _implied_ version based on
 the most recently tagged version and the commit messages. An additional value called
 the "increment" tracks the count of commits since the last version change, allowing
-a label to be created to mark pre-release.
+a label to be created to mark pre-release versions.
 
 ![Commits Graph](versioning.drawio.svg?raw=true)
 
