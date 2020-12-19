@@ -30,6 +30,10 @@ inputs:
   namespace:
     description: "Use to create a named sub-version. This value will be appended to tags created for this version."
     required: false
+  short_tags:
+    description: "If false, only full versions, i.e. 'v1.0.0', will be supported as tags. If true, tags will support truncated minor and patch versions such as 'v1' (default)."
+    required: true
+    default: "true"
 outputs:
   major:
     description: "Current major number"
