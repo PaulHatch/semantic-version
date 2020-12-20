@@ -1025,6 +1025,7 @@ const eol = '\n';
 
 const tagPrefix = core.getInput('tag_prefix') || '';
 const namespace = core.getInput('namespace') || '';
+const shortTags = core.getInput('short_tags') === 'true';
 
 const cmd = async (command, ...args) => {
   let output = '', errors = '';
@@ -1061,7 +1062,7 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
   }
 
   let tag;
-  if (major === 0 || patch !== 0) {
+  if (!shortTags || major === 0 || patch !== 0) {
     // Always tag pre-release/major version 0 as full version
     tag = `${tagPrefix}${major}.${minor}.${patch}`;
   } else if (minor !== 0) {
@@ -1122,7 +1123,8 @@ async function run() {
     const minorPattern = core.getInput('minor_pattern', { required: true });
     const changePath = core.getInput('change_path') || '';
 
-    const releasePattern = namespace === '' ? `${tagPrefix}*[0-9.]` : `${tagPrefix}*[0-9.]-${namespace}`;
+    const versionPattern = shortTags ? '*[0-9.]' : '[0-9]+\\.[0-9]+\\.[0-9]+'
+    const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;
     let major = 0, minor = 0, patch = 0, increment = 0;
     let changed = true;
 

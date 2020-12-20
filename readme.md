@@ -67,6 +67,8 @@ it will be given the new version if the build were to be retriggered, for exampl
 - uses: paulhatch/semantic-version@v3.1.2
   with:
     # The prefix to use to identify tags
+    branch: "master"
+    # The prefix to use to identify tags
     tag_prefix: "v"
     # A string which, if present in a git commit, indicates that a change represents a
     # major (breaking) change
@@ -80,6 +82,9 @@ it will be given the new version if the build were to be retriggered, for exampl
     change_path: "src/my-service"
     # Named version, will be used as suffix for name version tag
     namespace: project-b
+    # Indicate whether short tags like 'v1' should be supported. If false only full
+    # tags like 'v1.0.0' will be recognized.
+    short_tags: true
 ```
 
 ## Using Multiple Versions in the Same Repository

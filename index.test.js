@@ -10,7 +10,8 @@ const defaultInputs = {
     tag_prefix: "v",
     major_pattern: "(MAJOR)",
     minor_pattern: "(MINOR)",
-    format: "${major}.${minor}.${patch}"
+    format: "${major}.${minor}.${patch}",
+    short_tags: true
 };
 
 // Creates a randomly named git repository and returns a function to execute commands in it
@@ -444,6 +445,21 @@ test('Current tag is used', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 7.6.5+0');
+
+    repo.clean();
+});
+
+test('Short tag can be switched off', () => {
+    const repo = createTestRepo({ tag_prefix: '', short_tags: 'false' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+    repo.exec('git tag 7');
+
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 0.0.1+2');
 
     repo.clean();
 });
