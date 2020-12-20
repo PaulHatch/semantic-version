@@ -64,7 +64,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v3.1.2
+- uses: paulhatch/semantic-version@v3.2
   with:
     # The prefix to use to identify tags
     branch: "master"
@@ -116,12 +116,12 @@ job referencing semantic version multiple times. For example:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v3.1.2
+  uses: paulhatch/semantic-version@v3.2
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v3.1.2
+  uses: paulhatch/semantic-version@v3.2
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
