@@ -34,6 +34,10 @@ inputs:
     description: "If false, only full versions, i.e. 'v1.0.0', will be supported as tags. If true, tags will support truncated minor and patch versions such as 'v1' (default)."
     required: true
     default: "true"
+  bump_each_commit:
+    description: "If true, every commit will be treated as a bump to the version."
+    required: true
+    default: "false"
 outputs:
   major:
     description: "Current major number"

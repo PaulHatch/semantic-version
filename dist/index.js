@@ -1026,6 +1026,7 @@ const eol = '\n';
 const tagPrefix = core.getInput('tag_prefix') || '';
 const namespace = core.getInput('namespace') || '';
 const shortTags = core.getInput('short_tags') === 'true';
+const bumpEachCommit = core.getInput('bump_each_commit') === 'true';
 
 const cmd = async (command, ...args) => {
   let output = '', errors = '';
@@ -1198,6 +1199,24 @@ async function run() {
       .trim()
       .split(eol)
       .reverse();
+
+    if (bumpEachCommit) {
+      core.info(history)
+      history.forEach(line => {
+        if (line.includes(majorPattern)) {
+          major += 1;
+          minor = 0;
+          patch = 0;
+        } else if (line.includes(minorPattern)) {
+          minor += 1;
+          patch = 0;
+        } else {
+          patch += 1;
+        }
+      });
+      setOutput(major, minor, patch, increment, changed, branch, namespace);
+      return;
+    }
 
     // Discover the change time from the history log by finding the oldest log
     // that could set the version.
