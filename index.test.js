@@ -11,7 +11,8 @@ const defaultInputs = {
     major_pattern: "(MAJOR)",
     minor_pattern: "(MINOR)",
     format: "${major}.${minor}.${patch}",
-    short_tags: true
+    short_tags: true,
+    bump_each_commit: false
 };
 
 // Creates a randomly named git repository and returns a function to execute commands in it
@@ -460,6 +461,45 @@ test('Short tag can be switched off', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 0.0.1+2');
+
+    repo.clean();
+});
+
+test('Bump each commit works', () => {
+    const repo = createTestRepo({ tag_prefix: '', bump_each_commit: true }); // 0.0.0
+
+    expect(repo.runAction()).toMatch('Version is 0.0.0+0');
+    repo.makeCommit('Initial Commit');
+    expect(repo.runAction()).toMatch('Version is 0.0.1+0');
+    repo.makeCommit('Second Commit');
+    expect(repo.runAction()).toMatch('Version is 0.0.2+0');
+    repo.makeCommit('Third Commit');
+    expect(repo.runAction()).toMatch('Version is 0.0.3+0');
+    repo.makeCommit('Fourth Commit (MINOR)');
+    expect(repo.runAction()).toMatch('Version is 0.1.0+0');
+    repo.makeCommit('Fifth Commit');
+    expect(repo.runAction()).toMatch('Version is 0.1.1+0');
+    repo.makeCommit('Sixth Commit (MAJOR)');
+    expect(repo.runAction()).toMatch('Version is 1.0.0+0');
+    repo.makeCommit('Seventh Commit');
+    expect(repo.runAction()).toMatch('Version is 1.0.1+0');
+
+    repo.clean();
+});
+
+test('Bump each commit picks up tags', () => {
+    const repo = createTestRepo({ tag_prefix: '', bump_each_commit: true }); // 0.0.0
+
+    expect(repo.runAction()).toMatch('Version is 0.0.0+0');
+    repo.makeCommit('Initial Commit');
+    expect(repo.runAction()).toMatch('Version is 0.0.1+0');
+    repo.makeCommit('Second Commit');
+    expect(repo.runAction()).toMatch('Version is 0.0.2+0');
+    repo.makeCommit('Third Commit');
+    repo.exec('git tag 3.0.0');
+    expect(repo.runAction()).toMatch('Version is 3.0.0+0');
+    repo.makeCommit('Fourth Commit');
+    expect(repo.runAction()).toMatch('Version is 3.0.1+0');
 
     repo.clean();
 });

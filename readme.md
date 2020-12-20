@@ -85,6 +85,8 @@ it will be given the new version if the build were to be retriggered, for exampl
     # Indicate whether short tags like 'v1' should be supported. If false only full
     # tags like 'v1.0.0' will be recognized.
     short_tags: true
+    # If this is set to true, *every* commit will be treated as a new version.
+    bump_each_commit: false
 ```
 
 ## Using Multiple Versions in the Same Repository
