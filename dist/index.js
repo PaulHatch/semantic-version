@@ -1141,12 +1141,6 @@ async function run() {
       `git tag --points-at ${branch} ${releasePattern}`
     )).trim();
 
-    if (currentTag) {
-      [major, minor, patch] = parseVersion(currentTag);
-      setOutput(major, minor, patch, 0, false, branch, namespace);
-      return;
-    }
-
     let tag = '';
     try {
       tag = (await cmd(
@@ -1203,7 +1197,9 @@ async function run() {
     if (bumpEachCommit) {
       core.info(history)
       history.forEach(line => {
-        if (line.includes(majorPattern)) {
+        if (currentTag) {
+          [major, minor, patch] = parseVersion(currentTag);
+        } else if (line.includes(majorPattern)) {
           major += 1;
           minor = 0;
           patch = 0;
@@ -1214,6 +1210,7 @@ async function run() {
           patch += 1;
         }
       });
+
       setOutput(major, minor, patch, increment, changed, branch, namespace);
       return;
     }
@@ -1236,6 +1233,16 @@ async function run() {
     } else {
       increment = history.length - 1;
       patch++;
+    }
+
+    if (currentTag) {
+      let tagVersion = parseVersion(currentTag);
+      if (tagVersion[0] !== major &&
+        tagVersion[1] !== minor &&
+        tagVersion[2] !== patch) {
+        [major, minor, patch] = tagVersion;
+        increment = 0;
+      }
     }
 
     setOutput(major, minor, patch, increment, changed, branch, namespace);

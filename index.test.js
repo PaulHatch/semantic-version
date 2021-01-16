@@ -90,10 +90,11 @@ test('Tagging does not break version', () => {
 
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit(`Second Commit`); // 0.0.1+1
+    repo.makeCommit(`Third Commit`); // 0.0.1+2
     repo.exec('git tag v0.0.1')
     const result = repo.runAction();
 
-    expect(result).toMatch('Version is 0.0.1+0');
+    expect(result).toMatch('Version is 0.0.1+2');
 
     repo.clean();
 });
@@ -500,6 +501,17 @@ test('Bump each commit picks up tags', () => {
     expect(repo.runAction()).toMatch('Version is 3.0.0+0');
     repo.makeCommit('Fourth Commit');
     expect(repo.runAction()).toMatch('Version is 3.0.1+0');
+
+    repo.clean();
+});
+
+test('Increment not affected by matching tag', () => {
+    const repo = createTestRepo({ tag_prefix: '' }); // 0.0.1
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit'); // 0.0.1+1
+    repo.exec('git tag 1.0.0');
+    expect(repo.runAction()).toMatch('Version is 0.0.1+1');
 
     repo.clean();
 });
