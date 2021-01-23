@@ -510,7 +510,7 @@ test('Increment not affected by matching tag', () => {
 
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit('Second Commit'); // 0.0.1+1
-    repo.exec('git tag 1.0.0');
+    repo.exec('git tag 0.0.1');
     expect(repo.runAction()).toMatch('Version is 0.0.1+1');
 
     repo.clean();

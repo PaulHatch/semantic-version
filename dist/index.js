@@ -1248,8 +1248,8 @@ async function run() {
 
     if (currentTag) {
       let tagVersion = parseVersion(currentTag);
-      if (tagVersion[0] !== major &&
-        tagVersion[1] !== minor &&
+      if (tagVersion[0] !== major ||
+        tagVersion[1] !== minor ||
         tagVersion[2] !== patch) {
         [major, minor, patch] = tagVersion;
         increment = 0;
