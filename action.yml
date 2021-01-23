@@ -50,7 +50,7 @@ outputs:
   version:
     description: "The version result, in the format {major}.{minor}.{patch}"
   version_tag:
-    description: "The version result with trailing zeros removed"
+    description: "The version tag"
   changed:
     description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
 runs:
