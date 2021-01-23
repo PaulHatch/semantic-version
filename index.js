@@ -92,6 +92,17 @@ const parseVersion = (tag) => {
   return [major, minor, patch];
 };
 
+const createMatchTest = (pattern) => {
+
+  if (pattern.startsWith('/') && pattern.endsWith('/')) {
+    var regex = new RegExp(pattern.slice(1, -1));
+    return (l) => regex.test(l);
+  } else {
+    return (l) => l.includes(pattern);
+  }
+
+};
+
 async function run() {
   try {
     const remote = await cmd('git', 'remote');
@@ -99,8 +110,8 @@ async function run() {
     const remotePrefix = remoteExists ? 'origin/' : '';
 
     const branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
-    const majorPattern = core.getInput('major_pattern', { required: true });
-    const minorPattern = core.getInput('minor_pattern', { required: true });
+    const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
+    const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
     const changePath = core.getInput('change_path') || '';
 
     const versionPattern = shortTags ? '*[0-9.]' : '[0-9]+\\.[0-9]+\\.[0-9]+'
@@ -178,11 +189,11 @@ async function run() {
       history.forEach(line => {
         if (currentTag) {
           [major, minor, patch] = parseVersion(currentTag);
-        } else if (line.includes(majorPattern)) {
+        } else if (majorPattern(line)) {
           major += 1;
           minor = 0;
           patch = 0;
-        } else if (line.includes(minorPattern)) {
+        } else if (minorPattern(line)) {
           minor += 1;
           patch = 0;
         } else {
@@ -197,8 +208,8 @@ async function run() {
     // Discover the change time from the history log by finding the oldest log
     // that could set the version.
 
-    const majorIndex = history.findIndex(x => x.includes(majorPattern));
-    const minorIndex = history.findIndex(x => x.includes(minorPattern));
+    const majorIndex = history.findIndex(x => majorPattern(x));
+    const minorIndex = history.findIndex(x => minorPattern(x));
 
     if (majorIndex !== -1) {
       increment = history.length - (majorIndex + 1);

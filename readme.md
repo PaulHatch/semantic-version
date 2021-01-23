@@ -71,9 +71,9 @@ it will be given the new version if the build were to be retriggered, for exampl
     # The prefix to use to identify tags
     tag_prefix: "v"
     # A string which, if present in a git commit, indicates that a change represents a
-    # major (breaking) change
+    # major (breaking) change, supports regular expressions wrapped with '/'
     major_pattern: "(MAJOR)"
-    # Same as above except indicating a minor change
+    # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
     minor_pattern: "(MINOR)"
     # A string to determine the format of the version output
     format: "${major}.${minor}.${patch}-prerelease.${increment}"

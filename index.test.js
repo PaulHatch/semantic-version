@@ -515,3 +515,23 @@ test('Increment not affected by matching tag', () => {
 
     repo.clean();
 });
+
+test('Regular expressions can be used as major tag', () => {
+    const repo = createTestRepo({ tag_prefix: '', major_pattern: '/S[a-z]+Value/' }); // 0.0.1
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit SomeValue'); // 0.0.1+1
+    expect(repo.runAction()).toMatch('Version is 1.0.0+0');
+
+    repo.clean();
+});
+
+test('Regular expressions can be used as minor tag', () => {
+    const repo = createTestRepo({ tag_prefix: '', minor_pattern: '/S[a-z]+Value/' }); // 0.0.1
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit SomeValue'); // 0.0.1+1
+    expect(repo.runAction()).toMatch('Version is 0.1.0+0');
+
+    repo.clean();
+});

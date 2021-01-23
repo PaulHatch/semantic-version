@@ -13,11 +13,11 @@ inputs:
     required: false
     default: "v"
   major_pattern:
-    description: "A string which, if present in a git commit, indicates that a change represents a major (breaking) change"
+    description: "A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression."
     required: true
     default: "(MAJOR)"
   minor_pattern:
-    description: "A string which, if present in a git commit, indicates that a change represents a minor (feature) change"
+    description: "A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression."
     required: true
     default: "(MINOR)"
   format:
