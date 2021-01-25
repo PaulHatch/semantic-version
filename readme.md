@@ -115,15 +115,17 @@ not increase the `increment` output. In addition, if there are no changes in
 a given commit with this path specified, the `changed` value will be false.
 
 Second, the input `namespace` can be set to create an additional named version.
-If this value is set, it will be appended to the end of tags for the version,
-and only tags with this value appended will be considered when determining the
-version.
+If this value is set, it will be appended (separated by a hyphen) to the end of
+tags for the version, and only tags with this value appended will be considered
+when determining the version.  The namespace will be pruned from the string
+output as "version" within the action.
 
 Finally, set different values for `major_pattern` and `minor_pattern` than the
 other projects in order to be able to mark these commits independently.
 
 To use secondary versions in a workflow, simply create additional steps in a
-job referencing semantic version multiple times. For example:
+job referencing semantic version multiple times. For example, a project tagged
+like `v1.2.3+0-db` could be configured like this:
 
 ```yaml
 - name: Application Version
