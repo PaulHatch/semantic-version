@@ -51,6 +51,10 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
     tag = `${tagPrefix}${major}`;
   }
 
+  if (namespace !== '') {
+    tag += `-${namespace}`
+  }
+
   const repository = process.env.GITHUB_REPOSITORY;
 
   if (!changed) {
