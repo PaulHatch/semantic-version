@@ -1072,6 +1072,10 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
     tag = `${tagPrefix}${major}`;
   }
 
+  if (namespace !== '') {
+    tag += `-${namespace}`
+  }
+
   const repository = process.env.GITHUB_REPOSITORY;
 
   if (!changed) {
@@ -1130,10 +1134,14 @@ async function run() {
     const remoteExists = remote !== '';
     const remotePrefix = remoteExists ? 'origin/' : '';
 
-    const branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
+    let branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
     const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
     const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
     const changePath = core.getInput('change_path') || '';
+
+    if (branch === 'HEAD') {
+      branch = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+    }
 
     const versionPattern = shortTags ? '*[0-9.]' : '[0-9]+\\.[0-9]+\\.[0-9]+'
     const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;

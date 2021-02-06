@@ -85,6 +85,22 @@ test('Repository with commits shows increment', () => {
     repo.clean();
 });
 
+test('Repository show commit for checked out commit', () => {
+    const repo = createTestRepo({ branch: 'HEAD' }); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit(`Second Commit`); // 0.0.1+1
+    let result = repo.runAction();
+    expect(result).toMatch('Version is 0.0.1+1');
+
+    repo.exec(`git checkout HEAD~1`); // 0.0.1+1
+    result = repo.runAction();
+    expect(result).toMatch('Version is 0.0.1+0');
+
+
+    repo.clean();
+});
+
 test('Tagging does not break version', () => {
     const repo = createTestRepo(); // 0.0.0+0
 
