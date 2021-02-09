@@ -6,7 +6,7 @@ const windows = process.platform === "win32";
 
 // Action input variables
 const defaultInputs = {
-    branch: "master",
+    branch: "HEAD",
     tag_prefix: "v",
     major_pattern: "(MAJOR)",
     minor_pattern: "(MINOR)",
@@ -81,6 +81,22 @@ test('Repository with commits shows increment', () => {
     const result = repo.runAction();
 
     expect(result).toMatch('Version is 0.0.1+1');
+
+    repo.clean();
+});
+
+test('Repository show commit for checked out commit', () => {
+    const repo = createTestRepo(); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit(`Second Commit`); // 0.0.1+1
+    let result = repo.runAction();
+    expect(result).toMatch('Version is 0.0.1+1');
+
+    repo.exec(`git checkout HEAD~1`); // 0.0.1+1
+    result = repo.runAction();
+    expect(result).toMatch('Version is 0.0.1+0');
+
 
     repo.clean();
 });

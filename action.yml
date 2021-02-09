@@ -5,9 +5,9 @@ branding:
   color: "blue"
 inputs:
   branch:
-    description: "The branch name"
+    description: "Set to specify a specific branch, default is the current HEAD"
     required: true
-    default: "master"
+    default: "HEAD"
   tag_prefix:
     description: "The prefix to use to identify tags"
     required: false
