@@ -1130,11 +1130,7 @@ const createMatchTest = (pattern) => {
 
 async function run() {
   try {
-    const remote = await cmd('git', 'remote');
-    const remoteExists = remote !== '';
-    const remotePrefix = remoteExists ? 'origin/' : '';
-
-    let branch = `${remotePrefix}${core.getInput('branch', { required: true })}`;
+    let branch = core.getInput('branch', { required: true });
     const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
     const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
     const changePath = core.getInput('change_path') || '';
@@ -1177,7 +1173,7 @@ async function run() {
 
     let root;
     if (tag === '') {
-      if (remoteExists) {
+      if (await cmd('git', 'remote') !== '') {
         core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
       }
       // no release tags yet, use the initial commit as the root

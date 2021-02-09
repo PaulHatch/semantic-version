@@ -6,7 +6,7 @@ const windows = process.platform === "win32";
 
 // Action input variables
 const defaultInputs = {
-    branch: "master",
+    branch: "HEAD",
     tag_prefix: "v",
     major_pattern: "(MAJOR)",
     minor_pattern: "(MINOR)",
@@ -86,7 +86,7 @@ test('Repository with commits shows increment', () => {
 });
 
 test('Repository show commit for checked out commit', () => {
-    const repo = createTestRepo({ branch: 'HEAD' }); // 0.0.0+0
+    const repo = createTestRepo(); // 0.0.0+0
 
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit(`Second Commit`); // 0.0.1+1
