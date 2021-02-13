@@ -66,10 +66,8 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v3.3
+- uses: paulhatch/semantic-version@v4
   with:
-    # The prefix to use to identify tags
-    branch: "master"
     # The prefix to use to identify tags
     tag_prefix: "v"
     # A string which, if present in a git commit, indicates that a change represents a
@@ -130,12 +128,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v3.3
+  uses: paulhatch/semantic-version@v4
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v3.3
+  uses: paulhatch/semantic-version@v4
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
