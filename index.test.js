@@ -551,3 +551,18 @@ test('Regular expressions can be used as minor tag', () => {
 
     repo.clean();
 });
+
+test('Short tags disabled matches full tags', () => {
+    const repo = createTestRepo({ short_tags: 'false' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Second Commit');
+    repo.makeCommit('Third Commit');
+    repo.exec('git tag v1.2.3');
+
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 1.2.3+0');
+
+    repo.clean();
+});

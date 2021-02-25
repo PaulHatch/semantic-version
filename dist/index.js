@@ -1139,7 +1139,7 @@ async function run() {
       branch = (await cmd('git', 'rev-parse', 'HEAD')).trim();
     }
 
-    const versionPattern = shortTags ? '*[0-9.]' : '[0-9]+\\.[0-9]+\\.[0-9]+'
+    const versionPattern = shortTags ? '*[0-9.]' : '*[0-9].*[0-9].*[0-9]'
     const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;
     let major = 0, minor = 0, patch = 0, increment = 0;
     let changed = true;
