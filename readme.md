@@ -66,7 +66,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v4
+- uses: paulhatch/semantic-version@v4.0.1
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
