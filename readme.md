@@ -128,12 +128,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v4
+  uses: paulhatch/semantic-version@v4.0.1
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v4
+  uses: paulhatch/semantic-version@v4.0.1
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
