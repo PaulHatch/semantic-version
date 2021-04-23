@@ -78,9 +78,18 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
 
 const parseVersion = (tag) => {
 
-  console.log(tag);
-  let tagParts = tag.split('/');
-  let versionValues = tagParts[tagParts.length - 1]
+  let stripedTag;
+  if (tagPrefix.includes('/') && tag.includes(tagPrefix)) {
+    let tagParts = tag
+      .replace(tagPrefix, '<--!PREFIX!-->')
+      .split('/');
+    stripedTag = tagParts[tagParts.length - 1]
+      .replace('<--!PREFIX!-->', tagPrefix);
+  } else {
+    let tagParts = tag.split('/');
+    stripedTag = tagParts[tagParts.length - 1];
+  }
+  let versionValues = stripedTag
     .substr(tagPrefix.length)
     .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
     .split('.');

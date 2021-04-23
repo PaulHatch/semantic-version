@@ -566,3 +566,15 @@ test('Short tags disabled matches full tags', () => {
 
     repo.clean();
 });
+
+test('Tag prefix can include forward slash', () => {
+    const repo = createTestRepo({ short_tags: 'false', tag_prefix: 'version/' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag version/1.2.3');
+    const result = repo.runAction();
+
+    expect(result).toMatch('Version is 1.2.3+0');
+
+    repo.clean();
+});
