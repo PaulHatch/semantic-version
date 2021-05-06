@@ -3,7 +3,8 @@
 # Git-Based Semantic Versioning
 
 This action produces a [semantic version](https://semver.org) for a repository
-using the repository's git history.
+using the repository's git history without ever requiring a human to choose or
+manually assign the version number.
 
 This action is designed to facilitate assigning version numbers during a build
 automatically while publishing version that only increment by one value per
@@ -35,7 +36,10 @@ goals:
 To solve this problem, this action calculates the next _implied_ version based on
 the most recently tagged version and the commit messages. An additional value called
 the "increment" tracks the count of commits since the last version change, allowing
-a label to be created to mark pre-release versions.
+a label to be created to mark pre-release versions. The version produced by this
+action is always the_implied version (unless `bump_each_commit` is set to `true`).
+Subsequently tagging a commit that is chosen as the implied version is what bumps
+the version for future commits.
 
 ![Commits Graph](versioning.drawio.svg?raw=true)
 
@@ -49,7 +53,8 @@ is encountered that commit is treated as the start of a major or minor version
 instead of the default patch level. As with normal commits the implied version
 will only increment by one value since the last tag regardless of how many major
 or minor commits are encountered. Major commits override minor commits, so a set
-of commits containing both will result in a major version increment. 
+of commits containing both major and minor tags will result in a major version
+increment. 
 
 ![Commits Graph](minor.drawio.svg?raw=true)
 
