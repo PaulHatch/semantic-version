@@ -86,7 +86,7 @@ it will be given the new version if the build were to be retriggered, for exampl
     # 'changed' output will true. Enter multiple paths separated by spaces.
     change_path: "src/my-service"
     # Named version, will be used as suffix for name version tag
-    namespace: project-b
+    namespace: my-service
     # Indicate whether short tags like 'v1' should be supported. If false only full
     # tags like 'v1.0.0' will be recognized.
     short_tags: true
