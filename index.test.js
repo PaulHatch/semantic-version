@@ -10,7 +10,7 @@ const defaultInputs = {
     tag_prefix: "v",
     major_pattern: "(MAJOR)",
     minor_pattern: "(MINOR)",
-    format: "${major}.${minor}.${patch}",
+    format: "${major}.${minor}.${patch}+${increment}",
     short_tags: true,
     bump_each_commit: false
 };
