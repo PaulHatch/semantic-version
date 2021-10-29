@@ -61,7 +61,7 @@ const setOutput = (major, minor, patch, increment, changed, branch, namespace) =
     core.info('No changes detected for this commit');
   }
 
-  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
+  core.info(`Version is ${version}`);
   if (repository !== undefined && !namespace) {
     core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.split('/').reverse()[0]}`);
   }
