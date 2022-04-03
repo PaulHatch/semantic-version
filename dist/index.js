@@ -1,62 +1,18 @@
-module.exports =
-/******/ (function(modules, runtime) { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete installedModules[moduleId];
-/******/ 		}
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	__webpack_require__.ab = __dirname + "/";
-/******/
-/******/ 	// the startup function
-/******/ 	function startup() {
-/******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
-/******/ 	};
-/******/
-/******/ 	// run startup
-/******/ 	return startup();
-/******/ })
-/************************************************************************/
-/******/ ({
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
-/***/ 1:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 949:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -69,7 +25,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -82,323 +38,1075 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
-const assert_1 = __webpack_require__(357);
-const childProcess = __importStar(__webpack_require__(129));
-const path = __importStar(__webpack_require__(622));
-const util_1 = __webpack_require__(669);
-const ioUtil = __importStar(__webpack_require__(672));
-const exec = util_1.promisify(childProcess.exec);
-const execFile = util_1.promisify(childProcess.execFile);
-/**
- * Copies a file or folder.
- * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
- *
- * @param     source    source path
- * @param     dest      destination path
- * @param     options   optional. See CopyOptions.
- */
-function cp(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { force, recursive, copySourceDirectory } = readCopyOptions(options);
-        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
-        // Dest is an existing file, but not forcing
-        if (destStat && destStat.isFile() && !force) {
-            return;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cmd = void 0;
+// Using require instead of import to support integration testing
+const exec = __importStar(__nccwpck_require__(514));
+const cmd = (command, ...args) => __awaiter(void 0, void 0, void 0, function* () {
+    let output = '', errors = '';
+    const options = {
+        silent: true,
+        listeners: {
+            stdout: (data) => { output += data.toString(); },
+            stderr: (data) => { errors += data.toString(); },
+            ignoreReturnCode: true,
+            silent: true
         }
-        // If dest is an existing directory, should copy inside.
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory
-            ? path.join(dest, path.basename(source))
-            : dest;
-        if (!(yield ioUtil.exists(source))) {
-            throw new Error(`no such file or directory: ${source}`);
-        }
-        const sourceStat = yield ioUtil.stat(source);
-        if (sourceStat.isDirectory()) {
-            if (!recursive) {
-                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
-            }
-            else {
-                yield cpDirRecursive(source, newDest, 0, force);
-            }
-        }
-        else {
-            if (path.relative(source, newDest) === '') {
-                // a file cannot be copied to itself
-                throw new Error(`'${newDest}' and '${source}' are the same file`);
-            }
-            yield copyFile(source, newDest, force);
-        }
-    });
-}
-exports.cp = cp;
-/**
- * Moves a path.
- *
- * @param     source    source path
- * @param     dest      destination path
- * @param     options   optional. See MoveOptions.
- */
-function mv(source, dest, options = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (yield ioUtil.exists(dest)) {
-            let destExists = true;
-            if (yield ioUtil.isDirectory(dest)) {
-                // If dest is directory copy src into dest
-                dest = path.join(dest, path.basename(source));
-                destExists = yield ioUtil.exists(dest);
-            }
-            if (destExists) {
-                if (options.force == null || options.force) {
-                    yield rmRF(dest);
-                }
-                else {
-                    throw new Error('Destination already exists');
-                }
-            }
-        }
-        yield mkdirP(path.dirname(dest));
-        yield ioUtil.rename(source, dest);
-    });
-}
-exports.mv = mv;
-/**
- * Remove a path recursively with force
- *
- * @param inputPath path to remove
- */
-function rmRF(inputPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (ioUtil.IS_WINDOWS) {
-            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
-            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
-            // Check for invalid characters
-            // https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
-            if (/[*"<>|]/.test(inputPath)) {
-                throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
-            }
-            try {
-                const cmdPath = ioUtil.getCmdPath();
-                if (yield ioUtil.isDirectory(inputPath, true)) {
-                    yield exec(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
-                        env: { inputPath }
-                    });
-                }
-                else {
-                    yield exec(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
-                        env: { inputPath }
-                    });
-                }
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-            }
-            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
-            try {
-                yield ioUtil.unlink(inputPath);
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-            }
-        }
-        else {
-            let isDir = false;
-            try {
-                isDir = yield ioUtil.isDirectory(inputPath);
-            }
-            catch (err) {
-                // if you try to delete a file that doesn't exist, desired result is achieved
-                // other errors are valid
-                if (err.code !== 'ENOENT')
-                    throw err;
-                return;
-            }
-            if (isDir) {
-                yield execFile(`rm`, [`-rf`, `${inputPath}`]);
-            }
-            else {
-                yield ioUtil.unlink(inputPath);
-            }
-        }
-    });
-}
-exports.rmRF = rmRF;
-/**
- * Make a directory.  Creates the full path with folders in between
- * Will throw if it fails
- *
- * @param   fsPath        path to create
- * @returns Promise<void>
- */
-function mkdirP(fsPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        assert_1.ok(fsPath, 'a path argument must be provided');
-        yield ioUtil.mkdir(fsPath, { recursive: true });
-    });
-}
-exports.mkdirP = mkdirP;
-/**
- * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
- * If you check and the tool does not exist, it will throw.
- *
- * @param     tool              name of the tool
- * @param     check             whether to check if tool exists
- * @returns   Promise<string>   path to tool
- */
-function which(tool, check) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!tool) {
-            throw new Error("parameter 'tool' is required");
-        }
-        // recursive when check=true
-        if (check) {
-            const result = yield which(tool, false);
-            if (!result) {
-                if (ioUtil.IS_WINDOWS) {
-                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
-                }
-                else {
-                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
-                }
-            }
-            return result;
-        }
-        const matches = yield findInPath(tool);
-        if (matches && matches.length > 0) {
-            return matches[0];
-        }
-        return '';
-    });
-}
-exports.which = which;
-/**
- * Returns a list of all occurrences of the given tool on the system path.
- *
- * @returns   Promise<string[]>  the paths of the tool
- */
-function findInPath(tool) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!tool) {
-            throw new Error("parameter 'tool' is required");
-        }
-        // build the list of extensions to try
-        const extensions = [];
-        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
-            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
-                if (extension) {
-                    extensions.push(extension);
-                }
-            }
-        }
-        // if it's rooted, return it if exists. otherwise return empty.
-        if (ioUtil.isRooted(tool)) {
-            const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
-            if (filePath) {
-                return [filePath];
-            }
-            return [];
-        }
-        // if any path separators, return empty
-        if (tool.includes(path.sep)) {
-            return [];
-        }
-        // build the list of directories
-        //
-        // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
-        // it feels like we should not do this. Checking the current directory seems like more of a use
-        // case of a shell, and the which() function exposed by the toolkit should strive for consistency
-        // across platforms.
-        const directories = [];
-        if (process.env.PATH) {
-            for (const p of process.env.PATH.split(path.delimiter)) {
-                if (p) {
-                    directories.push(p);
-                }
-            }
-        }
-        // find all matches
-        const matches = [];
-        for (const directory of directories) {
-            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
-            if (filePath) {
-                matches.push(filePath);
-            }
-        }
-        return matches;
-    });
-}
-exports.findInPath = findInPath;
-function readCopyOptions(options) {
-    const force = options.force == null ? true : options.force;
-    const recursive = Boolean(options.recursive);
-    const copySourceDirectory = options.copySourceDirectory == null
-        ? true
-        : Boolean(options.copySourceDirectory);
-    return { force, recursive, copySourceDirectory };
-}
-function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Ensure there is not a run away recursive copy
-        if (currentDepth >= 255)
-            return;
-        currentDepth++;
-        yield mkdirP(destDir);
-        const files = yield ioUtil.readdir(sourceDir);
-        for (const fileName of files) {
-            const srcFile = `${sourceDir}/${fileName}`;
-            const destFile = `${destDir}/${fileName}`;
-            const srcFileStat = yield ioUtil.lstat(srcFile);
-            if (srcFileStat.isDirectory()) {
-                // Recurse
-                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
-            }
-            else {
-                yield copyFile(srcFile, destFile, force);
-            }
-        }
-        // Change the mode for the newly created directory
-        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
-    });
-}
-// Buffered file copy
-function copyFile(srcFile, destFile, force) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
-            // unlink/re-link it
-            try {
-                yield ioUtil.lstat(destFile);
-                yield ioUtil.unlink(destFile);
-            }
-            catch (e) {
-                // Try to override file permission
-                if (e.code === 'EPERM') {
-                    yield ioUtil.chmod(destFile, '0666');
-                    yield ioUtil.unlink(destFile);
-                }
-                // other errors = it doesn't exist, no work to do
-            }
-            // Copy over symlink
-            const symlinkFull = yield ioUtil.readlink(srcFile);
-            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
-        }
-        else if (!(yield ioUtil.exists(destFile)) || force) {
-            yield ioUtil.copyFile(srcFile, destFile);
-        }
-    });
-}
-//# sourceMappingURL=io.js.map
+    };
+    try {
+        yield exec.exec(command, args, options);
+    }
+    catch (err) {
+        //core.info(`The command cd '${command} ${args.join(' ')}' failed: ${err}`);
+    }
+    if (errors !== '') {
+        //core.info(`stderr: ${errors}`);
+    }
+    return output;
+});
+exports.cmd = cmd;
+
 
 /***/ }),
 
-/***/ 9:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 614:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConfigurationProvider = void 0;
+const CsvUserFormatter_1 = __nccwpck_require__(105);
+const DefaultTagFormatter_1 = __nccwpck_require__(808);
+const DefaultVersionFormatter_1 = __nccwpck_require__(524);
+const JsonUserFormatter_1 = __nccwpck_require__(892);
+const DefaultCommitsProvider_1 = __nccwpck_require__(458);
+const DefaultCurrentCommitResolver_1 = __nccwpck_require__(35);
+const DefaultVersionClassifier_1 = __nccwpck_require__(527);
+const TagLastReleaseResolver_1 = __nccwpck_require__(936);
+const BumpAlwaysVersionClassifier_1 = __nccwpck_require__(482);
+class ConfigurationProvider {
+    constructor(config) {
+        this.config = config;
+    }
+    GetCurrentCommitResolver() { return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config); }
+    GetLastReleaseResolver() { return new TagLastReleaseResolver_1.TagLastReleaseResolver(this.config); }
+    GetCommitsProvider() { return new DefaultCommitsProvider_1.DefaultCommitsProvider(this.config); }
+    GetVersionClassifier() {
+        if (this.config.bumpEachCommit) {
+            return new BumpAlwaysVersionClassifier_1.BumpAlwaysVersionClassifier(this.config);
+        }
+        return new DefaultVersionClassifier_1.DefaultVersionClassifier(this.config);
+    }
+    GetVersionFormatter() { return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config); }
+    GetTagFormatter() { return new DefaultTagFormatter_1.DefaultTagFormatter(this.config); }
+    GetUserFormatter() {
+        switch (this.config.userFormatType) {
+            case 'json': return new JsonUserFormatter_1.JsonUserFormatter(this.config);
+            case 'csv': return new CsvUserFormatter_1.CsvUserFormatter(this.config);
+            default:
+                throw new Error(`Unknown user format type: ${this.config.userFormatType}, supported types: json, csv`);
+        }
+    }
+}
+exports.ConfigurationProvider = ConfigurationProvider;
+
+
+/***/ }),
+
+/***/ 10:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionResult = void 0;
+/** Represents the total output for the action */
+class VersionResult {
+    /**
+     * Creates a new result instance
+     * @param major - The major version number
+     * @param minor - The minor version number
+     * @param patch - The patch version number
+     * @param increment - The number of commits for this version (usually used to create version suffix)
+     * @param formattedVersion - The formatted semantic version
+     * @param versionTag - The string to be used as a Git tag
+     * @param changed - True if the version was changed, otherwise false
+     * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
+     * @param currentCommit - The current commit hash
+     */
+    constructor(major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.increment = increment;
+        this.formattedVersion = formattedVersion;
+        this.versionTag = versionTag;
+        this.changed = changed;
+        this.authors = authors;
+        this.currentCommit = currentCommit;
+    }
+}
+exports.VersionResult = VersionResult;
+
+
+/***/ }),
+
+/***/ 139:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.runAction = void 0;
+const VersionResult_1 = __nccwpck_require__(10);
+const VersionType_1 = __nccwpck_require__(895);
+const UserInfo_1 = __nccwpck_require__(907);
+const VersionInformation_1 = __nccwpck_require__(686);
+function runAction(configurationProvider) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const currentCommitResolver = configurationProvider.GetCurrentCommitResolver();
+        const lastReleaseResolver = configurationProvider.GetLastReleaseResolver();
+        const commitsProvider = configurationProvider.GetCommitsProvider();
+        const versionClassifier = configurationProvider.GetVersionClassifier();
+        const versionFormatter = configurationProvider.GetVersionFormatter();
+        const tagFormmater = configurationProvider.GetTagFormatter();
+        const userFormatter = configurationProvider.GetUserFormatter();
+        if (yield currentCommitResolver.IsEmptyRepoAsync()) {
+            let versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false);
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '');
+        }
+        const currentCommit = yield currentCommitResolver.ResolveAsync();
+        const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
+        const commitSet = yield commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
+        const classification = yield versionClassifier.ClassifyAsync(lastRelease, commitSet);
+        const { major, minor, patch, increment, type, changed } = classification;
+        // At this point all necessary data has been pulled from the database, create
+        // version information to be used by the formatters
+        let versionInfo = new VersionInformation_1.VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed);
+        // Group all the authors together, count the number of commits per author
+        const allAuthors = versionInfo.commits
+            .reduce((acc, commit) => {
+            const key = `${commit.author} <${commit.authorEmail}>`;
+            acc[key] = acc[key] || { n: commit.author, e: commit.authorEmail, c: 0 };
+            acc[key].c++;
+            return acc;
+        }, {});
+        const authors = Object.values(allAuthors)
+            .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
+            .sort((a, b) => b.commits - a.commits);
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit);
+    });
+}
+exports.runAction = runAction;
+
+
+/***/ }),
+
+/***/ 105:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CsvUserFormatter = void 0;
+class CsvUserFormatter {
+    constructor(config) {
+        // placeholder for consistency with other formatters
+    }
+    Format(type, users) {
+        return users.map(user => `${user.name} <${user.email}>`).join(', ');
+    }
+}
+exports.CsvUserFormatter = CsvUserFormatter;
+
+
+/***/ }),
+
+/***/ 808:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultTagFormatter = void 0;
+/** Default tag formatter which allows a prefix to be specified */
+class DefaultTagFormatter {
+    constructor(config) {
+        this.namespace = config.namespace;
+        this.tagPrefix = config.tagPrefix;
+        this.namespaceSeperator = '-'; // maybe make configurable in the future
+    }
+    Format(versionInfo) {
+        const result = `${this.tagPrefix}${versionInfo.major}.${versionInfo.minor}.${versionInfo.patch}`;
+        if (!!this.namespace) {
+            return `${result}${this.namespaceSeperator}${this.namespace}`;
+        }
+        return result;
+    }
+    GetPattern() {
+        if (!!this.namespace) {
+            return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]${this.namespaceSeperator}${this.namespace}`;
+        }
+        return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]`;
+    }
+    Parse(tag) {
+        let stripedTag;
+        if (this.tagPrefix.includes('/') && tag.includes(this.tagPrefix)) {
+            let tagParts = tag
+                .replace(this.tagPrefix, '<--!PREFIX!-->')
+                .split('/');
+            stripedTag = tagParts[tagParts.length - 1]
+                .replace('<--!PREFIX!-->', this.tagPrefix);
+        }
+        else {
+            let tagParts = tag.split('/');
+            stripedTag = tagParts[tagParts.length - 1];
+        }
+        let versionValues = stripedTag
+            .substring(this.tagPrefix.length)
+            .slice(0, this.namespace === '' ? 999 : -(this.namespace.length + 1))
+            .split('.');
+        let major = parseInt(versionValues[0]);
+        let minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
+        let patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
+        if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
+            throw `Invalid tag ${tag} (${versionValues})`;
+        }
+        return [major, minor, patch];
+    }
+    ;
+}
+exports.DefaultTagFormatter = DefaultTagFormatter;
+
+
+/***/ }),
+
+/***/ 524:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultVersionFormatter = void 0;
+class DefaultVersionFormatter {
+    constructor(config) {
+        this.formatString = config.versionFormat;
+    }
+    Format(versionInfo) {
+        return this.formatString
+            .replace('${major}', versionInfo.major.toString())
+            .replace('${minor}', versionInfo.minor.toString())
+            .replace('${patch}', versionInfo.patch.toString())
+            .replace('${increment}', versionInfo.increment.toString());
+    }
+}
+exports.DefaultVersionFormatter = DefaultVersionFormatter;
+
+
+/***/ }),
+
+/***/ 892:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JsonUserFormatter = void 0;
+class JsonUserFormatter {
+    constructor(config) {
+        // placeholder for consistency with other formatters
+    }
+    Format(type, users) {
+        let result = users.map(u => ({ name: u.name, email: u.email }));
+        return JSON.stringify(result).replace('\n', '');
+    }
+}
+exports.JsonUserFormatter = JsonUserFormatter;
+
+
+/***/ }),
+
+/***/ 109:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const action_1 = __nccwpck_require__(139);
+const ConfigurationProvider_1 = __nccwpck_require__(614);
+const core = __importStar(__nccwpck_require__(186));
+function setOutput(versionResult) {
+    const { major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit } = versionResult;
+    const repository = process.env.GITHUB_REPOSITORY;
+    if (!changed) {
+        core.info('No changes detected for this commit');
+    }
+    core.info(`Version is ${formattedVersion}`);
+    if (repository !== undefined) {
+        core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split('/').slice(-1)[0]}`);
+    }
+    core.setOutput("version", formattedVersion);
+    core.setOutput("major", major.toString());
+    core.setOutput("minor", minor.toString());
+    core.setOutput("patch", patch.toString());
+    core.setOutput("increment", increment.toString());
+    core.setOutput("changed", changed.toString());
+    core.setOutput("version_tag", versionTag);
+    core.setOutput("authors", authors);
+}
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const config = {
+            branch: core.getInput('branch'),
+            tagPrefix: core.getInput('tag_prefix'),
+            majorPattern: core.getInput('major_pattern'),
+            minorPattern: core.getInput('minor_pattern'),
+            versionFormat: core.getInput('version_format'),
+            changePath: core.getInput('change_path'),
+            namespace: core.getInput('namespace'),
+            bumpEachCommit: core.getInput('bump_each_commit') === 'true',
+            searchCommitBody: core.getInput('search_commit_body') === 'true',
+            userFormatType: core.getInput('user_format_type')
+        };
+        if (config.versionFormat === '' && core.getInput('format') !== '') {
+            core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
+            config.versionFormat = core.getInput('format');
+        }
+        if (core.getInput('short_tags') !== '') {
+            core.warning(`The 'short_tags' input option is no longer supported`);
+        }
+        const configurationProvider = new ConfigurationProvider_1.ConfigurationProvider(config);
+        const result = yield (0, action_1.runAction)(configurationProvider);
+        setOutput(result);
+    });
+}
+exports.run = run;
+run();
+
+
+/***/ }),
+
+/***/ 482:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BumpAlwaysVersionClassifier = void 0;
+const DefaultVersionClassifier_1 = __nccwpck_require__(527);
+const VersionClassification_1 = __nccwpck_require__(457);
+const VersionType_1 = __nccwpck_require__(895);
+class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVersionClassifier {
+    constructor(config) {
+        super(config);
+        // Placeholder for consistency
+    }
+    ClassifyAsync(lastRelease, commitSet) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (lastRelease.currentPatch !== null) {
+                return new VersionClassification_1.VersionClassification(VersionType_1.VersionType.None, 0, false, lastRelease.currentMajor, lastRelease.currentMinor, lastRelease.currentPatch);
+            }
+            let { major, minor, patch } = lastRelease;
+            let type = VersionType_1.VersionType.None;
+            if (commitSet.commits.length === 0) {
+                return new VersionClassification_1.VersionClassification(type, 0, false, major, minor, patch);
+            }
+            for (let commit of commitSet.commits.reverse()) {
+                if (this.majorPattern(commit)) {
+                    major += 1;
+                    minor = 0;
+                    patch = 0;
+                    type = VersionType_1.VersionType.Major;
+                }
+                else if (this.minorPattern(commit)) {
+                    minor += 1;
+                    patch = 0;
+                    type = VersionType_1.VersionType.Minor;
+                }
+                else {
+                    patch += 1;
+                    type = VersionType_1.VersionType.Patch;
+                }
+            }
+            return new VersionClassification_1.VersionClassification(type, 0, true, major, minor, patch);
+        });
+    }
+}
+exports.BumpAlwaysVersionClassifier = BumpAlwaysVersionClassifier;
+
+
+/***/ }),
+
+/***/ 142:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CommitInfo = void 0;
+/** Represents information about a commit */
+class CommitInfo {
+    /**
+     * Creates a new commit information instance
+     * @param hash - The hash of the commit
+     * @param subject - The subject of the commit message
+     * @param body - The body of the commit message
+     * @param author - The author's name
+     * @param authorEmail - The author's email
+     * @param authorDate - The date the commit was authored
+     * @param committer - The committer's name
+     * @param committerEmail - The committer's email
+     * @param committerDate - The date the commit was committed
+     * @param tags - List of any tags associated with this commit
+     */
+    constructor(hash, subject, body, author, authorEmail, authorDate, committer, committerEmail, committerDate, tags) {
+        this.hash = hash;
+        this.subject = subject;
+        this.body = body;
+        this.author = author;
+        this.authorEmail = authorEmail;
+        this.authorDate = authorDate;
+        this.committer = committer;
+        this.committerEmail = committerEmail;
+        this.committerDate = committerDate;
+        this.tags = tags;
+    }
+}
+exports.CommitInfo = CommitInfo;
+
+
+/***/ }),
+
+/***/ 859:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CommitInfoSet = void 0;
+/** Represents information about a set of commits */
+class CommitInfoSet {
+    constructor(changed, commits) {
+        this.changed = changed;
+        this.commits = commits;
+    }
+}
+exports.CommitInfoSet = CommitInfoSet;
+
+
+/***/ }),
+
+/***/ 458:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultCommitsProvider = void 0;
+const CommandRunner_1 = __nccwpck_require__(949);
+const CommitInfo_1 = __nccwpck_require__(142);
+const CommitInfoSet_1 = __nccwpck_require__(859);
+class DefaultCommitsProvider {
+    constructor(config) {
+        this.changePath = config.changePath;
+    }
+    GetCommitsAsync(startHash, endHash) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const logSplitter = `@@@START_RECORD`;
+            const formatPlaceholders = Object.entries({
+                hash: '%H',
+                subject: '%s',
+                body: '%b',
+                author: '%an',
+                authorEmail: '%ae',
+                authorDate: '%aI',
+                committer: '%cn',
+                committerEmail: '%ce',
+                committerDate: '%cI',
+                tags: '%d'
+            });
+            const pretty = logSplitter + '%n' + formatPlaceholders
+                .map(x => `@@@${x[0]}%n${x[1]}`)
+                .join('%n');
+            var logCommand = `git log --pretty="${pretty}" --author-date-order ${(startHash === '' ? endHash : `${startHash}..${endHash}`)}`;
+            if (this.changePath !== '') {
+                logCommand += ` -- ${this.changePath}`;
+            }
+            const log = yield (0, CommandRunner_1.cmd)(logCommand);
+            const entries = log
+                .split(logSplitter)
+                .slice(1);
+            const commits = entries.map(entry => {
+                const fields = entry
+                    .split(`@@@`)
+                    .slice(1)
+                    .reduce((acc, value) => {
+                    const firstLine = value.indexOf('\n');
+                    const key = value.substring(0, firstLine);
+                    acc[key] = value.substring(firstLine + 1).trim();
+                    return acc;
+                }, {});
+                const tags = fields.tags
+                    .split(',')
+                    .map((v) => v.trim())
+                    .filter((v) => v.startsWith('tags: '))
+                    .map((v) => v.substring(5).trim());
+                return new CommitInfo_1.CommitInfo(fields.hash, fields.subject, fields.body, fields.author, fields.authorEmail, new Date(fields.authorDate), fields.committer, fields.committerEmail, new Date(fields.committerDate), tags);
+            });
+            // check for changes
+            let changed = true;
+            if (this.changePath !== '') {
+                if (startHash === '') {
+                    const changedFiles = yield (0, CommandRunner_1.cmd)(`git log --name-only --oneline ${endHash} -- ${this.changePath}`);
+                    changed = changedFiles.length > 0;
+                }
+                else {
+                    const changedFiles = yield (0, CommandRunner_1.cmd)(`git diff --name-only ${startHash}..${endHash} -- ${this.changePath}`);
+                    changed = changedFiles.length > 0;
+                }
+            }
+            return new CommitInfoSet_1.CommitInfoSet(changed, commits);
+        });
+    }
+}
+exports.DefaultCommitsProvider = DefaultCommitsProvider;
+
+
+/***/ }),
+
+/***/ 35:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultCurrentCommitResolver = void 0;
+const CommandRunner_1 = __nccwpck_require__(949);
+class DefaultCurrentCommitResolver {
+    constructor(config) {
+        this.branch = config.branch;
+    }
+    ResolveAsync() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.branch === 'HEAD') {
+                return (yield (0, CommandRunner_1.cmd)('git', 'rev-parse', 'HEAD')).trim();
+            }
+            return this.branch;
+        });
+    }
+    IsEmptyRepoAsync() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let lastCommitAll = (yield (0, CommandRunner_1.cmd)('git', 'rev-list', '-n1', '--all')).trim();
+            return lastCommitAll === '';
+        });
+    }
+}
+exports.DefaultCurrentCommitResolver = DefaultCurrentCommitResolver;
+
+
+/***/ }),
+
+/***/ 527:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultVersionClassifier = void 0;
+const VersionClassification_1 = __nccwpck_require__(457);
+const VersionType_1 = __nccwpck_require__(895);
+class DefaultVersionClassifier {
+    constructor(config) {
+        const searchBody = config.searchCommitBody;
+        this.majorPattern = this.parsePattern(config.majorPattern, searchBody);
+        this.minorPattern = this.parsePattern(config.minorPattern, searchBody);
+    }
+    parsePattern(pattern, searchBody) {
+        if (pattern.startsWith('/') && pattern.endsWith('/')) {
+            var regex = new RegExp(pattern.slice(1, -1));
+            return searchBody ?
+                (commit) => regex.test(commit.subject) || regex.test(commit.body) :
+                (commit) => regex.test(commit.subject);
+        }
+        else {
+            const matchString = pattern;
+            return searchBody ?
+                (commit) => commit.subject.includes(matchString) || commit.body.includes(matchString) :
+                (commit) => commit.subject.includes(matchString);
+        }
+    }
+    getNextVersion(current, type) {
+        switch (type) {
+            case VersionType_1.VersionType.Major:
+                return { major: current.major + 1, minor: 0, patch: 0 };
+            case VersionType_1.VersionType.Minor:
+                return { major: current.major, minor: current.minor + 1, patch: 0 };
+            case VersionType_1.VersionType.Patch:
+                return { major: current.major, minor: current.minor, patch: current.patch + 1 };
+            case VersionType_1.VersionType.None:
+                return { major: current.major, minor: current.minor, patch: current.patch };
+            default:
+                throw new Error(`Unknown change type: ${type}`);
+        }
+    }
+    resolveCommitType(commitsSet) {
+        if (commitsSet.commits.length === 0) {
+            return { type: VersionType_1.VersionType.None, increment: 0, changed: commitsSet.changed };
+        }
+        const commits = commitsSet.commits.reverse();
+        let index = 1;
+        for (let commit of commits) {
+            if (this.majorPattern(commit)) {
+                return { type: VersionType_1.VersionType.Major, increment: commits.length - index, changed: commitsSet.changed };
+            }
+            index++;
+        }
+        index = 1;
+        for (let commit of commits) {
+            if (this.minorPattern(commit)) {
+                return { type: VersionType_1.VersionType.Minor, increment: commits.length - index, changed: commitsSet.changed };
+            }
+            index++;
+        }
+        return { type: VersionType_1.VersionType.Patch, increment: commitsSet.commits.length - 1, changed: true };
+    }
+    ClassifyAsync(lastRelease, commitSet) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { type, increment, changed } = this.resolveCommitType(commitSet);
+            const { major, minor, patch } = this.getNextVersion(lastRelease, type);
+            if (lastRelease.currentPatch !== null) {
+                // If the current commit is tagged, we must use that version. Here we check if the version we have resolved from the
+                // previous commits is the same as the current version. If it is, we will use the increment value, otherwise we reset
+                // to zero. For example:
+                // - commit 1 - v1.0.0+0
+                // - commit 2 - v1.0.0+1
+                // - commit 3 was tagged v2.0.0 - v2.0.0+0
+                // - commit 4 - v2.0.1+0
+                const versionsMatch = lastRelease.currentMajor === major && lastRelease.currentMinor === minor && lastRelease.currentPatch === patch;
+                const currentIncremement = versionsMatch ? increment : 0;
+                return new VersionClassification_1.VersionClassification(VersionType_1.VersionType.None, currentIncremement, false, lastRelease.currentMajor, lastRelease.currentMinor, lastRelease.currentPatch);
+            }
+            return new VersionClassification_1.VersionClassification(type, increment, changed, major, minor, patch);
+        });
+    }
+}
+exports.DefaultVersionClassifier = DefaultVersionClassifier;
+
+
+/***/ }),
+
+/***/ 300:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReleaseInformation = void 0;
+// Finds the hash of the last commit
+class ReleaseInformation {
+    /**
+     * Creates a new instance
+     * @param major - the major version number
+     * @param minor - the minor version number
+     * @param patch - the patch version number
+     * @param hash - the hash of commit of the last release
+     * @param currentMajor - the major version number from the current commit
+     * @param currentMinor - the minor version number from the current commit
+     * @param currentPatch - the patch version number from the current commit
+     */
+    constructor(major, minor, patch, hash, currentMajor, currentMinor, currentPatch) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.hash = hash;
+        this.currentMajor = currentMajor;
+        this.currentMinor = currentMinor;
+        this.currentPatch = currentPatch;
+    }
+}
+exports.ReleaseInformation = ReleaseInformation;
+
+
+/***/ }),
+
+/***/ 936:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TagLastReleaseResolver = void 0;
+const CommandRunner_1 = __nccwpck_require__(949);
+const ReleaseInformation_1 = __nccwpck_require__(300);
+const core = __importStar(__nccwpck_require__(186));
+class TagLastReleaseResolver {
+    constructor(config) {
+        this.changePath = config.changePath;
+    }
+    ResolveAsync(current, tagFormatter) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const releasePattern = tagFormatter.GetPattern();
+            let currentTag = (yield (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
+            const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+            let tag = '';
+            try {
+                tag = (yield (0, CommandRunner_1.cmd)('git', `describe`, `--tags`, `--abbrev=0`, `--match=${releasePattern}`, `${current}~1`)).trim();
+            }
+            catch (err) {
+                tag = '';
+            }
+            if (tag === '') {
+                if ((yield (0, CommandRunner_1.cmd)('git', 'remote')) !== '') {
+                    // Since there is no remote, we assume that there are no other tags to pull. In
+                    // practice this isn't likely to happen, but it keeps the test output from being
+                    // polluted with a bunch of warnings.
+                    core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+                }
+                // no release tags yet, use the initial commit as the root
+                return new ReleaseInformation_1.ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch);
+            }
+            // parse the version tag
+            const [major, minor, patch] = tagFormatter.Parse(tag);
+            const root = yield (0, CommandRunner_1.cmd)('git', `merge-base`, tag, current);
+            return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch);
+        });
+    }
+}
+exports.TagLastReleaseResolver = TagLastReleaseResolver;
+
+
+/***/ }),
+
+/***/ 907:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserInfo = void 0;
+/** Represents information about a user (e.g. committer, author, tagger) */
+class UserInfo {
+    /**
+     * Creates a new instance
+     * @param name - User's name
+     * @param email - User's email
+     * @param commits - Number of commits in the scope evaluated
+     */
+    constructor(name, email, commits) {
+        this.name = name;
+        this.email = email;
+        this.commits = commits;
+    }
+}
+exports.UserInfo = UserInfo;
+
+
+/***/ }),
+
+/***/ 457:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionClassification = void 0;
+/** The result of a version classification */
+class VersionClassification {
+    /**
+     * Creates a new version classification result instance
+     * @param type - The type of change the current range represents
+     * @param increment - The number of commits which have this version, usually zero-based
+     * @param changed - True if the version has changed, false otherwise
+     * @param major - The major version number
+     * @param minor - The minor version number
+     * @param patch - The patch version number
+     */
+    constructor(type, increment, changed, major, minor, patch) {
+        this.type = type;
+        this.increment = increment;
+        this.changed = changed;
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+    }
+}
+exports.VersionClassification = VersionClassification;
+
+
+/***/ }),
+
+/***/ 686:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionInformation = void 0;
+/**
+ * Represents the "resolved" information about a version change, serves
+ * as the input to formatters that produce the final output
+ */
+class VersionInformation {
+    /**
+     * Creates a new version information instance
+     * @param major - The major version number
+     * @param minor - The minor version number
+     * @param patch - The patch version number
+     * @param increment - The number of commits for this version
+     * @param type - The type of change the current range represents
+     * @param commits - The list of commits for this version
+     * @param changed - True if the version has changed, false otherwise
+     */
+    constructor(major, minor, patch, increment, type, commits, changed) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.increment = increment;
+        this.type = type;
+        this.commits = commits;
+        this.changed = changed;
+    }
+}
+exports.VersionInformation = VersionInformation;
+
+
+/***/ }),
+
+/***/ 895:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionType = void 0;
+/** Indicates the type of change a particular version change represents */
+var VersionType;
+(function (VersionType) {
+    /** Indicates a major version change */
+    VersionType[VersionType["Major"] = 0] = "Major";
+    /** Indicates a minor version change */
+    VersionType[VersionType["Minor"] = 1] = "Minor";
+    /** Indicates a patch version change */
+    VersionType[VersionType["Patch"] = 2] = "Patch";
+    /** Indicates no change--generally this means that the current commit is already tagged with a version */
+    VersionType[VersionType["None"] = 3] = "None";
+})(VersionType = exports.VersionType || (exports.VersionType = {}));
+
+
+/***/ }),
+
+/***/ 241:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issue = exports.issueCommand = void 0;
+const os = __importStar(__nccwpck_require__(37));
+const utils_1 = __nccwpck_require__(278);
+/**
+ * Commands
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * Examples:
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+exports.issueCommand = issueCommand;
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+exports.issue = issue;
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            let first = true;
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
+                    }
+                }
+            }
+        }
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+        return cmdStr;
+    }
+}
+function escapeData(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
+}
+function escapeProperty(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 186:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -430,15 +1138,624 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getIDToken = exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+const command_1 = __nccwpck_require__(241);
+const file_command_1 = __nccwpck_require__(717);
+const utils_1 = __nccwpck_require__(278);
+const os = __importStar(__nccwpck_require__(37));
+const path = __importStar(__nccwpck_require__(17));
+const oidc_utils_1 = __nccwpck_require__(41);
+/**
+ * The code to exit an action
+ */
+var ExitCode;
+(function (ExitCode) {
+    /**
+     * A code indicating that the action was successful
+     */
+    ExitCode[ExitCode["Success"] = 0] = "Success";
+    /**
+     * A code indicating that the action was a failure
+     */
+    ExitCode[ExitCode["Failure"] = 1] = "Failure";
+})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
+//-----------------------------------------------------------------------
+// Variables
+//-----------------------------------------------------------------------
+/**
+ * Sets env variable for this action and future actions in the job
+ * @param name the name of the variable to set
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function exportVariable(name, val) {
+    const convertedVal = utils_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
+}
+exports.exportVariable = exportVariable;
+/**
+ * Registers a secret which will get masked from logs
+ * @param secret value of the secret
+ */
+function setSecret(secret) {
+    command_1.issueCommand('add-mask', {}, secret);
+}
+exports.setSecret = setSecret;
+/**
+ * Prepends inputPath to the PATH (for this action and future actions)
+ * @param inputPath
+ */
+function addPath(inputPath) {
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
+    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
+}
+exports.addPath = addPath;
+/**
+ * Gets the value of an input.
+ * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
+ * Returns an empty string if the value is not defined.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string
+ */
+function getInput(name, options) {
+    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
+    if (options && options.required && !val) {
+        throw new Error(`Input required and not supplied: ${name}`);
+    }
+    if (options && options.trimWhitespace === false) {
+        return val;
+    }
+    return val.trim();
+}
+exports.getInput = getInput;
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    return inputs;
+}
+exports.getMultilineInput = getMultilineInput;
+/**
+ * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
+ * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
+ * The return value is also in boolean type.
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   boolean
+ */
+function getBooleanInput(name, options) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    const val = getInput(name, options);
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
+        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+}
+exports.getBooleanInput = getBooleanInput;
+/**
+ * Sets the value of an output.
+ *
+ * @param     name     name of the output to set
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function setOutput(name, value) {
+    process.stdout.write(os.EOL);
+    command_1.issueCommand('set-output', { name }, value);
+}
+exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
+//-----------------------------------------------------------------------
+// Results
+//-----------------------------------------------------------------------
+/**
+ * Sets the action status to failed.
+ * When the action exits it will be with an exit code of 1
+ * @param message add error issue message
+ */
+function setFailed(message) {
+    process.exitCode = ExitCode.Failure;
+    error(message);
+}
+exports.setFailed = setFailed;
+//-----------------------------------------------------------------------
+// Logging Commands
+//-----------------------------------------------------------------------
+/**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
+ * Writes debug message to user log
+ * @param message debug message
+ */
+function debug(message) {
+    command_1.issueCommand('debug', {}, message);
+}
+exports.debug = debug;
+/**
+ * Adds an error issue
+ * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function error(message, properties = {}) {
+    command_1.issueCommand('error', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.error = error;
+/**
+ * Adds a warning issue
+ * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function warning(message, properties = {}) {
+    command_1.issueCommand('warning', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.warning = warning;
+/**
+ * Adds a notice issue
+ * @param message notice issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function notice(message, properties = {}) {
+    command_1.issueCommand('notice', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.notice = notice;
+/**
+ * Writes info to log with console.log.
+ * @param message info message
+ */
+function info(message) {
+    process.stdout.write(message + os.EOL);
+}
+exports.info = info;
+/**
+ * Begin an output group.
+ *
+ * Output until the next `groupEnd` will be foldable in this group
+ *
+ * @param name The name of the output group
+ */
+function startGroup(name) {
+    command_1.issue('group', name);
+}
+exports.startGroup = startGroup;
+/**
+ * End an output group.
+ */
+function endGroup() {
+    command_1.issue('endgroup');
+}
+exports.endGroup = endGroup;
+/**
+ * Wrap an asynchronous function call in a group.
+ *
+ * Returns the same type as the function itself.
+ *
+ * @param name The name of the group
+ * @param fn The function to wrap in the group
+ */
+function group(name, fn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        startGroup(name);
+        let result;
+        try {
+            result = yield fn();
+        }
+        finally {
+            endGroup();
+        }
+        return result;
+    });
+}
+exports.group = group;
+//-----------------------------------------------------------------------
+// Wrapper action state
+//-----------------------------------------------------------------------
+/**
+ * Saves state for current action, the state can only be retrieved by this action's post job execution.
+ *
+ * @param     name     name of the state to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function saveState(name, value) {
+    command_1.issueCommand('save-state', { name }, value);
+}
+exports.saveState = saveState;
+/**
+ * Gets the value of an state set by this action's main execution.
+ *
+ * @param     name     name of the state to get
+ * @returns   string
+ */
+function getState(name) {
+    return process.env[`STATE_${name}`] || '';
+}
+exports.getState = getState;
+function getIDToken(aud) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield oidc_utils_1.OidcClient.getIDToken(aud);
+    });
+}
+exports.getIDToken = getIDToken;
+//# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 717:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issueCommand = void 0;
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__nccwpck_require__(147));
+const os = __importStar(__nccwpck_require__(37));
+const utils_1 = __nccwpck_require__(278);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 41:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OidcClient = void 0;
+const http_client_1 = __nccwpck_require__(925);
+const auth_1 = __nccwpck_require__(702);
+const core_1 = __nccwpck_require__(186);
+class OidcClient {
+    static createHttpClient(allowRetry = true, maxRetry = 10) {
+        const requestOptions = {
+            allowRetries: allowRetry,
+            maxRetries: maxRetry
+        };
+        return new http_client_1.HttpClient('actions/oidc-client', [new auth_1.BearerCredentialHandler(OidcClient.getRequestToken())], requestOptions);
+    }
+    static getRequestToken() {
+        const token = process.env['ACTIONS_ID_TOKEN_REQUEST_TOKEN'];
+        if (!token) {
+            throw new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_TOKEN env variable');
+        }
+        return token;
+    }
+    static getIDTokenUrl() {
+        const runtimeUrl = process.env['ACTIONS_ID_TOKEN_REQUEST_URL'];
+        if (!runtimeUrl) {
+            throw new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable');
+        }
+        return runtimeUrl;
+    }
+    static getCall(id_token_url) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const httpclient = OidcClient.createHttpClient();
+            const res = yield httpclient
+                .getJson(id_token_url)
+                .catch(error => {
+                throw new Error(`Failed to get ID Token. \n 
+        Error Code : ${error.statusCode}\n 
+        Error Message: ${error.result.message}`);
+            });
+            const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
+            if (!id_token) {
+                throw new Error('Response json body do not have ID Token field');
+            }
+            return id_token;
+        });
+    }
+    static getIDToken(audience) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // New ID Token is requested from action service
+                let id_token_url = OidcClient.getIDTokenUrl();
+                if (audience) {
+                    const encodedAudience = encodeURIComponent(audience);
+                    id_token_url = `${id_token_url}&audience=${encodedAudience}`;
+                }
+                core_1.debug(`ID token url is ${id_token_url}`);
+                const id_token = yield OidcClient.getCall(id_token_url);
+                core_1.setSecret(id_token);
+                return id_token;
+            }
+            catch (error) {
+                throw new Error(`Error message: ${error.message}`);
+            }
+        });
+    }
+}
+exports.OidcClient = OidcClient;
+//# sourceMappingURL=oidc-utils.js.map
+
+/***/ }),
+
+/***/ 278:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toCommandProperties = exports.toCommandValue = void 0;
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        file: annotationProperties.file,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
+exports.toCommandProperties = toCommandProperties;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 514:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getExecOutput = exports.exec = void 0;
+const string_decoder_1 = __nccwpck_require__(576);
+const tr = __importStar(__nccwpck_require__(159));
+/**
+ * Exec a command.
+ * Output will be streamed to the live console.
+ * Returns promise with return code
+ *
+ * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
+ * @param     args               optional arguments for tool. Escaping is handled by the lib.
+ * @param     options            optional exec options.  See ExecOptions
+ * @returns   Promise<number>    exit code
+ */
+function exec(commandLine, args, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const commandArgs = tr.argStringToArray(commandLine);
+        if (commandArgs.length === 0) {
+            throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
+        }
+        // Path to tool to execute should be first arg
+        const toolPath = commandArgs[0];
+        args = commandArgs.slice(1).concat(args || []);
+        const runner = new tr.ToolRunner(toolPath, args, options);
+        return runner.exec();
+    });
+}
+exports.exec = exec;
+/**
+ * Exec a command and get the output.
+ * Output will be streamed to the live console.
+ * Returns promise with the exit code and collected stdout and stderr
+ *
+ * @param     commandLine           command to execute (can include additional args). Must be correctly escaped.
+ * @param     args                  optional arguments for tool. Escaping is handled by the lib.
+ * @param     options               optional exec options.  See ExecOptions
+ * @returns   Promise<ExecOutput>   exit code, stdout, and stderr
+ */
+function getExecOutput(commandLine, args, options) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        let stdout = '';
+        let stderr = '';
+        //Using string decoder covers the case where a mult-byte character is split
+        const stdoutDecoder = new string_decoder_1.StringDecoder('utf8');
+        const stderrDecoder = new string_decoder_1.StringDecoder('utf8');
+        const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
+        const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
+        const stdErrListener = (data) => {
+            stderr += stderrDecoder.write(data);
+            if (originalStdErrListener) {
+                originalStdErrListener(data);
+            }
+        };
+        const stdOutListener = (data) => {
+            stdout += stdoutDecoder.write(data);
+            if (originalStdoutListener) {
+                originalStdoutListener(data);
+            }
+        };
+        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
+        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        //flush any remaining characters
+        stdout += stdoutDecoder.end();
+        stderr += stderrDecoder.end();
+        return {
+            exitCode,
+            stdout,
+            stderr
+        };
+    });
+}
+exports.getExecOutput = getExecOutput;
+//# sourceMappingURL=exec.js.map
+
+/***/ }),
+
+/***/ 159:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.argStringToArray = exports.ToolRunner = void 0;
-const os = __importStar(__webpack_require__(87));
-const events = __importStar(__webpack_require__(614));
-const child = __importStar(__webpack_require__(129));
-const path = __importStar(__webpack_require__(622));
-const io = __importStar(__webpack_require__(1));
-const ioUtil = __importStar(__webpack_require__(672));
-const timers_1 = __webpack_require__(213);
+const os = __importStar(__nccwpck_require__(37));
+const events = __importStar(__nccwpck_require__(361));
+const child = __importStar(__nccwpck_require__(81));
+const path = __importStar(__nccwpck_require__(17));
+const io = __importStar(__nccwpck_require__(351));
+const ioUtil = __importStar(__nccwpck_require__(962));
+const timers_1 = __nccwpck_require__(512);
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
 /*
@@ -1022,837 +2339,684 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 82:
-/***/ (function(__unusedmodule, exports) {
+/***/ 702:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-// We use any as a valid input type
-/* eslint-disable @typescript-eslint/no-explicit-any */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.toCommandProperties = exports.toCommandValue = void 0;
-/**
- * Sanitizes an input into a string so it can be passed into issueCommand safely
- * @param input input to sanitize into a string
- */
-function toCommandValue(input) {
-    if (input === null || input === undefined) {
-        return '';
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class BasicCredentialHandler {
+    constructor(username, password) {
+        this.username = username;
+        this.password = password;
     }
-    else if (typeof input === 'string' || input instanceof String) {
-        return input;
+    prepareRequest(options) {
+        options.headers['Authorization'] =
+            'Basic ' +
+                Buffer.from(this.username + ':' + this.password).toString('base64');
     }
-    return JSON.stringify(input);
+    // This handler cannot handle 401
+    canHandleAuthentication(response) {
+        return false;
+    }
+    handleAuthentication(httpClient, requestInfo, objs) {
+        return null;
+    }
 }
-exports.toCommandValue = toCommandValue;
-/**
- *
- * @param annotationProperties
- * @returns The command properties to send with the actual annotation command
- * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
- */
-function toCommandProperties(annotationProperties) {
-    if (!Object.keys(annotationProperties).length) {
-        return {};
+exports.BasicCredentialHandler = BasicCredentialHandler;
+class BearerCredentialHandler {
+    constructor(token) {
+        this.token = token;
     }
-    return {
-        title: annotationProperties.title,
-        line: annotationProperties.startLine,
-        endLine: annotationProperties.endLine,
-        col: annotationProperties.startColumn,
-        endColumn: annotationProperties.endColumn
-    };
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        options.headers['Authorization'] = 'Bearer ' + this.token;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication(response) {
+        return false;
+    }
+    handleAuthentication(httpClient, requestInfo, objs) {
+        return null;
+    }
 }
-exports.toCommandProperties = toCommandProperties;
-//# sourceMappingURL=utils.js.map
+exports.BearerCredentialHandler = BearerCredentialHandler;
+class PersonalAccessTokenCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        options.headers['Authorization'] =
+            'Basic ' + Buffer.from('PAT:' + this.token).toString('base64');
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication(response) {
+        return false;
+    }
+    handleAuthentication(httpClient, requestInfo, objs) {
+        return null;
+    }
+}
+exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
+
 
 /***/ }),
 
-/***/ 87:
-/***/ (function(module) {
-
-module.exports = require("os");
-
-/***/ }),
-
-/***/ 102:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 925:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-// For internal use, subject to change.
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.issueCommand = void 0;
-// We use any as a valid input type
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(82);
-function issueCommand(command, message) {
-    const filePath = process.env[`GITHUB_${command}`];
-    if (!filePath) {
-        throw new Error(`Unable to find environment variable for file command ${command}`);
-    }
-    if (!fs.existsSync(filePath)) {
-        throw new Error(`Missing file at path: ${filePath}`);
-    }
-    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
-        encoding: 'utf8'
-    });
-}
-exports.issueCommand = issueCommand;
-//# sourceMappingURL=file-command.js.map
-
-/***/ }),
-
-/***/ 104:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-const core = __webpack_require__(470);
-const exec = __webpack_require__(986);
-const eol = '\n';
-
-const tagPrefix = core.getInput('tag_prefix') || '';
-const namespace = core.getInput('namespace') || '';
-const shortTags = core.getInput('short_tags') === 'true';
-const bumpEachCommit = core.getInput('bump_each_commit') === 'true';
-
-const cmd = async (command, ...args) => {
-  let output = '', errors = '';
-  const options = {
-    silent: true
-  };
-  options.listeners = {
-    stdout: (data) => { output += data.toString(); },
-    stderr: (data) => { errors += data.toString(); },
-    ignoreReturnCode: true,
-    silent: true
-  };
-
-  await exec.exec(command, args, options)
-    .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
-
-  if (errors !== '') {
-    core.info(`stderr: ${errors}`);
-  }
-
-  return output;
-};
-
-const setOutput = (major, minor, patch, increment, changed, branch, namespace) => {
-  const format = core.getInput('format', { required: true });
-  var version = format
-    .replace('${major}', major)
-    .replace('${minor}', minor)
-    .replace('${patch}', patch)
-    .replace('${increment}', increment);
-
-  if (namespace !== '') {
-    version += `-${namespace}`
-  }
-
-  let tag;
-  if (!shortTags || major === 0 || patch !== 0) {
-    // Always tag pre-release/major version 0 as full version
-    tag = `${tagPrefix}${major}.${minor}.${patch}`;
-  } else if (minor !== 0) {
-    tag = `${tagPrefix}${major}.${minor}`;
-  } else {
-    tag = `${tagPrefix}${major}`;
-  }
-
-  if (namespace !== '') {
-    tag += `-${namespace}`
-  }
-
-  const repository = process.env.GITHUB_REPOSITORY;
-
-  if (!changed) {
-    core.info('No changes detected for this commit');
-  }
-
-  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
-  if (repository !== undefined && !namespace) {
-    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.split('/').reverse()[0]}`);
-  }
-
-  core.setOutput("version", version);
-  core.setOutput("major", major.toString());
-  core.setOutput("minor", minor.toString());
-  core.setOutput("patch", patch.toString());
-  core.setOutput("increment", increment.toString());
-  core.setOutput("changed", changed.toString());
-  core.setOutput("version_tag", tag);
-
-};
-
-const parseVersion = (tag) => {
-
-  let stripedTag;
-  if (tagPrefix.includes('/') && tag.includes(tagPrefix)) {
-    let tagParts = tag
-      .replace(tagPrefix, '<--!PREFIX!-->')
-      .split('/');
-    stripedTag = tagParts[tagParts.length - 1]
-      .replace('<--!PREFIX!-->', tagPrefix);
-  } else {
-    let tagParts = tag.split('/');
-    stripedTag = tagParts[tagParts.length - 1];
-  }
-  let versionValues = stripedTag
-    .substr(tagPrefix.length)
-    .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
-    .split('.');
-
-  let major = parseInt(versionValues[0]);
-  let minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
-  let patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
-
-  if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-    throw `Invalid tag ${tag} (${versionValues})`;
-  }
-
-  return [major, minor, patch];
-};
-
-const createMatchTest = (pattern) => {
-
-  if (pattern.startsWith('/') && pattern.endsWith('/')) {
-    var regex = new RegExp(pattern.slice(1, -1));
-    return (l) => regex.test(l);
-  } else {
-    return (l) => l.includes(pattern);
-  }
-
-};
-
-async function run() {
-  try {
-    let branch = core.getInput('branch', { required: true });
-    const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
-    const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
-    const changePath = core.getInput('change_path') || '';
-
-    if (branch === 'HEAD') {
-      branch = (await cmd('git', 'rev-parse', 'HEAD')).trim();
-    }
-
-    const versionPattern = shortTags ? '*[0-9.]' : '*[0-9].*[0-9].*[0-9]'
-    const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;
-    let major = 0, minor = 0, patch = 0, increment = 0;
-    let changed = true;
-
-    let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
-
-    if (lastCommitAll === '') {
-      // empty repo
-      setOutput('0', '0', '0', '0', changed, branch, namespace);
-      return;
-    }
-
-    let currentTag = (await cmd(
-      `git tag --points-at ${branch} ${releasePattern}`
-    )).trim();
-
-    let tag = '';
-    try {
-      tag = (await cmd(
-        'git',
-        `describe`,
-        `--tags`,
-        `--abbrev=0`,
-        `--match=${releasePattern}`,
-        `${branch}~1`
-      )).trim();
-    }
-    catch (err) {
-      tag = '';
-    }
-
-    let root;
-    if (tag === '') {
-      if (await cmd('git', 'remote') !== '') {
-        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
-      }
-      // no release tags yet, use the initial commit as the root
-      root = '';
-    } else {
-      // parse the version tag
-      [major, minor, patch] = parseVersion(tag);
-
-      root = await cmd('git', `merge-base`, tag, branch);
-    }
-    root = root.trim();
-
-    var logCommand = `git log --pretty="%s" --author-date-order ${(root === '' ? branch : `${root}..${branch}`)}`;
-
-    if (changePath !== '') {
-      logCommand += ` -- ${changePath}`;
-    }
-
-    const log = await cmd(logCommand);
-
-    if (changePath !== '') {
-      if (root === '') {
-        const changedFiles = await cmd(`git log --name-only --oneline ${branch} -- ${changePath}`);
-        changed = changedFiles.length > 0;
-      } else {
-        const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
-        changed = changedFiles.length > 0;
-      }
-    }
-
-    let history = log
-      .trim()
-      .split(eol)
-      .reverse();
-
-    if (bumpEachCommit) {
-      core.info(history)
-      history.forEach(line => {
-        if (currentTag) {
-          [major, minor, patch] = parseVersion(currentTag);
-        } else if (majorPattern(line)) {
-          major += 1;
-          minor = 0;
-          patch = 0;
-        } else if (minorPattern(line)) {
-          minor += 1;
-          patch = 0;
-        } else {
-          patch += 1;
-        }
-      });
-
-      setOutput(major, minor, patch, increment, changed, branch, namespace);
-      return;
-    }
-
-    // Discover the change time from the history log by finding the oldest log
-    // that could set the version.
-
-    const majorIndex = history.findIndex(x => majorPattern(x));
-    const minorIndex = history.findIndex(x => minorPattern(x));
-
-    if (majorIndex !== -1) {
-      increment = history.length - (majorIndex + 1);
-      patch = 0;
-      minor = 0;
-      major++;
-    } else if (minorIndex !== -1) {
-      increment = history.length - (minorIndex + 1);
-      patch = 0;
-      minor++;
-    } else {
-      increment = history.length - 1;
-      patch++;
-    }
-
-    if (currentTag) {
-      let tagVersion = parseVersion(currentTag);
-      if (tagVersion[0] !== major ||
-        tagVersion[1] !== minor ||
-        tagVersion[2] !== patch) {
-        [major, minor, patch] = tagVersion;
-        increment = 0;
-      }
-    }
-
-    setOutput(major, minor, patch, increment, changed, branch, namespace);
-
-  } catch (error) {
-    core.error(error);
-    core.setFailed(error.message);
-  }
-}
-
-run();
-
-
-
-/***/ }),
-
-/***/ 129:
-/***/ (function(module) {
-
-module.exports = require("child_process");
-
-/***/ }),
-
-/***/ 213:
-/***/ (function(module) {
-
-module.exports = require("timers");
-
-/***/ }),
-
-/***/ 304:
-/***/ (function(module) {
-
-module.exports = require("string_decoder");
-
-/***/ }),
-
-/***/ 357:
-/***/ (function(module) {
-
-module.exports = require("assert");
-
-/***/ }),
-
-/***/ 431:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.issue = exports.issueCommand = void 0;
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(82);
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const http = __nccwpck_require__(685);
+const https = __nccwpck_require__(687);
+const pm = __nccwpck_require__(443);
+let tunnel;
+var HttpCodes;
+(function (HttpCodes) {
+    HttpCodes[HttpCodes["OK"] = 200] = "OK";
+    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
+    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
+    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
+    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
+    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
+    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
+    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
+    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
+    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
+    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
+    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
+    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
+    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
+    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
+    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
+    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
+    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
+    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
+    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
+    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
+    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
+    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
+var Headers;
+(function (Headers) {
+    Headers["Accept"] = "accept";
+    Headers["ContentType"] = "content-type";
+})(Headers = exports.Headers || (exports.Headers = {}));
+var MediaTypes;
+(function (MediaTypes) {
+    MediaTypes["ApplicationJson"] = "application/json";
+})(MediaTypes = exports.MediaTypes || (exports.MediaTypes = {}));
 /**
- * Commands
- *
- * Command Format:
- *   ::name key=value,key=value::message
- *
- * Examples:
- *   ::warning::This is the message
- *   ::set-env name=MY_VAR::some value
+ * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
+ * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
  */
-function issueCommand(command, properties, message) {
-    const cmd = new Command(command, properties, message);
-    process.stdout.write(cmd.toString() + os.EOL);
+function getProxyUrl(serverUrl) {
+    let proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+    return proxyUrl ? proxyUrl.href : '';
 }
-exports.issueCommand = issueCommand;
-function issue(name, message = '') {
-    issueCommand(name, {}, message);
+exports.getProxyUrl = getProxyUrl;
+const HttpRedirectCodes = [
+    HttpCodes.MovedPermanently,
+    HttpCodes.ResourceMoved,
+    HttpCodes.SeeOther,
+    HttpCodes.TemporaryRedirect,
+    HttpCodes.PermanentRedirect
+];
+const HttpResponseRetryCodes = [
+    HttpCodes.BadGateway,
+    HttpCodes.ServiceUnavailable,
+    HttpCodes.GatewayTimeout
+];
+const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
+const ExponentialBackoffCeiling = 10;
+const ExponentialBackoffTimeSlice = 5;
+class HttpClientError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.name = 'HttpClientError';
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+    }
 }
-exports.issue = issue;
-const CMD_STRING = '::';
-class Command {
-    constructor(command, properties, message) {
-        if (!command) {
-            command = 'missing.command';
-        }
-        this.command = command;
-        this.properties = properties;
+exports.HttpClientError = HttpClientError;
+class HttpClientResponse {
+    constructor(message) {
         this.message = message;
     }
-    toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-            cmdStr += ' ';
-            let first = true;
-            for (const key in this.properties) {
-                if (this.properties.hasOwnProperty(key)) {
-                    const val = this.properties[key];
-                    if (val) {
-                        if (first) {
-                            first = false;
-                        }
-                        else {
-                            cmdStr += ',';
-                        }
-                        cmdStr += `${key}=${escapeProperty(val)}`;
-                    }
-                }
-            }
-        }
-        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
-        return cmdStr;
+    readBody() {
+        return new Promise(async (resolve, reject) => {
+            let output = Buffer.alloc(0);
+            this.message.on('data', (chunk) => {
+                output = Buffer.concat([output, chunk]);
+            });
+            this.message.on('end', () => {
+                resolve(output.toString());
+            });
+        });
     }
 }
-function escapeData(s) {
-    return utils_1.toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A');
+exports.HttpClientResponse = HttpClientResponse;
+function isHttps(requestUrl) {
+    let parsedUrl = new URL(requestUrl);
+    return parsedUrl.protocol === 'https:';
 }
-function escapeProperty(s) {
-    return utils_1.toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A')
-        .replace(/:/g, '%3A')
-        .replace(/,/g, '%2C');
+exports.isHttps = isHttps;
+class HttpClient {
+    constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._allowRedirectDowngrade = false;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+            if (requestOptions.ignoreSslError != null) {
+                this._ignoreSslError = requestOptions.ignoreSslError;
+            }
+            this._socketTimeout = requestOptions.socketTimeout;
+            if (requestOptions.allowRedirects != null) {
+                this._allowRedirects = requestOptions.allowRedirects;
+            }
+            if (requestOptions.allowRedirectDowngrade != null) {
+                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
+            }
+            if (requestOptions.maxRedirects != null) {
+                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+            }
+            if (requestOptions.keepAlive != null) {
+                this._keepAlive = requestOptions.keepAlive;
+            }
+            if (requestOptions.allowRetries != null) {
+                this._allowRetries = requestOptions.allowRetries;
+            }
+            if (requestOptions.maxRetries != null) {
+                this._maxRetries = requestOptions.maxRetries;
+            }
+        }
+    }
+    options(requestUrl, additionalHeaders) {
+        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+    }
+    get(requestUrl, additionalHeaders) {
+        return this.request('GET', requestUrl, null, additionalHeaders || {});
+    }
+    del(requestUrl, additionalHeaders) {
+        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+    }
+    post(requestUrl, data, additionalHeaders) {
+        return this.request('POST', requestUrl, data, additionalHeaders || {});
+    }
+    patch(requestUrl, data, additionalHeaders) {
+        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+    }
+    put(requestUrl, data, additionalHeaders) {
+        return this.request('PUT', requestUrl, data, additionalHeaders || {});
+    }
+    head(requestUrl, additionalHeaders) {
+        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+    }
+    sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return this.request(verb, requestUrl, stream, additionalHeaders);
+    }
+    /**
+     * Gets a typed object from an endpoint
+     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+     */
+    async getJson(requestUrl, additionalHeaders = {}) {
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        let res = await this.get(requestUrl, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async postJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.post(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async putJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.put(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async patchJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.patch(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    /**
+     * Makes a raw http request.
+     * All other methods such as get, post, patch, and request ultimately call this.
+     * Prefer get, del, post and patch
+     */
+    async request(verb, requestUrl, data, headers) {
+        if (this._disposed) {
+            throw new Error('Client has already been disposed.');
+        }
+        let parsedUrl = new URL(requestUrl);
+        let info = this._prepareRequest(verb, parsedUrl, headers);
+        // Only perform retries on reads since writes may not be idempotent.
+        let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1
+            ? this._maxRetries + 1
+            : 1;
+        let numTries = 0;
+        let response;
+        while (numTries < maxTries) {
+            response = await this.requestRaw(info, data);
+            // Check if it's an authentication challenge
+            if (response &&
+                response.message &&
+                response.message.statusCode === HttpCodes.Unauthorized) {
+                let authenticationHandler;
+                for (let i = 0; i < this.handlers.length; i++) {
+                    if (this.handlers[i].canHandleAuthentication(response)) {
+                        authenticationHandler = this.handlers[i];
+                        break;
+                    }
+                }
+                if (authenticationHandler) {
+                    return authenticationHandler.handleAuthentication(this, info, data);
+                }
+                else {
+                    // We have received an unauthorized response but have no handlers to handle it.
+                    // Let the response return to the caller.
+                    return response;
+                }
+            }
+            let redirectsRemaining = this._maxRedirects;
+            while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1 &&
+                this._allowRedirects &&
+                redirectsRemaining > 0) {
+                const redirectUrl = response.message.headers['location'];
+                if (!redirectUrl) {
+                    // if there's no location to redirect to, we won't
+                    break;
+                }
+                let parsedRedirectUrl = new URL(redirectUrl);
+                if (parsedUrl.protocol == 'https:' &&
+                    parsedUrl.protocol != parsedRedirectUrl.protocol &&
+                    !this._allowRedirectDowngrade) {
+                    throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
+                }
+                // we need to finish reading the response before reassigning response
+                // which will leak the open socket.
+                await response.readBody();
+                // strip authorization header if redirected to a different hostname
+                if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                    for (let header in headers) {
+                        // header names are case insensitive
+                        if (header.toLowerCase() === 'authorization') {
+                            delete headers[header];
+                        }
+                    }
+                }
+                // let's make the request with the new redirectUrl
+                info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+                response = await this.requestRaw(info, data);
+                redirectsRemaining--;
+            }
+            if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
+                // If not a retry code, return immediately instead of retrying
+                return response;
+            }
+            numTries += 1;
+            if (numTries < maxTries) {
+                await response.readBody();
+                await this._performExponentialBackoff(numTries);
+            }
+        }
+        return response;
+    }
+    /**
+     * Needs to be called if keepAlive is set to true in request options.
+     */
+    dispose() {
+        if (this._agent) {
+            this._agent.destroy();
+        }
+        this._disposed = true;
+    }
+    /**
+     * Raw request.
+     * @param info
+     * @param data
+     */
+    requestRaw(info, data) {
+        return new Promise((resolve, reject) => {
+            let callbackForResult = function (err, res) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(res);
+            };
+            this.requestRawWithCallback(info, data, callbackForResult);
+        });
+    }
+    /**
+     * Raw request with callback.
+     * @param info
+     * @param data
+     * @param onResult
+     */
+    requestRawWithCallback(info, data, onResult) {
+        let socket;
+        if (typeof data === 'string') {
+            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
+        }
+        let callbackCalled = false;
+        let handleResult = (err, res) => {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                onResult(err, res);
+            }
+        };
+        let req = info.httpModule.request(info.options, (msg) => {
+            let res = new HttpClientResponse(msg);
+            handleResult(null, res);
+        });
+        req.on('socket', sock => {
+            socket = sock;
+        });
+        // If we ever get disconnected, we want the socket to timeout eventually
+        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
+            if (socket) {
+                socket.end();
+            }
+            handleResult(new Error('Request timeout: ' + info.options.path), null);
+        });
+        req.on('error', function (err) {
+            // err has statusCode property
+            // res should have headers
+            handleResult(err, null);
+        });
+        if (data && typeof data === 'string') {
+            req.write(data, 'utf8');
+        }
+        if (data && typeof data !== 'string') {
+            data.on('close', function () {
+                req.end();
+            });
+            data.pipe(req);
+        }
+        else {
+            req.end();
+        }
+    }
+    /**
+     * Gets an http agent. This function is useful when you need an http agent that handles
+     * routing through a proxy server - depending upon the url and proxy environment variables.
+     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+     */
+    getAgent(serverUrl) {
+        let parsedUrl = new URL(serverUrl);
+        return this._getAgent(parsedUrl);
+    }
+    _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = requestUrl;
+        const usingSsl = info.parsedUrl.protocol === 'https:';
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port
+            ? parseInt(info.parsedUrl.port)
+            : defaultPort;
+        info.options.path =
+            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        if (this.userAgent != null) {
+            info.options.headers['user-agent'] = this.userAgent;
+        }
+        info.options.agent = this._getAgent(info.parsedUrl);
+        // gives handlers an opportunity to participate
+        if (this.handlers) {
+            this.handlers.forEach(handler => {
+                handler.prepareRequest(info.options);
+            });
+        }
+        return info;
+    }
+    _mergeHeaders(headers) {
+        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+        if (this.requestOptions && this.requestOptions.headers) {
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
+        }
+        return lowercaseKeys(headers || {});
+    }
+    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
+        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+            clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
+        }
+        return additionalHeaders[header] || clientHeader || _default;
+    }
+    _getAgent(parsedUrl) {
+        let agent;
+        let proxyUrl = pm.getProxyUrl(parsedUrl);
+        let useProxy = proxyUrl && proxyUrl.hostname;
+        if (this._keepAlive && useProxy) {
+            agent = this._proxyAgent;
+        }
+        if (this._keepAlive && !useProxy) {
+            agent = this._agent;
+        }
+        // if agent is already assigned use that agent.
+        if (!!agent) {
+            return agent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        let maxSockets = 100;
+        if (!!this.requestOptions) {
+            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        if (useProxy) {
+            // If using proxy, need tunnel
+            if (!tunnel) {
+                tunnel = __nccwpck_require__(294);
+            }
+            const agentOptions = {
+                maxSockets: maxSockets,
+                keepAlive: this._keepAlive,
+                proxy: {
+                    ...((proxyUrl.username || proxyUrl.password) && {
+                        proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+                    }),
+                    host: proxyUrl.hostname,
+                    port: proxyUrl.port
+                }
+            };
+            let tunnelAgent;
+            const overHttps = proxyUrl.protocol === 'https:';
+            if (usingSsl) {
+                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+            }
+            else {
+                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+            }
+            agent = tunnelAgent(agentOptions);
+            this._proxyAgent = agent;
+        }
+        // if reusing agent across request and tunneling agent isn't assigned create a new agent
+        if (this._keepAlive && !agent) {
+            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
+            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+            this._agent = agent;
+        }
+        // if not using private agent and tunnel agent isn't setup then use global agent
+        if (!agent) {
+            agent = usingSsl ? https.globalAgent : http.globalAgent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            agent.options = Object.assign(agent.options || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return agent;
+    }
+    _performExponentialBackoff(retryNumber) {
+        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    }
+    static dateTimeDeserializer(key, value) {
+        if (typeof value === 'string') {
+            let a = new Date(value);
+            if (!isNaN(a.valueOf())) {
+                return a;
+            }
+        }
+        return value;
+    }
+    async _processResponse(res, options) {
+        return new Promise(async (resolve, reject) => {
+            const statusCode = res.message.statusCode;
+            const response = {
+                statusCode: statusCode,
+                result: null,
+                headers: {}
+            };
+            // not found leads to null obj returned
+            if (statusCode == HttpCodes.NotFound) {
+                resolve(response);
+            }
+            let obj;
+            let contents;
+            // get the result from the body
+            try {
+                contents = await res.readBody();
+                if (contents && contents.length > 0) {
+                    if (options && options.deserializeDates) {
+                        obj = JSON.parse(contents, HttpClient.dateTimeDeserializer);
+                    }
+                    else {
+                        obj = JSON.parse(contents);
+                    }
+                    response.result = obj;
+                }
+                response.headers = res.message.headers;
+            }
+            catch (err) {
+                // Invalid resource (contents not json);  leaving result obj null
+            }
+            // note that 3xx redirects are handled by the http layer.
+            if (statusCode > 299) {
+                let msg;
+                // if exception/error in body, attempt to get better error
+                if (obj && obj.message) {
+                    msg = obj.message;
+                }
+                else if (contents && contents.length > 0) {
+                    // it may be the case that the exception is in the body message as string
+                    msg = contents;
+                }
+                else {
+                    msg = 'Failed request: (' + statusCode + ')';
+                }
+                let err = new HttpClientError(msg, statusCode);
+                err.result = response.result;
+                reject(err);
+            }
+            else {
+                resolve(response);
+            }
+        });
+    }
 }
-//# sourceMappingURL=command.js.map
+exports.HttpClient = HttpClient;
+
 
 /***/ }),
 
-/***/ 470:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 443:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
-const command_1 = __webpack_require__(431);
-const file_command_1 = __webpack_require__(102);
-const utils_1 = __webpack_require__(82);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
-/**
- * The code to exit an action
- */
-var ExitCode;
-(function (ExitCode) {
-    /**
-     * A code indicating that the action was successful
-     */
-    ExitCode[ExitCode["Success"] = 0] = "Success";
-    /**
-     * A code indicating that the action was a failure
-     */
-    ExitCode[ExitCode["Failure"] = 1] = "Failure";
-})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
-//-----------------------------------------------------------------------
-// Variables
-//-----------------------------------------------------------------------
-/**
- * Sets env variable for this action and future actions in the job
- * @param name the name of the variable to set
- * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function exportVariable(name, val) {
-    const convertedVal = utils_1.toCommandValue(val);
-    process.env[name] = convertedVal;
-    const filePath = process.env['GITHUB_ENV'] || '';
-    if (filePath) {
-        const delimiter = '_GitHubActionsFileCommandDelimeter_';
-        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
-        file_command_1.issueCommand('ENV', commandValue);
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+function getProxyUrl(reqUrl) {
+    let usingSsl = reqUrl.protocol === 'https:';
+    let proxyUrl;
+    if (checkBypass(reqUrl)) {
+        return proxyUrl;
+    }
+    let proxyVar;
+    if (usingSsl) {
+        proxyVar = process.env['https_proxy'] || process.env['HTTPS_PROXY'];
     }
     else {
-        command_1.issueCommand('set-env', { name }, convertedVal);
+        proxyVar = process.env['http_proxy'] || process.env['HTTP_PROXY'];
     }
-}
-exports.exportVariable = exportVariable;
-/**
- * Registers a secret which will get masked from logs
- * @param secret value of the secret
- */
-function setSecret(secret) {
-    command_1.issueCommand('add-mask', {}, secret);
-}
-exports.setSecret = setSecret;
-/**
- * Prepends inputPath to the PATH (for this action and future actions)
- * @param inputPath
- */
-function addPath(inputPath) {
-    const filePath = process.env['GITHUB_PATH'] || '';
-    if (filePath) {
-        file_command_1.issueCommand('PATH', inputPath);
+    if (proxyVar) {
+        proxyUrl = new URL(proxyVar);
     }
-    else {
-        command_1.issueCommand('add-path', {}, inputPath);
-    }
-    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
+    return proxyUrl;
 }
-exports.addPath = addPath;
-/**
- * Gets the value of an input.
- * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
- * Returns an empty string if the value is not defined.
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   string
- */
-function getInput(name, options) {
-    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
-    if (options && options.required && !val) {
-        throw new Error(`Input required and not supplied: ${name}`);
-    }
-    if (options && options.trimWhitespace === false) {
-        return val;
-    }
-    return val.trim();
-}
-exports.getInput = getInput;
-/**
- * Gets the values of an multiline input.  Each value is also trimmed.
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   string[]
- *
- */
-function getMultilineInput(name, options) {
-    const inputs = getInput(name, options)
-        .split('\n')
-        .filter(x => x !== '');
-    return inputs;
-}
-exports.getMultilineInput = getMultilineInput;
-/**
- * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
- * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
- * The return value is also in boolean type.
- * ref: https://yaml.org/spec/1.2/spec.html#id2804923
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   boolean
- */
-function getBooleanInput(name, options) {
-    const trueValue = ['true', 'True', 'TRUE'];
-    const falseValue = ['false', 'False', 'FALSE'];
-    const val = getInput(name, options);
-    if (trueValue.includes(val))
-        return true;
-    if (falseValue.includes(val))
+exports.getProxyUrl = getProxyUrl;
+function checkBypass(reqUrl) {
+    if (!reqUrl.hostname) {
         return false;
-    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
-        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
-}
-exports.getBooleanInput = getBooleanInput;
-/**
- * Sets the value of an output.
- *
- * @param     name     name of the output to set
- * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function setOutput(name, value) {
-    process.stdout.write(os.EOL);
-    command_1.issueCommand('set-output', { name }, value);
-}
-exports.setOutput = setOutput;
-/**
- * Enables or disables the echoing of commands into stdout for the rest of the step.
- * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
- *
- */
-function setCommandEcho(enabled) {
-    command_1.issue('echo', enabled ? 'on' : 'off');
-}
-exports.setCommandEcho = setCommandEcho;
-//-----------------------------------------------------------------------
-// Results
-//-----------------------------------------------------------------------
-/**
- * Sets the action status to failed.
- * When the action exits it will be with an exit code of 1
- * @param message add error issue message
- */
-function setFailed(message) {
-    process.exitCode = ExitCode.Failure;
-    error(message);
-}
-exports.setFailed = setFailed;
-//-----------------------------------------------------------------------
-// Logging Commands
-//-----------------------------------------------------------------------
-/**
- * Gets whether Actions Step Debug is on or not
- */
-function isDebug() {
-    return process.env['RUNNER_DEBUG'] === '1';
-}
-exports.isDebug = isDebug;
-/**
- * Writes debug message to user log
- * @param message debug message
- */
-function debug(message) {
-    command_1.issueCommand('debug', {}, message);
-}
-exports.debug = debug;
-/**
- * Adds an error issue
- * @param message error issue message. Errors will be converted to string via toString()
- * @param properties optional properties to add to the annotation.
- */
-function error(message, properties = {}) {
-    command_1.issueCommand('error', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
-}
-exports.error = error;
-/**
- * Adds a warning issue
- * @param message warning issue message. Errors will be converted to string via toString()
- * @param properties optional properties to add to the annotation.
- */
-function warning(message, properties = {}) {
-    command_1.issueCommand('warning', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
-}
-exports.warning = warning;
-/**
- * Adds a notice issue
- * @param message notice issue message. Errors will be converted to string via toString()
- * @param properties optional properties to add to the annotation.
- */
-function notice(message, properties = {}) {
-    command_1.issueCommand('notice', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
-}
-exports.notice = notice;
-/**
- * Writes info to log with console.log.
- * @param message info message
- */
-function info(message) {
-    process.stdout.write(message + os.EOL);
-}
-exports.info = info;
-/**
- * Begin an output group.
- *
- * Output until the next `groupEnd` will be foldable in this group
- *
- * @param name The name of the output group
- */
-function startGroup(name) {
-    command_1.issue('group', name);
-}
-exports.startGroup = startGroup;
-/**
- * End an output group.
- */
-function endGroup() {
-    command_1.issue('endgroup');
-}
-exports.endGroup = endGroup;
-/**
- * Wrap an asynchronous function call in a group.
- *
- * Returns the same type as the function itself.
- *
- * @param name The name of the group
- * @param fn The function to wrap in the group
- */
-function group(name, fn) {
-    return __awaiter(this, void 0, void 0, function* () {
-        startGroup(name);
-        let result;
-        try {
-            result = yield fn();
+    }
+    let noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
+    if (!noProxy) {
+        return false;
+    }
+    // Determine the request port
+    let reqPort;
+    if (reqUrl.port) {
+        reqPort = Number(reqUrl.port);
+    }
+    else if (reqUrl.protocol === 'http:') {
+        reqPort = 80;
+    }
+    else if (reqUrl.protocol === 'https:') {
+        reqPort = 443;
+    }
+    // Format the request hostname and hostname with port
+    let upperReqHosts = [reqUrl.hostname.toUpperCase()];
+    if (typeof reqPort === 'number') {
+        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
+    }
+    // Compare request host against noproxy
+    for (let upperNoProxyItem of noProxy
+        .split(',')
+        .map(x => x.trim().toUpperCase())
+        .filter(x => x)) {
+        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+            return true;
         }
-        finally {
-            endGroup();
-        }
-        return result;
-    });
+    }
+    return false;
 }
-exports.group = group;
-//-----------------------------------------------------------------------
-// Wrapper action state
-//-----------------------------------------------------------------------
-/**
- * Saves state for current action, the state can only be retrieved by this action's post job execution.
- *
- * @param     name     name of the state to store
- * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function saveState(name, value) {
-    command_1.issueCommand('save-state', { name }, value);
-}
-exports.saveState = saveState;
-/**
- * Gets the value of an state set by this action's main execution.
- *
- * @param     name     name of the state to get
- * @returns   string
- */
-function getState(name) {
-    return process.env[`STATE_${name}`] || '';
-}
-exports.getState = getState;
-//# sourceMappingURL=core.js.map
+exports.checkBypass = checkBypass;
+
 
 /***/ }),
 
-/***/ 614:
-/***/ (function(module) {
-
-module.exports = require("events");
-
-/***/ }),
-
-/***/ 622:
-/***/ (function(module) {
-
-module.exports = require("path");
-
-/***/ }),
-
-/***/ 669:
-/***/ (function(module) {
-
-module.exports = require("util");
-
-/***/ }),
-
-/***/ 672:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 962:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -1885,10 +3049,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var _a;
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rename = exports.readlink = exports.readdir = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
-const fs = __importStar(__webpack_require__(747));
-const path = __importStar(__webpack_require__(622));
+const fs = __importStar(__nccwpck_require__(147));
+const path = __importStar(__nccwpck_require__(17));
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -2035,15 +3199,8 @@ exports.getCmdPath = getCmdPath;
 
 /***/ }),
 
-/***/ 747:
-/***/ (function(module) {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ 986:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 351:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -2075,81 +3232,750 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExecOutput = exports.exec = void 0;
-const string_decoder_1 = __webpack_require__(304);
-const tr = __importStar(__webpack_require__(9));
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
+const assert_1 = __nccwpck_require__(491);
+const childProcess = __importStar(__nccwpck_require__(81));
+const path = __importStar(__nccwpck_require__(17));
+const util_1 = __nccwpck_require__(837);
+const ioUtil = __importStar(__nccwpck_require__(962));
+const exec = util_1.promisify(childProcess.exec);
+const execFile = util_1.promisify(childProcess.execFile);
 /**
- * Exec a command.
- * Output will be streamed to the live console.
- * Returns promise with return code
+ * Copies a file or folder.
+ * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
  *
- * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
- * @param     args               optional arguments for tool. Escaping is handled by the lib.
- * @param     options            optional exec options.  See ExecOptions
- * @returns   Promise<number>    exit code
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See CopyOptions.
  */
-function exec(commandLine, args, options) {
+function cp(source, dest, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
-        const commandArgs = tr.argStringToArray(commandLine);
-        if (commandArgs.length === 0) {
-            throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
+        const { force, recursive, copySourceDirectory } = readCopyOptions(options);
+        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
+        // Dest is an existing file, but not forcing
+        if (destStat && destStat.isFile() && !force) {
+            return;
         }
-        // Path to tool to execute should be first arg
-        const toolPath = commandArgs[0];
-        args = commandArgs.slice(1).concat(args || []);
-        const runner = new tr.ToolRunner(toolPath, args, options);
-        return runner.exec();
+        // If dest is an existing directory, should copy inside.
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory
+            ? path.join(dest, path.basename(source))
+            : dest;
+        if (!(yield ioUtil.exists(source))) {
+            throw new Error(`no such file or directory: ${source}`);
+        }
+        const sourceStat = yield ioUtil.stat(source);
+        if (sourceStat.isDirectory()) {
+            if (!recursive) {
+                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+            }
+            else {
+                yield cpDirRecursive(source, newDest, 0, force);
+            }
+        }
+        else {
+            if (path.relative(source, newDest) === '') {
+                // a file cannot be copied to itself
+                throw new Error(`'${newDest}' and '${source}' are the same file`);
+            }
+            yield copyFile(source, newDest, force);
+        }
     });
 }
-exports.exec = exec;
+exports.cp = cp;
 /**
- * Exec a command and get the output.
- * Output will be streamed to the live console.
- * Returns promise with the exit code and collected stdout and stderr
+ * Moves a path.
  *
- * @param     commandLine           command to execute (can include additional args). Must be correctly escaped.
- * @param     args                  optional arguments for tool. Escaping is handled by the lib.
- * @param     options               optional exec options.  See ExecOptions
- * @returns   Promise<ExecOutput>   exit code, stdout, and stderr
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See MoveOptions.
  */
-function getExecOutput(commandLine, args, options) {
-    var _a, _b;
+function mv(source, dest, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
-        let stdout = '';
-        let stderr = '';
-        //Using string decoder covers the case where a mult-byte character is split
-        const stdoutDecoder = new string_decoder_1.StringDecoder('utf8');
-        const stderrDecoder = new string_decoder_1.StringDecoder('utf8');
-        const originalStdoutListener = (_a = options === null || options === void 0 ? void 0 : options.listeners) === null || _a === void 0 ? void 0 : _a.stdout;
-        const originalStdErrListener = (_b = options === null || options === void 0 ? void 0 : options.listeners) === null || _b === void 0 ? void 0 : _b.stderr;
-        const stdErrListener = (data) => {
-            stderr += stderrDecoder.write(data);
-            if (originalStdErrListener) {
-                originalStdErrListener(data);
+        if (yield ioUtil.exists(dest)) {
+            let destExists = true;
+            if (yield ioUtil.isDirectory(dest)) {
+                // If dest is directory copy src into dest
+                dest = path.join(dest, path.basename(source));
+                destExists = yield ioUtil.exists(dest);
             }
-        };
-        const stdOutListener = (data) => {
-            stdout += stdoutDecoder.write(data);
-            if (originalStdoutListener) {
-                originalStdoutListener(data);
+            if (destExists) {
+                if (options.force == null || options.force) {
+                    yield rmRF(dest);
+                }
+                else {
+                    throw new Error('Destination already exists');
+                }
             }
-        };
-        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
-        //flush any remaining characters
-        stdout += stdoutDecoder.end();
-        stderr += stderrDecoder.end();
-        return {
-            exitCode,
-            stdout,
-            stderr
-        };
+        }
+        yield mkdirP(path.dirname(dest));
+        yield ioUtil.rename(source, dest);
     });
 }
-exports.getExecOutput = getExecOutput;
-//# sourceMappingURL=exec.js.map
+exports.mv = mv;
+/**
+ * Remove a path recursively with force
+ *
+ * @param inputPath path to remove
+ */
+function rmRF(inputPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (ioUtil.IS_WINDOWS) {
+            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
+            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
+            // Check for invalid characters
+            // https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+            if (/[*"<>|]/.test(inputPath)) {
+                throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
+            }
+            try {
+                const cmdPath = ioUtil.getCmdPath();
+                if (yield ioUtil.isDirectory(inputPath, true)) {
+                    yield exec(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
+                        env: { inputPath }
+                    });
+                }
+                else {
+                    yield exec(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
+                        env: { inputPath }
+                    });
+                }
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
+            try {
+                yield ioUtil.unlink(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+        }
+        else {
+            let isDir = false;
+            try {
+                isDir = yield ioUtil.isDirectory(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+                return;
+            }
+            if (isDir) {
+                yield execFile(`rm`, [`-rf`, `${inputPath}`]);
+            }
+            else {
+                yield ioUtil.unlink(inputPath);
+            }
+        }
+    });
+}
+exports.rmRF = rmRF;
+/**
+ * Make a directory.  Creates the full path with folders in between
+ * Will throw if it fails
+ *
+ * @param   fsPath        path to create
+ * @returns Promise<void>
+ */
+function mkdirP(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        assert_1.ok(fsPath, 'a path argument must be provided');
+        yield ioUtil.mkdir(fsPath, { recursive: true });
+    });
+}
+exports.mkdirP = mkdirP;
+/**
+ * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
+ * If you check and the tool does not exist, it will throw.
+ *
+ * @param     tool              name of the tool
+ * @param     check             whether to check if tool exists
+ * @returns   Promise<string>   path to tool
+ */
+function which(tool, check) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // recursive when check=true
+        if (check) {
+            const result = yield which(tool, false);
+            if (!result) {
+                if (ioUtil.IS_WINDOWS) {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+                }
+                else {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+                }
+            }
+            return result;
+        }
+        const matches = yield findInPath(tool);
+        if (matches && matches.length > 0) {
+            return matches[0];
+        }
+        return '';
+    });
+}
+exports.which = which;
+/**
+ * Returns a list of all occurrences of the given tool on the system path.
+ *
+ * @returns   Promise<string[]>  the paths of the tool
+ */
+function findInPath(tool) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // build the list of extensions to try
+        const extensions = [];
+        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
+            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
+                if (extension) {
+                    extensions.push(extension);
+                }
+            }
+        }
+        // if it's rooted, return it if exists. otherwise return empty.
+        if (ioUtil.isRooted(tool)) {
+            const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+            if (filePath) {
+                return [filePath];
+            }
+            return [];
+        }
+        // if any path separators, return empty
+        if (tool.includes(path.sep)) {
+            return [];
+        }
+        // build the list of directories
+        //
+        // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+        // it feels like we should not do this. Checking the current directory seems like more of a use
+        // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+        // across platforms.
+        const directories = [];
+        if (process.env.PATH) {
+            for (const p of process.env.PATH.split(path.delimiter)) {
+                if (p) {
+                    directories.push(p);
+                }
+            }
+        }
+        // find all matches
+        const matches = [];
+        for (const directory of directories) {
+            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
+            if (filePath) {
+                matches.push(filePath);
+            }
+        }
+        return matches;
+    });
+}
+exports.findInPath = findInPath;
+function readCopyOptions(options) {
+    const force = options.force == null ? true : options.force;
+    const recursive = Boolean(options.recursive);
+    const copySourceDirectory = options.copySourceDirectory == null
+        ? true
+        : Boolean(options.copySourceDirectory);
+    return { force, recursive, copySourceDirectory };
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Ensure there is not a run away recursive copy
+        if (currentDepth >= 255)
+            return;
+        currentDepth++;
+        yield mkdirP(destDir);
+        const files = yield ioUtil.readdir(sourceDir);
+        for (const fileName of files) {
+            const srcFile = `${sourceDir}/${fileName}`;
+            const destFile = `${destDir}/${fileName}`;
+            const srcFileStat = yield ioUtil.lstat(srcFile);
+            if (srcFileStat.isDirectory()) {
+                // Recurse
+                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+            }
+            else {
+                yield copyFile(srcFile, destFile, force);
+            }
+        }
+        // Change the mode for the newly created directory
+        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
+    });
+}
+// Buffered file copy
+function copyFile(srcFile, destFile, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
+            // unlink/re-link it
+            try {
+                yield ioUtil.lstat(destFile);
+                yield ioUtil.unlink(destFile);
+            }
+            catch (e) {
+                // Try to override file permission
+                if (e.code === 'EPERM') {
+                    yield ioUtil.chmod(destFile, '0666');
+                    yield ioUtil.unlink(destFile);
+                }
+                // other errors = it doesn't exist, no work to do
+            }
+            // Copy over symlink
+            const symlinkFull = yield ioUtil.readlink(srcFile);
+            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
+        }
+        else if (!(yield ioUtil.exists(destFile)) || force) {
+            yield ioUtil.copyFile(srcFile, destFile);
+        }
+    });
+}
+//# sourceMappingURL=io.js.map
+
+/***/ }),
+
+/***/ 294:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+module.exports = __nccwpck_require__(219);
+
+
+/***/ }),
+
+/***/ 219:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var net = __nccwpck_require__(982);
+var tls = __nccwpck_require__(404);
+var http = __nccwpck_require__(685);
+var https = __nccwpck_require__(687);
+var events = __nccwpck_require__(361);
+var assert = __nccwpck_require__(491);
+var util = __nccwpck_require__(837);
+
+
+exports.httpOverHttp = httpOverHttp;
+exports.httpsOverHttp = httpsOverHttp;
+exports.httpOverHttps = httpOverHttps;
+exports.httpsOverHttps = httpsOverHttps;
+
+
+function httpOverHttp(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = http.request;
+  return agent;
+}
+
+function httpsOverHttp(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = http.request;
+  agent.createSocket = createSecureSocket;
+  agent.defaultPort = 443;
+  return agent;
+}
+
+function httpOverHttps(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = https.request;
+  return agent;
+}
+
+function httpsOverHttps(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = https.request;
+  agent.createSocket = createSecureSocket;
+  agent.defaultPort = 443;
+  return agent;
+}
+
+
+function TunnelingAgent(options) {
+  var self = this;
+  self.options = options || {};
+  self.proxyOptions = self.options.proxy || {};
+  self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
+  self.requests = [];
+  self.sockets = [];
+
+  self.on('free', function onFree(socket, host, port, localAddress) {
+    var options = toOptions(host, port, localAddress);
+    for (var i = 0, len = self.requests.length; i < len; ++i) {
+      var pending = self.requests[i];
+      if (pending.host === options.host && pending.port === options.port) {
+        // Detect the request to connect same origin server,
+        // reuse the connection.
+        self.requests.splice(i, 1);
+        pending.request.onSocket(socket);
+        return;
+      }
+    }
+    socket.destroy();
+    self.removeSocket(socket);
+  });
+}
+util.inherits(TunnelingAgent, events.EventEmitter);
+
+TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
+  var self = this;
+  var options = mergeOptions({request: req}, self.options, toOptions(host, port, localAddress));
+
+  if (self.sockets.length >= this.maxSockets) {
+    // We are over limit so we'll add it to the queue.
+    self.requests.push(options);
+    return;
+  }
+
+  // If we are under maxSockets create a new one.
+  self.createSocket(options, function(socket) {
+    socket.on('free', onFree);
+    socket.on('close', onCloseOrRemove);
+    socket.on('agentRemove', onCloseOrRemove);
+    req.onSocket(socket);
+
+    function onFree() {
+      self.emit('free', socket, options);
+    }
+
+    function onCloseOrRemove(err) {
+      self.removeSocket(socket);
+      socket.removeListener('free', onFree);
+      socket.removeListener('close', onCloseOrRemove);
+      socket.removeListener('agentRemove', onCloseOrRemove);
+    }
+  });
+};
+
+TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
+  var self = this;
+  var placeholder = {};
+  self.sockets.push(placeholder);
+
+  var connectOptions = mergeOptions({}, self.proxyOptions, {
+    method: 'CONNECT',
+    path: options.host + ':' + options.port,
+    agent: false,
+    headers: {
+      host: options.host + ':' + options.port
+    }
+  });
+  if (options.localAddress) {
+    connectOptions.localAddress = options.localAddress;
+  }
+  if (connectOptions.proxyAuth) {
+    connectOptions.headers = connectOptions.headers || {};
+    connectOptions.headers['Proxy-Authorization'] = 'Basic ' +
+        new Buffer(connectOptions.proxyAuth).toString('base64');
+  }
+
+  debug('making CONNECT request');
+  var connectReq = self.request(connectOptions);
+  connectReq.useChunkedEncodingByDefault = false; // for v0.6
+  connectReq.once('response', onResponse); // for v0.6
+  connectReq.once('upgrade', onUpgrade);   // for v0.6
+  connectReq.once('connect', onConnect);   // for v0.7 or later
+  connectReq.once('error', onError);
+  connectReq.end();
+
+  function onResponse(res) {
+    // Very hacky. This is necessary to avoid http-parser leaks.
+    res.upgrade = true;
+  }
+
+  function onUpgrade(res, socket, head) {
+    // Hacky.
+    process.nextTick(function() {
+      onConnect(res, socket, head);
+    });
+  }
+
+  function onConnect(res, socket, head) {
+    connectReq.removeAllListeners();
+    socket.removeAllListeners();
+
+    if (res.statusCode !== 200) {
+      debug('tunneling socket could not be established, statusCode=%d',
+        res.statusCode);
+      socket.destroy();
+      var error = new Error('tunneling socket could not be established, ' +
+        'statusCode=' + res.statusCode);
+      error.code = 'ECONNRESET';
+      options.request.emit('error', error);
+      self.removeSocket(placeholder);
+      return;
+    }
+    if (head.length > 0) {
+      debug('got illegal response body from proxy');
+      socket.destroy();
+      var error = new Error('got illegal response body from proxy');
+      error.code = 'ECONNRESET';
+      options.request.emit('error', error);
+      self.removeSocket(placeholder);
+      return;
+    }
+    debug('tunneling connection has established');
+    self.sockets[self.sockets.indexOf(placeholder)] = socket;
+    return cb(socket);
+  }
+
+  function onError(cause) {
+    connectReq.removeAllListeners();
+
+    debug('tunneling socket could not be established, cause=%s\n',
+          cause.message, cause.stack);
+    var error = new Error('tunneling socket could not be established, ' +
+                          'cause=' + cause.message);
+    error.code = 'ECONNRESET';
+    options.request.emit('error', error);
+    self.removeSocket(placeholder);
+  }
+};
+
+TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
+  var pos = this.sockets.indexOf(socket)
+  if (pos === -1) {
+    return;
+  }
+  this.sockets.splice(pos, 1);
+
+  var pending = this.requests.shift();
+  if (pending) {
+    // If we have pending requests and a socket gets closed a new one
+    // needs to be created to take over in the pool for the one that closed.
+    this.createSocket(pending, function(socket) {
+      pending.request.onSocket(socket);
+    });
+  }
+};
+
+function createSecureSocket(options, cb) {
+  var self = this;
+  TunnelingAgent.prototype.createSocket.call(self, options, function(socket) {
+    var hostHeader = options.request.getHeader('host');
+    var tlsOptions = mergeOptions({}, self.options, {
+      socket: socket,
+      servername: hostHeader ? hostHeader.replace(/:.*$/, '') : options.host
+    });
+
+    // 0 is dummy port for v0.6
+    var secureSocket = tls.connect(0, tlsOptions);
+    self.sockets[self.sockets.indexOf(socket)] = secureSocket;
+    cb(secureSocket);
+  });
+}
+
+
+function toOptions(host, port, localAddress) {
+  if (typeof host === 'string') { // since v0.10
+    return {
+      host: host,
+      port: port,
+      localAddress: localAddress
+    };
+  }
+  return host; // for v0.11 or later
+}
+
+function mergeOptions(target) {
+  for (var i = 1, len = arguments.length; i < len; ++i) {
+    var overrides = arguments[i];
+    if (typeof overrides === 'object') {
+      var keys = Object.keys(overrides);
+      for (var j = 0, keyLen = keys.length; j < keyLen; ++j) {
+        var k = keys[j];
+        if (overrides[k] !== undefined) {
+          target[k] = overrides[k];
+        }
+      }
+    }
+  }
+  return target;
+}
+
+
+var debug;
+if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
+  debug = function() {
+    var args = Array.prototype.slice.call(arguments);
+    if (typeof args[0] === 'string') {
+      args[0] = 'TUNNEL: ' + args[0];
+    } else {
+      args.unshift('TUNNEL:');
+    }
+    console.error.apply(console, args);
+  }
+} else {
+  debug = function() {};
+}
+exports.debug = debug; // for test
+
+
+/***/ }),
+
+/***/ 491:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("assert");
+
+/***/ }),
+
+/***/ 81:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
+
+/***/ }),
+
+/***/ 361:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("events");
+
+/***/ }),
+
+/***/ 147:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ 685:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("http");
+
+/***/ }),
+
+/***/ 687:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("https");
+
+/***/ }),
+
+/***/ 982:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("net");
+
+/***/ }),
+
+/***/ 37:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("os");
+
+/***/ }),
+
+/***/ 17:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("path");
+
+/***/ }),
+
+/***/ 576:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("string_decoder");
+
+/***/ }),
+
+/***/ 512:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("timers");
+
+/***/ }),
+
+/***/ 404:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("tls");
+
+/***/ }),
+
+/***/ 837:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("util");
 
 /***/ })
 
-/******/ });
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __nccwpck_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 		}
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat */
+/******/ 	
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(109);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
+/******/ })()
+;
+//# sourceMappingURL=index.js.map
