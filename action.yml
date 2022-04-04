@@ -20,7 +20,7 @@ inputs:
     description: "A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression."
     required: true
     default: "(MINOR)"
-  format:
+  version_format:
     description: "Pattern to use when formatting output version"
     required: true
     default: "${major}.${minor}.${patch}"
@@ -30,14 +30,18 @@ inputs:
   namespace:
     description: "Use to create a named sub-version. This value will be appended to tags created for this version."
     required: false
-  short_tags:
-    description: "If false, only full versions, i.e. 'v1.0.0', will be supported as tags. If true, tags will support truncated minor and patch versions such as 'v1' (default)."
-    required: true
-    default: "true"
   bump_each_commit:
     description: "If true, every commit will be treated as a bump to the version."
     required: true
     default: "false"
+  search_commit_body:
+    description: "If true, the body of commits will also be searched for major/minor patterns to determine the version type."
+    required: true
+    default: "false"
+  user_format_type:
+    description: "The output method used to generate list of users, 'csv' or 'json'. Default is 'csv'."
+    required: true
+    default: "csv"
 outputs:
   major:
     description: "Current major number"
@@ -54,5 +58,5 @@ outputs:
   changed:
     description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"
