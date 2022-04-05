@@ -134,8 +134,10 @@ class VersionResult {
      * @param changed - True if the version was changed, otherwise false
      * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
      * @param currentCommit - The current commit hash
+     * @param previousCommit - The previous commit hash
+     * @param previousVersion - the previous version
      */
-    constructor(major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit) {
+    constructor(major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -145,6 +147,8 @@ class VersionResult {
         this.changed = changed;
         this.authors = authors;
         this.currentCommit = currentCommit;
+        this.previousCommit = previousCommit;
+        this.previousVersion = previousVersion;
     }
 }
 exports.VersionResult = VersionResult;
@@ -183,7 +187,7 @@ function runAction(configurationProvider) {
         const userFormatter = configurationProvider.GetUserFormatter();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
             let versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '');
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '', '', '0.0.0');
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
@@ -204,7 +208,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit);
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
     });
 }
 exports.runAction = runAction;
@@ -379,7 +383,7 @@ const action_1 = __nccwpck_require__(139);
 const ConfigurationProvider_1 = __nccwpck_require__(614);
 const core = __importStar(__nccwpck_require__(186));
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit } = versionResult;
+    const { major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
         core.info('No changes detected for this commit');
@@ -396,6 +400,9 @@ function setOutput(versionResult) {
     core.setOutput("changed", changed.toString());
     core.setOutput("version_tag", versionTag);
     core.setOutput("authors", authors);
+    core.setOutput("lastVersion", authors);
+    core.setOutput("previous_commit", previousCommit);
+    core.setOutput("previous_version", previousVersion);
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
