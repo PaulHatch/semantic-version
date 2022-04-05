@@ -12,7 +12,9 @@ export class VersionResult {
    * @param versionTag - The string to be used as a Git tag
    * @param changed - True if the version was changed, otherwise false
    * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
-   * @param currentCommit - The current commit hash
+   * @param currentCommit - The current commit hash 
+   * @param previousCommit - The previous commit hash
+   * @param previousVersion - the previous version
    */
   constructor(
     public major: number,
@@ -23,5 +25,7 @@ export class VersionResult {
     public versionTag: string,
     public changed: boolean,
     public authors: string,
-    public currentCommit: string) { }
+    public currentCommit: string,
+    public previousCommit: string,
+    public previousVersion: string) { }
 }

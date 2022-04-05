@@ -25,7 +25,9 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
       tagFormmater.Format(versionInfo),
       versionInfo.changed,
       userFormatter.Format('author', []),
-      ''
+      '',
+      '',
+      '0.0.0'
     );
   }
 
@@ -62,6 +64,8 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     tagFormmater.Format(versionInfo),
     versionInfo.changed,
     userFormatter.Format('author', authors),
-    currentCommit
+    currentCommit,
+    lastRelease.hash,
+    `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`
   );
 }
