@@ -1,5 +1,8 @@
 ![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
+> *Version 5-alpha now available!*
+> Version 5 adds support for several new features and allows easier extension/customization. See the [release notes](https://github.com/PaulHatch/semantic-version/releases/tag/v5.0.0-alpha) for more information.
+
 # Git-Based Semantic Versioning
 
 This action produces a [semantic version](https://semver.org) for a repository
@@ -87,9 +90,6 @@ it will be given the new version if the build were to be retriggered, for exampl
     change_path: "src/my-service"
     # Named version, will be used as suffix for name version tag
     namespace: my-service
-    # Indicate whether short tags like 'v1' should be supported. If false only full
-    # tags like 'v1.0.0' will be recognized.
-    short_tags: true
     # If this is set to true, *every* commit will be treated as a new version.
     bump_each_commit: false
     # If true, the body of commits will also be searched for major/minor patterns to determine the version type.
@@ -164,3 +164,6 @@ zero to pull the full history and tags.
     with:
       fetch-depth: 0
 ```
+
+Alternatively, you can set this number to a value high enough to pull all the commits
+you'd expect to have in a release.
