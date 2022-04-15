@@ -12,6 +12,10 @@ inputs:
     description: "The prefix to use to identify tags"
     required: false
     default: "v"
+  use_branches:
+    description: "Use branches instead of tags"
+    required: false
+    default: "false"
   major_pattern:
     description: "A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression."
     required: true

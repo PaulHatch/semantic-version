@@ -11,7 +11,7 @@ import { DefaultCommitsProvider } from './providers/DefaultCommitsProvider'
 import { DefaultCurrentCommitResolver } from './providers/DefaultCurrentCommitResolver'
 import { DefaultVersionClassifier } from './providers/DefaultVersionClassifier'
 import { LastReleaseResolver } from './providers/LastReleaseResolver'
-import { TagLastReleaseResolver } from './providers/TagLastReleaseResolver'
+import { DefaultLastReleaseResolver } from './providers/DefaultLastReleaseResolver'
 import { VersionClassifier } from './providers/VersionClassifier'
 import { BumpAlwaysVersionClassifier } from './providers/BumpAlwaysVersionClassifier'
 import { ActionConfig } from './ActionConfig';
@@ -26,7 +26,7 @@ export class ConfigurationProvider {
 
   public GetCurrentCommitResolver(): CurrentCommitResolver { return new DefaultCurrentCommitResolver(this.config); }
 
-  public GetLastReleaseResolver(): LastReleaseResolver { return new TagLastReleaseResolver(this.config); }
+  public GetLastReleaseResolver(): LastReleaseResolver { return new DefaultLastReleaseResolver(this.config); }
 
   public GetCommitsProvider(): CommitsProvider { return new DefaultCommitsProvider(this.config); }
 

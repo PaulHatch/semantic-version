@@ -4,6 +4,8 @@ export class ActionConfig {
     public branch: string = "HEAD";
     /** The prefix to use to identify tags */
     public tagPrefix: string = "v";
+    /** Use branches instead of tags */
+    public useBranches: boolean = false;
     /** A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression. */
     public majorPattern: string = "(MAJOR)";
     /** A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression. */

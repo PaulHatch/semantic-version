@@ -5,12 +5,14 @@ import { ReleaseInformation } from "./ReleaseInformation";
 import { ActionConfig } from "../ActionConfig";
 import * as core from '@actions/core';
 
-export class TagLastReleaseResolver implements LastReleaseResolver {
+export class DefaultLastReleaseResolver implements LastReleaseResolver {
 
     private changePath: string;
+    private useBranches: boolean;
 
     constructor(config: ActionConfig) {
         this.changePath = config.changePath;
+        this.useBranches = config.useBranches;
     }
 
     async ResolveAsync(current: string, tagFormatter: TagFormatter): Promise<ReleaseInformation> {
@@ -23,14 +25,15 @@ export class TagLastReleaseResolver implements LastReleaseResolver {
 
         let tag = '';
         try {
+            const refPrefixPattern = this.useBranches ? 'refs/heads/' : 'refs/tags/';
             if (!!currentTag) {
                 // If we already have the current branch tagged, we are checking for the previous one
                 // so that we will have an accurate increment (assuming the new tag is the expected one)
-                const command = `git for-each-ref --count=2 --sort=-v:*refname --format=%(refname:short) --merged=${current} refs/tags/${releasePattern}`;
+                const command = `git for-each-ref --count=2 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
                 tag = await cmd(command);
                 tag = tag.split('\n').at(-1) || '';
             } else {
-                const command = `git for-each-ref --count=1 --sort=-v:*refname --format=%(refname:short) --merged=${current} refs/tags/${releasePattern}`;
+                const command = `git for-each-ref --count=1 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
                 tag = await cmd(command);
             }
 

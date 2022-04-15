@@ -36,6 +36,7 @@ export async function run() {
   const config: ActionConfig = {
     branch: core.getInput('branch'),
     tagPrefix: core.getInput('tag_prefix'),
+    useBranches: core.getInput('use_branches') === 'true',
     majorPattern: core.getInput('major_pattern'),
     minorPattern: core.getInput('minor_pattern'),
     versionFormat: core.getInput('version_format'),

@@ -547,3 +547,36 @@ test('Correct tag is detected when versions pass 10s place', async () => {
 
     expect(result.versionTag).toBe('v10.15.1');
 }, 15000);
+
+test('Tags on unmerged branches are not considered', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git checkout -b feature/branch1');
+    repo.makeCommit('Commit 2');
+    repo.exec('git tag v2.0.0');
+    repo.makeCommit('Commit 3');
+    repo.exec('git checkout master');
+    repo.makeCommit('Commit 4');
+    repo.exec('git tag v1.0.0');
+    repo.makeCommit('Commit 5');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('v1.0.1');
+}, 15000);
+
+test('Can use branches instead of tags', async () => {
+    const repo = createTestRepo({ tagPrefix: 'release/', useBranches: true }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git checkout -b release/1.0.0');
+    repo.makeCommit('Commit 2');
+    repo.exec('git checkout master');
+    repo.exec('git merge release/1.0.0');
+    repo.makeCommit('Commit 3');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('release/1.0.1');
+}, 15000);
