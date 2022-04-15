@@ -21,17 +21,20 @@ export class TagLastReleaseResolver implements LastReleaseResolver {
         )).trim();
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
 
-
         let tag = '';
         try {
-            tag = (await cmd(
-                'git',
-                `describe`,
-                `--tags`,
-                `--abbrev=0`,
-                `--match=${releasePattern}`,
-                `${current}~1`
-            )).trim();
+            if (!!currentTag) {
+                // If we already have the current branch tagged, we are checking for the previous one
+                // so that we will have an accurate increment (assuming the new tag is the expected one)
+                const command = `git for-each-ref --count=2 --sort=-v:*refname --format=%(refname:short) --merged=${current} refs/tags/${releasePattern}`;
+                tag = await cmd(command);
+                tag = tag.split('\n').at(-1) || '';
+            } else {
+                const command = `git for-each-ref --count=1 --sort=-v:*refname --format=%(refname:short) --merged=${current} refs/tags/${releasePattern}`;
+                tag = await cmd(command);
+            }
+
+            tag = tag.trim();
         }
         catch (err) {
             tag = '';

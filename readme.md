@@ -1,7 +1,12 @@
 ![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
 > *Version 5-alpha now available!*
-> Version 5 adds support for several new features and allows easier extension/customization. See the [release notes](https://github.com/PaulHatch/semantic-version/releases/tag/v5.0.0-alpha) for more information.
+> Version 5 adds support for several new features and allows easier extension/customization.
+> ##### Breaking Changes
+> - Versions now use the version number (`--sort=-v:*refname`) rather than date to determine which tag is the latest.
+> - "Short tag" support removed
+>
+> See the [release notes](https://github.com/PaulHatch/semantic-version/releases/tag/v5.0.0-alpha) for more information.
 
 # Git-Based Semantic Versioning
 

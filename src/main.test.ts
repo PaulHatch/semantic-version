@@ -337,6 +337,7 @@ test('Changes to multiple monitored path is false when change is not in path', a
     expect(result.changed).toBe(false);
 }, 15000);
 
+
 test('Namespace is tracked separately', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
 
@@ -463,4 +464,86 @@ test('Tag prefix can include forward slash', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('1.2.3+0');
+}, 15000);
+
+test('Tags immediately before merge are detected', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git tag v1.0.0');
+    repo.makeCommit('Commit 2');
+    repo.exec('git checkout -b feature/branch');
+    repo.makeCommit('Commit 3');
+    repo.makeCommit('Commit 4');
+    repo.exec('git tag v2.0.0');
+    repo.exec('git checkout master');
+    repo.makeCommit('Commit 5');
+    repo.exec('git merge feature/branch');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('v2.0.1');
+}, 15000);
+
+test('Correct tag is detected on merged branches', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git tag v1.0.0');
+    repo.makeCommit('Commit 2');
+    repo.exec('git checkout -b feature/branch');
+    repo.makeCommit('Commit 3');
+    repo.exec('git tag v2.0.0');
+    repo.makeCommit('Commit 4');
+    repo.exec('git checkout master');
+    repo.makeCommit('Commit 5');
+    repo.exec('git merge feature/branch');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('v2.0.1');
+}, 15000);
+
+test('Correct tag is detected on multiple branches', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git checkout -b feature/branch1');
+    repo.exec('git tag v1.0.0');
+    repo.makeCommit('Commit 2');
+    repo.exec('git checkout master');
+    repo.exec('git merge feature/branch1');
+    repo.exec('git checkout -b feature/branch2');
+    repo.makeCommit('Commit 3');
+    repo.exec('git tag v2.0.0');
+    repo.makeCommit('Commit 4');
+    repo.exec('git checkout master');
+    repo.makeCommit('Commit 5');
+    repo.exec('git merge feature/branch2');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('v2.0.1');
+}, 15000);
+
+test('Correct tag is detected when versions pass 10s place', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit('Commit 1');
+    repo.exec('git checkout -b feature/branch1');
+    repo.exec('git tag v10.15.0');
+    repo.makeCommit('Commit 2');
+    repo.exec('git checkout master');
+    repo.exec('git merge feature/branch1');
+    repo.exec('git checkout -b feature/branch2');
+    repo.makeCommit('Commit 3');
+    repo.exec('git tag v10.7.0');
+    repo.makeCommit('Commit 4');
+    repo.exec('git checkout master');
+    repo.makeCommit('Commit 5');
+    repo.exec('git merge feature/branch2');
+    const result = await repo.runAction();
+
+    expect(result.versionTag).toBe('v10.15.1');
 }, 15000);
