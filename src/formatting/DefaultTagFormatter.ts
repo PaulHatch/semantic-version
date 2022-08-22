@@ -13,7 +13,7 @@ export class DefaultTagFormatter implements TagFormatter {
     this.namespace = config.namespace;
     this.tagPrefix = config.tagPrefix;
     this.namespaceSeperator = '-'; // maybe make configurable in the future
-  } 
+  }
 
   public Format(versionInfo: VersionInformation): string {
     const result = `${this.tagPrefix}${versionInfo.major}.${versionInfo.minor}.${versionInfo.patch}`;
@@ -35,17 +35,16 @@ export class DefaultTagFormatter implements TagFormatter {
   }
 
   public Parse(tag: string): [major: number, minor: number, patch: number] {
-    let stripedTag;
-    if (this.tagPrefix.includes('/') && tag.includes(this.tagPrefix)) {
-      let tagParts = tag
-        .replace(this.tagPrefix, '<--!PREFIX!-->')
-        .split('/');
-      stripedTag = tagParts[tagParts.length - 1]
-        .replace('<--!PREFIX!-->', this.tagPrefix);
-    } else {
-      let tagParts = tag.split('/');
-      stripedTag = tagParts[tagParts.length - 1];
-    }
+
+    let tagParts = tag
+      .replace(this.tagPrefix, '<--!PREFIX!-->')
+      .replace(this.namespace, '<--!NAMESPACE!-->')
+      .split('/');
+
+    const stripedTag = tagParts[tagParts.length - 1]
+      .replace('<--!PREFIX!-->', this.tagPrefix)
+      .replace('<--!NAMESPACE!-->', this.namespace);
+
     let versionValues = stripedTag
       .substring(this.tagPrefix.length)
       .slice(0, this.namespace === '' ? 999 : -(this.namespace.length + 1))
