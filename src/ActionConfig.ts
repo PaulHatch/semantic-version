@@ -8,8 +8,12 @@ export class ActionConfig {
     public useBranches: boolean = false;
     /** A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression. */
     public majorPattern: string = "(MAJOR)";
+    /** A string which indicates the flags used by the `majorPattern` regular expression. */
+    public majorFlags: string = "";
     /** A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression. */
     public minorPattern: string = "(MINOR)";
+    /** A string which indicates the flags used by the `minorPattern` regular expression. */
+    public minorFlags: string = "";
     /** Pattern to use when formatting output version */
     public versionFormat: string = '${major}.${minor}.${patch}';
     /** Path to check for changes. If any changes are detected in the path the 'changed' output will true. Enter multiple paths separated by spaces. */

@@ -86,8 +86,12 @@ it will be given the new version if the build were to be retriggered, for exampl
     # A string which, if present in a git commit, indicates that a change represents a
     # major (breaking) change, supports regular expressions wrapped with '/'
     major_pattern: "(MAJOR)"
+    # A string which indicates the flags used by the `major_pattern` regular expression. Supported flags: idgs
+    major_regexp_flags: ""
     # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
     minor_pattern: "(MINOR)"
+    # A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs
+    minor_regexp_flags: ""
     # A string to determine the format of the version output
     format: "${major}.${minor}.${patch}-prerelease${increment}"
     # Optional path to check for changes. If any changes are detected in the path the

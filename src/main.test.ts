@@ -472,6 +472,22 @@ test('Regular expressions can be used as minor tag', async () => {
     expect((await repo.runAction()).formattedVersion).toBe('0.1.0+0');
 }, 15000);
 
+test('Regular expressions and flags can be used as major tag', async () => {
+    const repo = createTestRepo({ tagPrefix: '', majorPattern: '/s[a-z]+value/', majorFlags: 'i' }); // 0.0.1
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit SomeValue'); // 1.0.0+0
+    expect((await repo.runAction()).formattedVersion).toBe('1.0.0+0');
+}, 15000);
+
+test('Regular expressions and flags can be used as minor tag', async () => {
+    const repo = createTestRepo({ tagPrefix: '', minorPattern: '/s[a-z]+value/', minorFlags: 'i' }); // 0.0.1
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.makeCommit('Second Commit SomeValue'); // 0.0.1+1
+    expect((await repo.runAction()).formattedVersion).toBe('0.1.0+0');
+}, 15000);
+
 test('Tag prefix can include forward slash', async () => {
     const repo = createTestRepo({ tagPrefix: 'version/' }); // 0.0.0
 
