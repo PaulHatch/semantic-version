@@ -407,6 +407,8 @@ function run() {
             useBranches: core.getInput('use_branches') === 'true',
             majorPattern: core.getInput('major_pattern'),
             minorPattern: core.getInput('minor_pattern'),
+            majorFlags: core.getInput('major_flags'),
+            minorFlags: core.getInput('minor_flags'),
             versionFormat: core.getInput('version_format'),
             changePath: core.getInput('change_path'),
             namespace: core.getInput('namespace'),

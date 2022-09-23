@@ -13,13 +13,13 @@ export class DefaultVersionClassifier implements VersionClassifier {
 
     constructor(config: ActionConfig) {
         const searchBody = config.searchCommitBody;
-        this.majorPattern = this.parsePattern(config.majorPattern, searchBody);
-        this.minorPattern = this.parsePattern(config.minorPattern, searchBody);
+        this.majorPattern = this.parsePattern(config.majorPattern, config.majorFlags, searchBody);
+        this.minorPattern = this.parsePattern(config.minorPattern, config.minorFlags, searchBody);
     }
 
-    protected parsePattern(pattern: string, searchBody: boolean): (pattern: CommitInfo) => boolean {
+    protected parsePattern(pattern: string, flags: string, searchBody: boolean): (pattern: CommitInfo) => boolean {
         if (pattern.startsWith('/') && pattern.endsWith('/')) {
-            var regex = new RegExp(pattern.slice(1, -1));
+            var regex = new RegExp(pattern.slice(1, -1), flags);
             return searchBody ?
                 (commit: CommitInfo) => regex.test(commit.subject) || regex.test(commit.body) :
                 (commit: CommitInfo) => regex.test(commit.subject);
