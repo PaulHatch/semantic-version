@@ -3,9 +3,10 @@ import { ActionConfig } from './ActionConfig';
 import { ConfigurationProvider } from './ConfigurationProvider';
 import { VersionResult } from './VersionResult';
 import * as core from '@actions/core';
+import { VersionType } from './providers/VersionType';
 
 function setOutput(versionResult: VersionResult) {
-  const { major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
+  const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
 
   const repository = process.env.GITHUB_REPOSITORY;
 
@@ -23,6 +24,7 @@ function setOutput(versionResult: VersionResult) {
   core.setOutput("minor", minor.toString());
   core.setOutput("patch", patch.toString());
   core.setOutput("increment", increment.toString());
+  core.setOutput("version_type", VersionType[versionType].toLowerCase());
   core.setOutput("changed", changed.toString());
   core.setOutput("version_tag", versionTag);
   core.setOutput("authors", authors);

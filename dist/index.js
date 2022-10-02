@@ -129,6 +129,7 @@ class VersionResult {
      * @param minor - The minor version number
      * @param patch - The patch version number
      * @param increment - The number of commits for this version (usually used to create version suffix)
+     * @param versionType - The type of version, e.g. major, minor, patch
      * @param formattedVersion - The formatted semantic version
      * @param versionTag - The string to be used as a Git tag
      * @param changed - True if the version was changed, otherwise false
@@ -137,11 +138,12 @@ class VersionResult {
      * @param previousCommit - The previous commit hash
      * @param previousVersion - the previous version
      */
-    constructor(major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion) {
+    constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
         this.increment = increment;
+        this.versionType = versionType;
         this.formattedVersion = formattedVersion;
         this.versionTag = versionTag;
         this.changed = changed;
@@ -186,8 +188,8 @@ function runAction(configurationProvider) {
         const tagFormmater = configurationProvider.GetTagFormatter();
         const userFormatter = configurationProvider.GetUserFormatter();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
-            let versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '', '', '0.0.0');
+            const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false);
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '', '', '0.0.0');
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
@@ -208,7 +210,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
     });
 }
 exports.runAction = runAction;
@@ -377,8 +379,9 @@ exports.run = void 0;
 const action_1 = __nccwpck_require__(9139);
 const ConfigurationProvider_1 = __nccwpck_require__(2614);
 const core = __importStar(__nccwpck_require__(2186));
+const VersionType_1 = __nccwpck_require__(895);
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
+    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
         core.info('No changes detected for this commit');
@@ -392,6 +395,7 @@ function setOutput(versionResult) {
     core.setOutput("minor", minor.toString());
     core.setOutput("patch", patch.toString());
     core.setOutput("increment", increment.toString());
+    core.setOutput("version_type", VersionType_1.VersionType[versionType].toLowerCase());
     core.setOutput("changed", changed.toString());
     core.setOutput("version_tag", versionTag);
     core.setOutput("authors", authors);
@@ -407,8 +411,8 @@ function run() {
             useBranches: core.getInput('use_branches') === 'true',
             majorPattern: core.getInput('major_pattern'),
             minorPattern: core.getInput('minor_pattern'),
-            majorFlags: core.getInput('major_flags'),
-            minorFlags: core.getInput('minor_flags'),
+            majorFlags: core.getInput('major_regexp_flags'),
+            minorFlags: core.getInput('minor_regexp_flags'),
             versionFormat: core.getInput('version_format'),
             changePath: core.getInput('change_path'),
             namespace: core.getInput('namespace'),
@@ -795,12 +799,12 @@ const VersionType_1 = __nccwpck_require__(895);
 class DefaultVersionClassifier {
     constructor(config) {
         const searchBody = config.searchCommitBody;
-        this.majorPattern = this.parsePattern(config.majorPattern, searchBody);
-        this.minorPattern = this.parsePattern(config.minorPattern, searchBody);
+        this.majorPattern = this.parsePattern(config.majorPattern, config.majorFlags, searchBody);
+        this.minorPattern = this.parsePattern(config.minorPattern, config.minorFlags, searchBody);
     }
-    parsePattern(pattern, searchBody) {
+    parsePattern(pattern, flags, searchBody) {
         if (pattern.startsWith('/') && pattern.endsWith('/')) {
-            var regex = new RegExp(pattern.slice(1, -1));
+            var regex = new RegExp(pattern.slice(1, -1), flags);
             return searchBody ?
                 (commit) => regex.test(commit.subject) || regex.test(commit.body) :
                 (commit) => regex.test(commit.subject);
@@ -1012,13 +1016,13 @@ exports.VersionType = void 0;
 var VersionType;
 (function (VersionType) {
     /** Indicates a major version change */
-    VersionType[VersionType["Major"] = 0] = "Major";
+    VersionType["Major"] = "Major";
     /** Indicates a minor version change */
-    VersionType[VersionType["Minor"] = 1] = "Minor";
+    VersionType["Minor"] = "Minor";
     /** Indicates a patch version change */
-    VersionType[VersionType["Patch"] = 2] = "Patch";
+    VersionType["Patch"] = "Patch";
     /** Indicates no change--generally this means that the current commit is already tagged with a version */
-    VersionType[VersionType["None"] = 3] = "None";
+    VersionType["None"] = "None";
 })(VersionType = exports.VersionType || (exports.VersionType = {}));
 
 

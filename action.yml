@@ -63,6 +63,8 @@ outputs:
     description: "Current patch number"
   increment:
     description: "An additional value indicating the number of commits for the current version"
+  version_type:
+    description: "Indicates the type of change this version represents vs the previous, e.g. 'major', 'minor', 'patch', or 'none'"
   version:
     description: "The version result, in the format {major}.{minor}.{patch}"
   version_tag:

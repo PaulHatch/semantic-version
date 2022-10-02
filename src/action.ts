@@ -15,12 +15,13 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const userFormatter = configurationProvider.GetUserFormatter();
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
-    let versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false);
+    const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false);
     return new VersionResult(
       versionInfo.major,
       versionInfo.minor,
       versionInfo.patch,
       versionInfo.increment,
+      versionInfo.type,
       versionFormatter.Format(versionInfo),
       tagFormmater.Format(versionInfo),
       versionInfo.changed,
@@ -60,6 +61,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     versionInfo.minor,
     versionInfo.patch,
     versionInfo.increment,
+    versionInfo.type,
     versionFormatter.Format(versionInfo),
     tagFormmater.Format(versionInfo),
     versionInfo.changed,
