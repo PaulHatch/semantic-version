@@ -152,7 +152,7 @@ async function run() {
         `--tags`,
         `--abbrev=0`,
         `--match=${releasePattern}`,
-        `${branch}~1`
+        `${branch}`
       )).trim();
     }
     catch (err) {
