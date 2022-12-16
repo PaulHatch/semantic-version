@@ -612,3 +612,31 @@ test('Can use branches instead of tags', async () => {
 
     expect(result.versionTag).toBe('release/1.0.1');
 }, 15000);
+
+test('Correct previous version is returned', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v2.0.1')
+    repo.makeCommit(`Second Commit`);
+    repo.makeCommit(`Third Commit`);
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('2.0.2+1');
+    expect(result.previousVersion).toBe('2.0.1');
+}, 15000);
+
+test('Correct previous version is returned when using branches', async () => {
+    const repo = createTestRepo({ tagPrefix: 'release/', useBranches: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git checkout -b release/2.0.1');
+    repo.makeCommit(`Second Commit`);
+    repo.exec('git checkout master');
+    repo.exec('git merge release/2.0.1');
+    repo.makeCommit(`Third Commit`);
+    const result = await repo.runAction();
+
+    expect(result.previousVersion).toBe('2.0.1');
+    expect(result.formattedVersion).toBe('2.0.2+0');    
+}, 15000);
