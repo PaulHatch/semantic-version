@@ -61,4 +61,12 @@ export class DefaultTagFormatter implements TagFormatter {
     return [major, minor, patch];
   };
 
+  public IsValid(tag: string): boolean {        
+    if (!!this.namespace) {
+      return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+${this.namespaceSeperator}${this.namespace}$`).test(tag);
+    }
+
+    return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+$`).test(tag);
+  }
+
 }

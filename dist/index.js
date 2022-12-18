@@ -286,6 +286,12 @@ class DefaultTagFormatter {
         return [major, minor, patch];
     }
     ;
+    IsValid(tag) {
+        if (!!this.namespace) {
+            return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+${this.namespaceSeperator}${this.namespace}$`).test(tag);
+        }
+        return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+$`).test(tag);
+    }
 }
 exports.DefaultTagFormatter = DefaultTagFormatter;
 
@@ -745,11 +751,17 @@ class DefaultLastReleaseResolver {
                     // so that we will have an accurate increment (assuming the new tag is the expected one)
                     const command = `git for-each-ref --count=2 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
                     tag = yield (0, CommandRunner_1.cmd)(command);
-                    tag = tag.split('\n').reverse().find(t => t !== '' && t !== currentTag) || '';
+                    tag = tag
+                        .split('\n')
+                        .reverse()
+                        .find(t => tagFormatter.IsValid(t) && t !== currentTag) || '';
                 }
                 else {
-                    const command = `git for-each-ref --count=1 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
-                    tag = yield (0, CommandRunner_1.cmd)(command);
+                    const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
+                    let tags = yield (0, CommandRunner_1.cmd)(command);
+                    tag = tags
+                        .split('\n')
+                        .find(t => tagFormatter.IsValid(t)) || '';
                 }
                 tag = tag.trim();
             }

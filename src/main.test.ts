@@ -667,3 +667,28 @@ test('Correct previous version is returned when directly tagged', async () => {
     expect(result.previousVersion).toBe('2.0.1');
     expect(result.formattedVersion).toBe('2.0.2+1');
 }, 15000);
+
+test('Prerelease suffixes are ignored', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit (MAJOR)');
+    repo.makeCommit(`Second Commit`);
+    repo.exec('git tag v1.0.0-alpha.1')
+    repo.makeCommit(`Third Commit`);
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('1.0.0+2');
+}, 15000);
+
+test('Prerelease suffixes are ignored when namespaces are set', async () => {
+    const repo = createTestRepo({ namespace: 'test' });
+
+    repo.makeCommit('Initial Commit (MAJOR)');
+    repo.exec('git tag v1.0.0-test')
+    repo.makeCommit(`Second Commit`);
+    repo.exec('git tag v1.0.1-test-alpha.1')
+    repo.makeCommit(`Third Commit`);
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('1.0.1+1');
+}, 15000);
