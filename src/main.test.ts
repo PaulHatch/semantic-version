@@ -97,6 +97,19 @@ test('Tagging does not break version', async () => {
     expect(result.formattedVersion).toBe('0.0.1+2');
 }, 15000);
 
+
+test('Tagging does not break version from previous tag', async () => {
+    const repo = createTestRepo(); // 0.0.0+0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1+0
+    repo.exec('git tag v0.0.1')
+    repo.makeCommit(`Second Commit`); // 0.0.2+0
+    repo.makeCommit(`Third Commit`); // 0.0.2+1
+    repo.exec('git tag v0.0.2')
+    const result = await repo.runAction();
+    expect(result.formattedVersion).toBe('0.0.2+1');
+}, 15000);
+
 test('Minor update bumps minor version and resets increment', async () => {
     const repo = createTestRepo(); // 0.0.0+0
 
@@ -639,4 +652,18 @@ test('Correct previous version is returned when using branches', async () => {
 
     expect(result.previousVersion).toBe('2.0.1');
     expect(result.formattedVersion).toBe('2.0.2+0');    
+}, 15000);
+
+test('Correct previous version is returned when directly tagged', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v2.0.1')
+    repo.makeCommit(`Second Commit`);
+    repo.makeCommit(`Third Commit`);
+    repo.exec('git tag v2.0.2')
+    const result = await repo.runAction();
+
+    expect(result.previousVersion).toBe('2.0.1');
+    expect(result.formattedVersion).toBe('2.0.2+1');
 }, 15000);

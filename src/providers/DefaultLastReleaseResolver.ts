@@ -31,7 +31,8 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 // so that we will have an accurate increment (assuming the new tag is the expected one)
                 const command = `git for-each-ref --count=2 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
                 tag = await cmd(command);
-                tag = tag.split('\n').at(-1) || '';
+                tag = tag.split('\n').reverse().find(t => t !== '' && t !== currentTag) || '';
+
             } else {
                 const command = `git for-each-ref --count=1 --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
                 tag = await cmd(command);
