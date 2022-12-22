@@ -1,12 +1,6 @@
 ![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
-> *Version 5-alpha now available!*
-> Version 5 adds support for several new features and allows easier extension/customization.
-> ##### Breaking Changes
-> - Versions now use the version number (`--sort=-v:*refname`) rather than date to determine which tag is the latest.
-> - "Short tag" support removed
->
-> See the [release notes](https://github.com/PaulHatch/semantic-version/releases/tag/v5.0.0-alpha) for more information.
+> *Version 5 GA now available!*
 
 # Git-Based Semantic Versioning
 
@@ -79,7 +73,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v4.0.2
+- uses: paulhatch/semantic-version@v5.0.0
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -148,12 +142,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v4.0.2
+  uses: paulhatch/semantic-version@v5.0.0
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v4.0.2
+  uses: paulhatch/semantic-version@v5.0.0
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
