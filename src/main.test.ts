@@ -692,3 +692,19 @@ test('Prerelease suffixes are ignored when namespaces are set', async () => {
 
     expect(result.formattedVersion).toBe('1.0.1+1');
 }, 15000);
+
+test('Namespace can contains a slash', async () => {
+    const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit('Second Commit'); // 0.0.2
+    repo.exec('git tag 0.1.0-sub/project');
+    repo.makeCommit('Third Commit'); // 0.0.2 / 0.1.1
+
+    const result = await repo.runAction();
+    const subprojectResult = await repo.runAction({ namespace: "sub/project" });
+
+    expect(result.formattedVersion).toBe('0.0.2+1');
+    expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
+}, 15000);
