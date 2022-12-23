@@ -87,7 +87,7 @@ it will be given the new version if the build were to be retriggered, for exampl
     # A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs
     minor_regexp_flags: ""
     # A string to determine the format of the version output
-    format: "${major}.${minor}.${patch}-prerelease${increment}"
+    version_format: "${major}.${minor}.${patch}-prerelease${increment}"
     # Optional path to check for changes. If any changes are detected in the path the
     # 'changed' output will true. Enter multiple paths separated by spaces.
     change_path: "src/my-service"
