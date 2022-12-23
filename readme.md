@@ -167,7 +167,7 @@ This history is required to determine the version correctly. To include the hist
 and tags, specify the fetch-depth parameter in your checkout action declaration. Specify
 zero to pull the full history and tags.
 
-```
+```yaml
   - name: Checkout
     uses: actions/checkout@v2
     with:

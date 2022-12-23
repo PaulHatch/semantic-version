@@ -23,7 +23,7 @@ To get started simply:
 
 The src/main.test.ts file contains integration tests that validate all the features of this action, to add a new test case simply add a new function to the bottom of this file.
 
-```
+```typescript
 test('Name of test goes here', async () => {
     // This method creates a test repository in your temp directory, the repo
     // object returned provides methods to interact with the repository
