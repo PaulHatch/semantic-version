@@ -2,6 +2,8 @@
 
 > *Version 5 GA now available!*
 
+See [contributing.md](contributing.md) for information on how to get help or contribute to this project.
+
 # Git-Based Semantic Versioning
 
 This action produces a [semantic version](https://semver.org) for a repository
