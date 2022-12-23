@@ -13,7 +13,7 @@ const windows = process.platform === "win32";
 const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
     const repoDirectory = path.join(os.tmpdir(), `test${Math.random().toString(36).substring(2, 15)}`);
     cp.execSync(`mkdir ${repoDirectory}`);
-    cp.execSync(`git init ${repoDirectory}`);
+    cp.execSync(`git init --initial-branch=master ${repoDirectory}`);
 
     const run = (command: string) => {
         return execute(repoDirectory, command);
