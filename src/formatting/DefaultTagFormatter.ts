@@ -61,12 +61,16 @@ export class DefaultTagFormatter implements TagFormatter {
     return [major, minor, patch];
   };
 
-  public IsValid(tag: string): boolean {        
+  public IsValid(tag: string): boolean {
+    const regexEscape = (literal: string) => literal.replace(/\W/g, '\\$&');
+    const tagPrefix = regexEscape(this.tagPrefix);
+    const namespaceSeperator = regexEscape(this.namespaceSeperator);
+    const namespace = regexEscape(this.namespace);
+
     if (!!this.namespace) {
-      return new RegExp(`^${this.tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${this.namespaceSeperator}${this.namespace}$`).test(tag);
+      return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
     }
 
-    return new RegExp(`^${this.tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);
+    return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);
   }
-
 }
