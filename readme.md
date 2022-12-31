@@ -41,7 +41,7 @@ To solve this problem, this action calculates the next _implied_ version based o
 the most recently tagged version and the commit messages. An additional value called
 the "increment" tracks the count of commits since the last version change, allowing
 a label to be created to mark pre-release versions. The version produced by this
-action is always the_implied version (unless `bump_each_commit` is set to `true`).
+action is always the implied version (unless `bump_each_commit` is set to `true`).
 Subsequently tagging a commit that is chosen as the implied version is what bumps
 the version for future commits.
 
@@ -75,7 +75,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v5.0.0
+- uses: paulhatch/semantic-version@v5.0.1
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -147,12 +147,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v5.0.0
+  uses: paulhatch/semantic-version@v5.0.1
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v5.0.0
+  uses: paulhatch/semantic-version@v5.0.1
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
