@@ -75,7 +75,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v5.0.1
+- uses: paulhatch/semantic-version@v5.0.2
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -147,12 +147,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v5.0.1
+  uses: paulhatch/semantic-version@v5.0.2
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v5.0.1
+  uses: paulhatch/semantic-version@v5.0.2
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
