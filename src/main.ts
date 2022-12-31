@@ -28,9 +28,9 @@ function setOutput(versionResult: VersionResult) {
   core.setOutput("changed", changed.toString());
   core.setOutput("version_tag", versionTag);
   core.setOutput("authors", authors);
-  core.setOutput("lastVersion", authors);
   core.setOutput("previous_commit", previousCommit);
   core.setOutput("previous_version", previousVersion);
+  core.setOutput("current_commit", currentCommit);
 }
 
 export async function run() {

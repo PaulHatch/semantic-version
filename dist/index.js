@@ -136,7 +136,7 @@ class VersionResult {
      * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
      * @param currentCommit - The current commit hash
      * @param previousCommit - The previous commit hash
-     * @param previousVersion - the previous version
+     * @param previousVersion - The previous version
      */
     constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion) {
         this.major = major;
@@ -287,10 +287,14 @@ class DefaultTagFormatter {
     }
     ;
     IsValid(tag) {
+        const regexEscape = (literal) => literal.replace(/\W/g, '\\$&');
+        const tagPrefix = regexEscape(this.tagPrefix);
+        const namespaceSeperator = regexEscape(this.namespaceSeperator);
+        const namespace = regexEscape(this.namespace);
         if (!!this.namespace) {
-            return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+${this.namespaceSeperator}${this.namespace}$`).test(tag);
+            return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
         }
-        return new RegExp(`^${this.tagPrefix}[0-9]+.[0-9]+.[0-9]+$`).test(tag);
+        return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);
     }
 }
 exports.DefaultTagFormatter = DefaultTagFormatter;
@@ -405,9 +409,9 @@ function setOutput(versionResult) {
     core.setOutput("changed", changed.toString());
     core.setOutput("version_tag", versionTag);
     core.setOutput("authors", authors);
-    core.setOutput("lastVersion", authors);
     core.setOutput("previous_commit", previousCommit);
     core.setOutput("previous_version", previousVersion);
+    core.setOutput("current_commit", currentCommit);
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {

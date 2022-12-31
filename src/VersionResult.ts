@@ -16,7 +16,7 @@ export class VersionResult {
    * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
    * @param currentCommit - The current commit hash 
    * @param previousCommit - The previous commit hash
-   * @param previousVersion - the previous version
+   * @param previousVersion - The previous version
    */
   constructor(
     public major: number,
