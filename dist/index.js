@@ -746,6 +746,7 @@ class DefaultLastReleaseResolver {
         return __awaiter(this, void 0, void 0, function* () {
             const releasePattern = tagFormatter.GetPattern();
             let currentTag = (yield (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
+            currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
             const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
             let tag = '';
             try {

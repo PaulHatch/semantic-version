@@ -21,6 +21,9 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         let currentTag = (await cmd(
             `git tag --points-at ${current} ${releasePattern}`
         )).trim();
+        
+        currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
+
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
 
         let tag = '';
