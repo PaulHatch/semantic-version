@@ -10,11 +10,13 @@ export class DefaultVersionClassifier implements VersionClassifier {
 
     protected majorPattern: (commit: CommitInfo) => boolean;
     protected minorPattern: (commit: CommitInfo) => boolean;
+    protected enablePrereleaseMode: boolean;
 
     constructor(config: ActionConfig) {
         const searchBody = config.searchCommitBody;
         this.majorPattern = this.parsePattern(config.majorPattern, config.majorFlags, searchBody);
         this.minorPattern = this.parsePattern(config.minorPattern, config.minorFlags, searchBody);
+        this.enablePrereleaseMode = config.enablePrereleaseMode;
     }
 
     protected parsePattern(pattern: string, flags: string, searchBody: boolean): (pattern: CommitInfo) => boolean {
@@ -32,7 +34,21 @@ export class DefaultVersionClassifier implements VersionClassifier {
     }
 
     protected getNextVersion(current: ReleaseInformation, type: VersionType): ({ major: number, minor: number, patch: number }) {
-        
+
+        if (this.enablePrereleaseMode && current.major === 0) {
+            switch (type) {
+                case VersionType.Major:
+                    return { major: current.major, minor: current.minor + 1, patch: 0 };
+                case VersionType.Minor:
+                case VersionType.Patch:
+                    return { major: current.major, minor: current.minor, patch: current.patch + 1 };
+                case VersionType.None:
+                    return { major: current.major, minor: current.minor, patch: current.patch };
+                default:
+                    throw new Error(`Unknown change type: ${type}`);
+            }
+        }
+
         switch (type) {
             case VersionType.Major:
                 return { major: current.major + 1, minor: 0, patch: 0 };

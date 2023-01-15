@@ -428,7 +428,8 @@ function run() {
             namespace: core.getInput('namespace'),
             bumpEachCommit: core.getInput('bump_each_commit') === 'true',
             searchCommitBody: core.getInput('search_commit_body') === 'true',
-            userFormatType: core.getInput('user_format_type')
+            userFormatType: core.getInput('user_format_type'),
+            enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
         };
         if (config.versionFormat === '' && core.getInput('format') !== '') {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
@@ -818,6 +819,7 @@ class DefaultVersionClassifier {
         const searchBody = config.searchCommitBody;
         this.majorPattern = this.parsePattern(config.majorPattern, config.majorFlags, searchBody);
         this.minorPattern = this.parsePattern(config.minorPattern, config.minorFlags, searchBody);
+        this.enablePrereleaseMode = config.enablePrereleaseMode;
     }
     parsePattern(pattern, flags, searchBody) {
         if (pattern.startsWith('/') && pattern.endsWith('/')) {
@@ -834,6 +836,19 @@ class DefaultVersionClassifier {
         }
     }
     getNextVersion(current, type) {
+        if (this.enablePrereleaseMode && current.major === 0) {
+            switch (type) {
+                case VersionType_1.VersionType.Major:
+                    return { major: current.major, minor: current.minor + 1, patch: 0 };
+                case VersionType_1.VersionType.Minor:
+                case VersionType_1.VersionType.Patch:
+                    return { major: current.major, minor: current.minor, patch: current.patch + 1 };
+                case VersionType_1.VersionType.None:
+                    return { major: current.major, minor: current.minor, patch: current.patch };
+                default:
+                    throw new Error(`Unknown change type: ${type}`);
+            }
+        }
         switch (type) {
             case VersionType_1.VersionType.Major:
                 return { major: current.major + 1, minor: 0, patch: 0 };

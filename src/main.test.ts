@@ -837,3 +837,33 @@ test('Prerelease tags are ignored on current commit', async () => {
     repo.makeCommit(`Commit ${i++}`);
     await validate('1.1.0+4');
 }, 15000);
+
+test('Pre-release mode does not update major version if major version is 0', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", enablePrereleaseMode: true });
+
+    repo.makeCommit('Initial Commit');
+    expect(( await repo.runAction()).formattedVersion).toBe('0.0.1');
+    repo.makeCommit('Second Commit (MINOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('0.0.1');
+    repo.makeCommit('Third Commit (MAJOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('0.1.0');
+    repo.exec('git tag 0.1.0');
+    repo.makeCommit('Fourth Commit (MAJOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('0.2.0');
+}, 15000);
+
+test('Pre-release mode updates major version if major version is not 0', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", enablePrereleaseMode: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag 1.0.0');
+    repo.makeCommit('Second Commit');
+    expect(( await repo.runAction()).formattedVersion).toBe('1.0.1');
+    repo.makeCommit('Third Commit (MINOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('1.1.0');
+    repo.makeCommit('Fourth Commit (MAJOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('2.0.0');
+    repo.exec('git tag 2.0.0');
+    repo.makeCommit('Fifth Commit (MAJOR)');
+    expect(( await repo.runAction()).formattedVersion).toBe('3.0.0');
+}, 15000);
