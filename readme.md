@@ -101,6 +101,9 @@ it will be given the new version if the build were to be retriggered, for exampl
     search_commit_body: false
     # The output method used to generate list of users, 'csv' or 'json'.
     user_format_type: "csv"
+    # Prevents pre-v1.0.0 version from automatically incrementing the major version.
+    # If enabled, when the major version is 0, major releases will be treated as minor and minor as patch. Note that the version_type output is unchanged.
+    enable_prerelease_mode: true
 ```
 
 ## Outputs 

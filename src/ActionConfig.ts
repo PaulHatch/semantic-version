@@ -26,4 +26,6 @@ export class ActionConfig {
     public searchCommitBody: boolean = false;
     /** The output method used to generate list of users, 'csv' or 'json'. Default is 'csv'. */
     public userFormatType: string = "csv";
+    /** Prevents pre-v1.0.0 version from automatically incrementing the major version. If enabled, when the major version is 0, major releases will be treated as minor and minor as patch. Note that the versionType output is unchanged.  */
+    public enablePrereleaseMode: boolean = false;
 }
