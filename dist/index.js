@@ -133,12 +133,13 @@ class VersionResult {
      * @param formattedVersion - The formatted semantic version
      * @param versionTag - The string to be used as a Git tag
      * @param changed - True if the version was changed, otherwise false
+     * @param isTagged - True if the commit had a tag that matched the `versionTag` format
      * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
      * @param currentCommit - The current commit hash
      * @param previousCommit - The previous commit hash
      * @param previousVersion - The previous version
      */
-    constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion) {
+    constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -147,6 +148,7 @@ class VersionResult {
         this.formattedVersion = formattedVersion;
         this.versionTag = versionTag;
         this.changed = changed;
+        this.isTagged = isTagged;
         this.authors = authors;
         this.currentCommit = currentCommit;
         this.previousCommit = previousCommit;
@@ -188,17 +190,18 @@ function runAction(configurationProvider) {
         const tagFormmater = configurationProvider.GetTagFormatter();
         const userFormatter = configurationProvider.GetUserFormatter();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
-            const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', []), '', '', '0.0.0');
+            const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false, false);
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', '0.0.0');
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
         const commitSet = yield commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
         const classification = yield versionClassifier.ClassifyAsync(lastRelease, commitSet);
+        const { isTagged } = lastRelease;
         const { major, minor, patch, increment, type, changed } = classification;
         // At this point all necessary data has been pulled from the database, create
         // version information to be used by the formatters
-        let versionInfo = new VersionInformation_1.VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed);
+        let versionInfo = new VersionInformation_1.VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed, isTagged);
         // Group all the authors together, count the number of commits per author
         const allAuthors = versionInfo.commits
             .reduce((acc, commit) => {
@@ -210,7 +213,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
     });
 }
 exports.runAction = runAction;
@@ -391,7 +394,7 @@ const ConfigurationProvider_1 = __nccwpck_require__(2614);
 const core = __importStar(__nccwpck_require__(2186));
 const VersionType_1 = __nccwpck_require__(895);
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, authors, currentCommit, previousCommit, previousVersion } = versionResult;
+    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
         core.info('No changes detected for this commit');
@@ -407,6 +410,7 @@ function setOutput(versionResult) {
     core.setOutput("increment", increment.toString());
     core.setOutput("version_type", VersionType_1.VersionType[versionType].toLowerCase());
     core.setOutput("changed", changed.toString());
+    core.setOutput("is_tagged", isTagged.toString());
     core.setOutput("version_tag", versionTag);
     core.setOutput("authors", authors);
     core.setOutput("previous_commit", previousCommit);
@@ -748,6 +752,7 @@ class DefaultLastReleaseResolver {
             const releasePattern = tagFormatter.GetPattern();
             let currentTag = (yield (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
             currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
+            const isTagged = currentTag !== '';
             const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
             let tag = '';
             try {
@@ -782,12 +787,12 @@ class DefaultLastReleaseResolver {
                     core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
                 }
                 // no release tags yet, use the initial commit as the root
-                return new ReleaseInformation_1.ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch);
+                return new ReleaseInformation_1.ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch, isTagged);
             }
             // parse the version tag
             const [major, minor, patch] = tagFormatter.Parse(tag);
             const root = yield (0, CommandRunner_1.cmd)('git', `merge-base`, tag, current);
-            return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch);
+            return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch, isTagged);
         });
     }
 }
@@ -926,8 +931,9 @@ class ReleaseInformation {
      * @param currentMajor - the major version number from the current commit
      * @param currentMinor - the minor version number from the current commit
      * @param currentPatch - the patch version number from the current commit
+     * @param isTagged - whether the current commit is tagged with a version
      */
-    constructor(major, minor, patch, hash, currentMajor, currentMinor, currentPatch) {
+    constructor(major, minor, patch, hash, currentMajor, currentMinor, currentPatch, isTagged) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -935,6 +941,7 @@ class ReleaseInformation {
         this.currentMajor = currentMajor;
         this.currentMinor = currentMinor;
         this.currentPatch = currentPatch;
+        this.isTagged = isTagged;
     }
 }
 exports.ReleaseInformation = ReleaseInformation;
@@ -1021,8 +1028,9 @@ class VersionInformation {
      * @param type - The type of change the current range represents
      * @param commits - The list of commits for this version
      * @param changed - True if the version has changed, false otherwise
+     * @param isTagged - True if the current commit is a version-tagged commit
      */
-    constructor(major, minor, patch, increment, type, commits, changed) {
+    constructor(major, minor, patch, increment, type, commits, changed, isTagged) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -1030,6 +1038,7 @@ class VersionInformation {
         this.type = type;
         this.commits = commits;
         this.changed = changed;
+        this.isTagged = isTagged;
     }
 }
 exports.VersionInformation = VersionInformation;

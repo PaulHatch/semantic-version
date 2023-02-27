@@ -15,7 +15,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const userFormatter = configurationProvider.GetUserFormatter();
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
-    const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false);
+    const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false, false);
     return new VersionResult(
       versionInfo.major,
       versionInfo.minor,
@@ -25,6 +25,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
       versionFormatter.Format(versionInfo),
       tagFormmater.Format(versionInfo),
       versionInfo.changed,
+      versionInfo.isTagged,
       userFormatter.Format('author', []),
       '',
       '',
@@ -37,11 +38,12 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const commitSet = await commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
   const classification = await versionClassifier.ClassifyAsync(lastRelease, commitSet);
 
+  const { isTagged } = lastRelease;
   const { major, minor, patch, increment, type, changed } = classification;
 
   // At this point all necessary data has been pulled from the database, create
   // version information to be used by the formatters
-  let versionInfo = new VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed);
+  let versionInfo = new VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed, isTagged);
 
   // Group all the authors together, count the number of commits per author
   const allAuthors = versionInfo.commits
@@ -65,6 +67,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     versionFormatter.Format(versionInfo),
     tagFormmater.Format(versionInfo),
     versionInfo.changed,
+    versionInfo.isTagged,
     userFormatter.Format('author', authors),
     currentCommit,
     lastRelease.hash,

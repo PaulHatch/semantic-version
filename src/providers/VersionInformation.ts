@@ -15,6 +15,7 @@ export class VersionInformation {
    * @param type - The type of change the current range represents
    * @param commits - The list of commits for this version
    * @param changed - True if the version has changed, false otherwise
+   * @param isTagged - True if the current commit is a version-tagged commit
    */
   constructor(
     public major: number,
@@ -23,5 +24,6 @@ export class VersionInformation {
     public increment: number,
     public type: VersionType,
     public commits: CommitInfo[],
-    public changed: boolean) { }
+    public changed: boolean,
+    public isTagged: boolean) { }
 }

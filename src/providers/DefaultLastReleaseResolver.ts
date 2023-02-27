@@ -23,6 +23,7 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         )).trim();
         
         currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
+        const isTagged = currentTag !== '';
 
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
 
@@ -63,13 +64,13 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
             }
             // no release tags yet, use the initial commit as the root
-            return new ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch);
+            return new ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch, isTagged);
         }
 
         // parse the version tag
         const [major, minor, patch] = tagFormatter.Parse(tag);
         const root = await cmd('git', `merge-base`, tag, current);
-        return new ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch);
+        return new ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch, isTagged);
     }
 
 }

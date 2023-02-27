@@ -867,3 +867,29 @@ test('Pre-release mode updates major version if major version is not 0', async (
     repo.makeCommit('Fifth Commit (MAJOR)');
     expect(( await repo.runAction()).formattedVersion).toBe('3.0.0');
 }, 15000);
+
+test('Tagged commit is flagged as release', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v', versionFormat: "${major}.${minor}.${patch}-prerelease.${increment}", enablePrereleaseMode: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v1.0.0');
+    var result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.0-prerelease.0');
+    expect(result.isTagged).toBe(true);
+
+    repo.makeCommit('Second Commit');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.1-prerelease.0')
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Third Commit (MINOR)');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.0');
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Fourth Commit (MINOR)');
+    repo.exec('git tag v1.1.0')
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
+    expect(result.isTagged).toBe(true);
+}, 15000);

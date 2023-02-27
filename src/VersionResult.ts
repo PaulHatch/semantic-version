@@ -13,6 +13,7 @@ export class VersionResult {
    * @param formattedVersion - The formatted semantic version
    * @param versionTag - The string to be used as a Git tag
    * @param changed - True if the version was changed, otherwise false
+   * @param isTagged - True if the commit had a tag that matched the `versionTag` format
    * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
    * @param currentCommit - The current commit hash 
    * @param previousCommit - The previous commit hash
@@ -27,6 +28,7 @@ export class VersionResult {
     public formattedVersion: string,
     public versionTag: string,
     public changed: boolean,
+    public isTagged: boolean,
     public authors: string,
     public currentCommit: string,
     public previousCommit: string,
