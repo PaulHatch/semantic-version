@@ -8,6 +8,7 @@ import { ConfigurationProvider } from './ConfigurationProvider';
 import { ActionConfig } from './ActionConfig';
 
 const windows = process.platform === "win32";
+const timeout = 30000;
 
 // Creates a randomly named git repository and returns a function to execute commands in it
 const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
@@ -22,6 +23,7 @@ const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
     // Configure up git user
     run(`git config user.name "Test User"`);
     run(`git config user.email "test@example.com"`);
+    run(`git config commit.gpgsign false`);
 
     let i = 1;
 
@@ -33,10 +35,10 @@ const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
                 run(`touch ${path !== '' ? path.trim() + '/' : ''}test${i++}`);
             }
             run(`git add --all`);
-            run(`git -c commit.gpgsign=false commit -m "${msg}"`);
+            run(`git commit -m "${msg}"`);
         },
         merge: (branch: string) => {
-            run(`git -c commit.gpgsign=false merge ${branch}`);
+            run(`git merge ${branch}`);
         },
         runAction: async (inputs?: Partial<ActionConfig>) => {
             let config = new ActionConfig();
@@ -63,7 +65,7 @@ test('Empty repository version is correct', async () => {
     var result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.0+0');
-}, 15000);
+}, timeout);
 
 test('Repository with commits shows increment', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -73,7 +75,7 @@ test('Repository with commits shows increment', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.1+1');
-}, 15000);
+}, timeout);
 
 test('Repository show commit for checked out commit', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -86,7 +88,7 @@ test('Repository show commit for checked out commit', async () => {
     repo.exec(`git checkout HEAD~1`); // 0.0.1+1
     result = await repo.runAction();
     expect(result.formattedVersion).toBe('0.0.1+0');
-}, 15000);
+}, timeout);
 
 test('Tagging does not break version', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -98,7 +100,7 @@ test('Tagging does not break version', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.1+2');
-}, 15000);
+}, timeout);
 
 
 test('Tagging does not break version from previous tag', async () => {
@@ -111,7 +113,7 @@ test('Tagging does not break version from previous tag', async () => {
     repo.exec('git tag v0.0.2')
     const result = await repo.runAction();
     expect(result.formattedVersion).toBe('0.0.2+1');
-}, 15000);
+}, timeout);
 
 test('Minor update bumps minor version and resets increment', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -121,7 +123,7 @@ test('Minor update bumps minor version and resets increment', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.1.0+0');
-}, 15000);
+}, timeout);
 
 test('Major update bumps major version and resets increment', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -132,7 +134,7 @@ test('Major update bumps major version and resets increment', async () => {
 
 
     expect(result.formattedVersion).toBe('1.0.0+0');
-}, 15000);
+}, timeout);
 
 test('Multiple major commits are idempotent', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -144,7 +146,7 @@ test('Multiple major commits are idempotent', async () => {
 
 
     expect(result.formattedVersion).toBe('1.0.0+1');
-}, 15000);
+}, timeout);
 
 test('Minor commits after a major commit are ignored', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -155,7 +157,7 @@ test('Minor commits after a major commit are ignored', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('1.0.0+1');
-}, 15000);
+}, timeout);
 
 test('Tags start new version', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -168,7 +170,7 @@ test('Tags start new version', async () => {
 
 
     expect(result.formattedVersion).toBe('0.0.2+0');
-}, 15000);
+}, timeout);
 
 test('Version pulled from last release branch', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -182,7 +184,7 @@ test('Version pulled from last release branch', async () => {
 
 
     expect(result.formattedVersion).toBe('5.6.8+0');
-}, 15000);
+}, timeout);
 
 /* Removed for now
 test('Tags on branches are used', async () => {
@@ -236,7 +238,7 @@ test('Merged tags do not affect version', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.3+1');
-}, 15000);
+}, timeout);
 
 test('Format input is respected', async () => {
     const repo = createTestRepo({ versionFormat: 'M${major}m${minor}p${patch}i${increment}' }); // M0m0p0i0
@@ -247,7 +249,7 @@ test('Format input is respected', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('M1m2p4i0');
-}, 15000);
+}, timeout);
 
 test('Version prefixes are not required/can be empty', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -258,7 +260,7 @@ test('Version prefixes are not required/can be empty', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.2+0');
-}, 15000);
+}, timeout);
 
 test('Tag order comes from commit order, not tag create order', async () => {
     const repo = createTestRepo(); // 0.0.0+0
@@ -276,7 +278,7 @@ test('Tag order comes from commit order, not tag create order', async () => {
 
 
     expect(result.formattedVersion).toBe('2.0.1+0');
-}, 15000);
+}, timeout);
 
 
 test('Change detection is true by default', async () => {
@@ -288,7 +290,7 @@ test('Change detection is true by default', async () => {
     const result = await repo.runAction();
 
     expect(result.changed).toBe(true);
-}, 15000);
+}, timeout);
 
 test('Changes to monitored path is true when change is in path', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -300,7 +302,7 @@ test('Changes to monitored path is true when change is in path', async () => {
     const result = await repo.runAction({ changePath: "project1" });
 
     expect(result.changed).toBe(true);
-}, 15000);
+}, timeout);
 
 test('Changes to monitored path is false when changes are not in path', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -313,7 +315,7 @@ test('Changes to monitored path is false when changes are not in path', async ()
     const result = await repo.runAction({ changePath: "project1" });
 
     expect(result.changed).toBe(false);
-}, 15000);
+}, timeout);
 
 test('Changes can be detected without tags', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -324,7 +326,7 @@ test('Changes can be detected without tags', async () => {
     const result = await repo.runAction({ changePath: "project1" });
 
     expect(result.changed).toBe(true);
-}, 15000);
+}, timeout);
 
 test('Changes to multiple monitored path is true when change is in path', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -337,7 +339,7 @@ test('Changes to multiple monitored path is true when change is in path', async 
     const result = await repo.runAction({ changePath: "project1 project2" });
 
     expect(result.changed).toBe(true);
-}, 15000);
+}, timeout);
 
 test('Changes to multiple monitored path is false when change is not in path', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -351,7 +353,7 @@ test('Changes to multiple monitored path is false when change is not in path', a
     const result = await repo.runAction({ changePath: "project1 project2" });
 
     expect(result.changed).toBe(false);
-}, 15000);
+}, timeout);
 
 
 test('Namespace is tracked separately', async () => {
@@ -368,7 +370,7 @@ test('Namespace is tracked separately', async () => {
 
     expect(result.formattedVersion).toBe('0.0.2+1');
     expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
-}, 15000);
+}, timeout);
 
 test('Namespace allows dashes', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -384,7 +386,7 @@ test('Namespace allows dashes', async () => {
 
     expect(result.formattedVersion).toBe('0.0.2+1');
     expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
-}, 15000);
+}, timeout);
 
 test('Commits outside of path are not counted', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -396,7 +398,7 @@ test('Commits outside of path are not counted', async () => {
     const result = await repo.runAction({ changePath: "project1" });
 
     expect(result.formattedVersion).toBe('0.0.0+0');
-}, 15000);
+}, timeout);
 
 test('Commits inside path are counted', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -412,7 +414,7 @@ test('Commits inside path are counted', async () => {
     const result = await repo.runAction({ changePath: "project1" });
 
     expect(result.formattedVersion).toBe('0.0.1+2');
-}, 15000);
+}, timeout);
 
 test('Current tag is used', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -425,7 +427,7 @@ test('Current tag is used', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('7.6.5+0');
-}, 15000);
+}, timeout);
 
 test('Bump each commit works', async () => {
 
@@ -446,7 +448,7 @@ test('Bump each commit works', async () => {
     expect((await repo.runAction()).formattedVersion).toBe('1.0.0+0');
     repo.makeCommit('Seventh Commit');
     expect((await repo.runAction()).formattedVersion).toBe('1.0.1+0');
-}, 15000);
+}, timeout);
 
 test('Bump each commit picks up tags', async () => {
     const repo = createTestRepo({ tagPrefix: '', bumpEachCommit: true }); // 0.0.0
@@ -461,7 +463,7 @@ test('Bump each commit picks up tags', async () => {
     expect((await repo.runAction()).formattedVersion).toBe('3.0.0+0');
     repo.makeCommit('Fourth Commit');
     expect((await repo.runAction()).formattedVersion).toBe('3.0.1+0');
-}, 15000);
+}, timeout);
 
 test('Increment not affected by matching tag', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.1
@@ -470,7 +472,7 @@ test('Increment not affected by matching tag', async () => {
     repo.makeCommit('Second Commit'); // 0.0.1+1
     repo.exec('git tag 0.0.1');
     expect((await repo.runAction()).formattedVersion).toBe('0.0.1+1');
-}, 15000);
+}, timeout);
 
 test('Regular expressions can be used as major tag', async () => {
     const repo = createTestRepo({ tagPrefix: '', majorPattern: '/S[a-z]+Value/' }); // 0.0.1
@@ -478,7 +480,7 @@ test('Regular expressions can be used as major tag', async () => {
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit('Second Commit SomeValue'); // 1.0.0+0
     expect((await repo.runAction()).formattedVersion).toBe('1.0.0+0');
-}, 15000);
+}, timeout);
 
 test('Regular expressions can be used as minor tag', async () => {
     const repo = createTestRepo({ tagPrefix: '', minorPattern: '/S[a-z]+Value/' }); // 0.0.1
@@ -486,7 +488,7 @@ test('Regular expressions can be used as minor tag', async () => {
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit('Second Commit SomeValue'); // 0.0.1+1
     expect((await repo.runAction()).formattedVersion).toBe('0.1.0+0');
-}, 15000);
+}, timeout);
 
 test('Regular expressions and flags can be used as major tag', async () => {
     const repo = createTestRepo({ tagPrefix: '', majorPattern: '/s[a-z]+value/', majorFlags: 'i' }); // 0.0.1
@@ -494,7 +496,7 @@ test('Regular expressions and flags can be used as major tag', async () => {
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit('Second Commit SomeValue'); // 1.0.0+0
     expect((await repo.runAction()).formattedVersion).toBe('1.0.0+0');
-}, 15000);
+}, timeout);
 
 test('Regular expressions and flags can be used as minor tag', async () => {
     const repo = createTestRepo({ tagPrefix: '', minorPattern: '/s[a-z]+value/', minorFlags: 'i' }); // 0.0.1
@@ -502,7 +504,7 @@ test('Regular expressions and flags can be used as minor tag', async () => {
     repo.makeCommit('Initial Commit'); // 0.0.1+0
     repo.makeCommit('Second Commit SomeValue'); // 0.0.1+1
     expect((await repo.runAction()).formattedVersion).toBe('0.1.0+0');
-}, 15000);
+}, timeout);
 
 test('Tag prefix can include forward slash', async () => {
     const repo = createTestRepo({ tagPrefix: 'version/' }); // 0.0.0
@@ -512,7 +514,7 @@ test('Tag prefix can include forward slash', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('1.2.3+0');
-}, 15000);
+}, timeout);
 
 test('Tags immediately before merge are detected', async () => {
     const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
@@ -531,7 +533,7 @@ test('Tags immediately before merge are detected', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
-}, 15000);
+}, timeout);
 
 test('Correct tag is detected on merged branches', async () => {
     const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
@@ -550,7 +552,7 @@ test('Correct tag is detected on merged branches', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
-}, 15000);
+}, timeout);
 
 test('Correct tag is detected on multiple branches', async () => {
     const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
@@ -572,7 +574,7 @@ test('Correct tag is detected on multiple branches', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
-}, 15000);
+}, timeout);
 
 test('Correct tag is detected when versions pass 10s place', async () => {
     const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
@@ -594,7 +596,7 @@ test('Correct tag is detected when versions pass 10s place', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v10.15.1');
-}, 15000);
+}, timeout);
 
 test('Tags on unmerged branches are not considered', async () => {
     const repo = createTestRepo({ tagPrefix: 'v' }); // 0.0.0
@@ -612,7 +614,7 @@ test('Tags on unmerged branches are not considered', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v1.0.1');
-}, 15000);
+}, timeout);
 
 test('Can use branches instead of tags', async () => {
     const repo = createTestRepo({ tagPrefix: 'release/', useBranches: true }); // 0.0.0
@@ -627,7 +629,7 @@ test('Can use branches instead of tags', async () => {
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('release/1.0.1');
-}, 15000);
+}, timeout);
 
 test('Correct previous version is returned', async () => {
     const repo = createTestRepo();
@@ -640,7 +642,7 @@ test('Correct previous version is returned', async () => {
 
     expect(result.formattedVersion).toBe('2.0.2+1');
     expect(result.previousVersion).toBe('2.0.1');
-}, 15000);
+}, timeout);
 
 test('Correct previous version is returned when using branches', async () => {
     const repo = createTestRepo({ tagPrefix: 'release/', useBranches: true });
@@ -655,7 +657,7 @@ test('Correct previous version is returned when using branches', async () => {
 
     expect(result.previousVersion).toBe('2.0.1');
     expect(result.formattedVersion).toBe('2.0.2+0');
-}, 15000);
+}, timeout);
 
 test('Correct previous version is returned when directly tagged', async () => {
     const repo = createTestRepo();
@@ -669,7 +671,7 @@ test('Correct previous version is returned when directly tagged', async () => {
 
     expect(result.previousVersion).toBe('2.0.1');
     expect(result.formattedVersion).toBe('2.0.2+1');
-}, 15000);
+}, timeout);
 
 test('Prerelease suffixes are ignored', async () => {
     const repo = createTestRepo();
@@ -681,7 +683,7 @@ test('Prerelease suffixes are ignored', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('1.0.0+2');
-}, 15000);
+}, timeout);
 
 test('Prerelease suffixes are ignored when namespaces are set', async () => {
     const repo = createTestRepo({ namespace: 'test' });
@@ -694,7 +696,7 @@ test('Prerelease suffixes are ignored when namespaces are set', async () => {
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('1.0.1+1');
-}, 15000);
+}, timeout);
 
 test('Namespace can contains a slash', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
@@ -710,7 +712,7 @@ test('Namespace can contains a slash', async () => {
 
     expect(result.formattedVersion).toBe('0.0.2+1');
     expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
-}, 15000);
+}, timeout);
 
 test('Namespace can contains a dot', async () => {
     const repo = createTestRepo({ tagPrefix: '' });
@@ -728,7 +730,7 @@ test('Namespace can contains a dot', async () => {
 
     expect(result.formattedVersion).toBe('0.0.2+2');
     expect(subprojectResult.formattedVersion).toBe('0.1.1+1');
-}, 15000);
+}, timeout);
 
 test('Patch increments only once', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}" });
@@ -749,7 +751,7 @@ test('Patch increments only once', async () => {
     expect(thirdResult.formattedVersion).toBe('0.0.2');
     expect(fourthResult.formattedVersion).toBe('0.0.2');
 
-}, 15000);
+}, timeout);
 
 test('Patch increments each time when bump each commit is set', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", bumpEachCommit: true });
@@ -770,7 +772,7 @@ test('Patch increments each time when bump each commit is set', async () => {
     expect(thirdResult.formattedVersion).toBe('0.0.3');
     expect(fourthResult.formattedVersion).toBe('0.0.4');
 
-}, 15000);
+}, timeout);
 
 test('Current commit is provided', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}" });
@@ -785,7 +787,7 @@ test('Current commit is provided', async () => {
 
     expect(result.currentCommit).toBeTruthy();
 
-}, 15000);
+}, timeout);
 
 test('Prerelease tags are ignored on current commit', async () => {
     const repo = createTestRepo({
@@ -839,7 +841,7 @@ test('Prerelease tags are ignored on current commit', async () => {
     await validate('1.1.0+3');
     repo.makeCommit(`Commit ${i++}`);
     await validate('1.1.0+4');
-}, 15000);
+}, timeout);
 
 test('Pre-release mode does not update major version if major version is 0', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", enablePrereleaseMode: true });
@@ -853,7 +855,7 @@ test('Pre-release mode does not update major version if major version is 0', asy
     repo.exec('git tag 0.1.0');
     repo.makeCommit('Fourth Commit (MAJOR)');
     expect(( await repo.runAction()).formattedVersion).toBe('0.2.0');
-}, 15000);
+}, timeout);
 
 test('Pre-release mode updates major version if major version is not 0', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", enablePrereleaseMode: true });
@@ -869,7 +871,7 @@ test('Pre-release mode updates major version if major version is not 0', async (
     repo.exec('git tag 2.0.0');
     repo.makeCommit('Fifth Commit (MAJOR)');
     expect(( await repo.runAction()).formattedVersion).toBe('3.0.0');
-}, 15000);
+}, timeout);
 
 test('Tagged commit is flagged as release', async () => {
     const repo = createTestRepo({ tagPrefix: 'v', versionFormat: "${major}.${minor}.${patch}-prerelease.${increment}", enablePrereleaseMode: true });
@@ -895,4 +897,4 @@ test('Tagged commit is flagged as release', async () => {
     result = await repo.runAction();
     expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
     expect(result.isTagged).toBe(true);
-}, 15000);
+}, timeout);
