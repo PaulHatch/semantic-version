@@ -33,7 +33,10 @@ const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
                 run(`touch ${path !== '' ? path.trim() + '/' : ''}test${i++}`);
             }
             run(`git add --all`);
-            run(`git commit -m "${msg}"`);
+            run(`git -c commit.gpgsign=false commit -m "${msg}"`);
+        },
+        merge: (branch: string) => {
+            run(`git -c commit.gpgsign=false merge ${branch}`);
         },
         runAction: async (inputs?: Partial<ActionConfig>) => {
             let config = new ActionConfig();
@@ -229,7 +232,7 @@ test('Merged tags do not affect version', async () => {
     repo.exec('git checkout master');
     repo.makeCommit('Fifth Commit'); // 0.0.2.0
     repo.exec('git tag v0.0.2');
-    repo.exec('git merge release/0.0.1');
+    repo.merge('release/0.0.1');
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('0.0.3+1');
@@ -524,7 +527,7 @@ test('Tags immediately before merge are detected', async () => {
     repo.exec('git tag v2.0.0');
     repo.exec('git checkout master');
     repo.makeCommit('Commit 5');
-    repo.exec('git merge feature/branch');
+    repo.merge('feature/branch');
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
@@ -543,7 +546,7 @@ test('Correct tag is detected on merged branches', async () => {
     repo.makeCommit('Commit 4');
     repo.exec('git checkout master');
     repo.makeCommit('Commit 5');
-    repo.exec('git merge feature/branch');
+    repo.merge('feature/branch');
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
@@ -558,14 +561,14 @@ test('Correct tag is detected on multiple branches', async () => {
     repo.exec('git tag v1.0.0');
     repo.makeCommit('Commit 2');
     repo.exec('git checkout master');
-    repo.exec('git merge feature/branch1');
+    repo.merge('feature/branch1');
     repo.exec('git checkout -b feature/branch2');
     repo.makeCommit('Commit 3');
     repo.exec('git tag v2.0.0');
     repo.makeCommit('Commit 4');
     repo.exec('git checkout master');
     repo.makeCommit('Commit 5');
-    repo.exec('git merge feature/branch2');
+    repo.merge('feature/branch2');
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v2.0.1');
@@ -580,14 +583,14 @@ test('Correct tag is detected when versions pass 10s place', async () => {
     repo.exec('git tag v10.15.0');
     repo.makeCommit('Commit 2');
     repo.exec('git checkout master');
-    repo.exec('git merge feature/branch1');
+    repo.merge('feature/branch1');
     repo.exec('git checkout -b feature/branch2');
     repo.makeCommit('Commit 3');
     repo.exec('git tag v10.7.0');
     repo.makeCommit('Commit 4');
     repo.exec('git checkout master');
     repo.makeCommit('Commit 5');
-    repo.exec('git merge feature/branch2');
+    repo.merge('feature/branch2');
     const result = await repo.runAction();
 
     expect(result.versionTag).toBe('v10.15.1');
@@ -619,7 +622,7 @@ test('Can use branches instead of tags', async () => {
     repo.exec('git checkout -b release/1.0.0');
     repo.makeCommit('Commit 2');
     repo.exec('git checkout master');
-    repo.exec('git merge release/1.0.0');
+    repo.merge('release/1.0.0');
     repo.makeCommit('Commit 3');
     const result = await repo.runAction();
 
@@ -646,7 +649,7 @@ test('Correct previous version is returned when using branches', async () => {
     repo.exec('git checkout -b release/2.0.1');
     repo.makeCommit(`Second Commit`);
     repo.exec('git checkout master');
-    repo.exec('git merge release/2.0.1');
+    repo.merge('release/2.0.1');
     repo.makeCommit(`Third Commit`);
     const result = await repo.runAction();
 
@@ -866,4 +869,30 @@ test('Pre-release mode updates major version if major version is not 0', async (
     repo.exec('git tag 2.0.0');
     repo.makeCommit('Fifth Commit (MAJOR)');
     expect(( await repo.runAction()).formattedVersion).toBe('3.0.0');
+}, 15000);
+
+test('Tagged commit is flagged as release', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v', versionFormat: "${major}.${minor}.${patch}-prerelease.${increment}", enablePrereleaseMode: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v1.0.0');
+    var result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.0-prerelease.0');
+    expect(result.isTagged).toBe(true);
+
+    repo.makeCommit('Second Commit');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.1-prerelease.0')
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Third Commit (MINOR)');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.0');
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Fourth Commit (MINOR)');
+    repo.exec('git tag v1.1.0')
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
+    expect(result.isTagged).toBe(true);
 }, 15000);

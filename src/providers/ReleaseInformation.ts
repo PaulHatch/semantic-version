@@ -9,6 +9,7 @@ export class ReleaseInformation {
    * @param currentMajor - the major version number from the current commit
    * @param currentMinor - the minor version number from the current commit
    * @param currentPatch - the patch version number from the current commit
+   * @param isTagged - whether the current commit is tagged with a version
    */
   constructor(
     public major: number,
@@ -17,5 +18,6 @@ export class ReleaseInformation {
     public hash: string,
     public currentMajor: number | null,
     public currentMinor: number | null,
-    public currentPatch: number | null,) { }
+    public currentPatch: number | null,
+    public isTagged: boolean,) { }
 }

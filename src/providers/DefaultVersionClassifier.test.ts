@@ -9,7 +9,7 @@ test('Regular expressions can be used as minor tag direct', async () => {
 
     const classifier = new DefaultVersionClassifier({ ...new ActionConfig(), ...{ tagPrefix: '', minorPattern: '/S[a-z]+Value/' }});
 
-    const releaseInfo =new ReleaseInformation(0,0,1,"",null,null,null);
+    const releaseInfo =new ReleaseInformation(0,0,1,"",null,null,null,false);
     const commitSet = new CommitInfoSet(false, [
         new CommitInfo("", "Second Commit SomeValue", "", "","", new Date(), "", "", new Date(), []),
         new CommitInfo("", "Initial Commit", "", "","", new Date(), "", "", new Date(), []),
