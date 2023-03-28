@@ -15,7 +15,7 @@ export class VersionResult {
    * @param changed - True if the version was changed, otherwise false
    * @param isTagged - True if the commit had a tag that matched the `versionTag` format
    * @param authors - Authors formatted according to the format mode (e.g. JSON, CSV, YAML, etc.)
-   * @param currentCommit - The current commit hash 
+   * @param currentCommit - The current commit hash
    * @param previousCommit - The previous commit hash
    * @param previousVersion - The previous version
    */

@@ -60,6 +60,33 @@ const execute = (workingDirectory: string, command: string, env?: any) => {
     }
 };
 
+test('Prerelease is detected and tagged correctly', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v', versionFormat: "${major}.${minor}.${patch}-rc.${increment}", prereleaseName: "rc" });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v1.0.0-rc.0');
+    var result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.0-rc.0');
+    expect(result.isTagged).toBe(true);
+
+    repo.makeCommit('Second Commit');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.1-rc.0')
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Third Commit (MINOR)');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-rc.0');
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Fourth Commit (MINOR)');
+    repo.exec('git tag v1.1.0-rc.0')
+    result = await repo.runAction();
+    console.log(result.formattedVersion)
+    expect(result.formattedVersion).toBe('1.1.0-rc.1');
+    expect(result.isTagged).toBe(true);
+}, timeout);
+
 test('Empty repository version is correct', async () => {
     const repo = createTestRepo(); // 0.0.0+0
     var result = await repo.runAction();
@@ -814,11 +841,11 @@ test('Prerelease tags are ignored on current commit', async () => {
     repo.makeCommit(`Commit ${i++}`);
     await validate('0.1.0+1');
     repo.exec('git tag v1.0.0-rc2');
-    await validate('0.1.0+1'); 
+    await validate('0.1.0+1');
     repo.makeCommit(`Commit ${i++}`);
-    await validate('0.1.0+2'); 
+    await validate('0.1.0+2');
     repo.exec('git tag v1.0.0-rc3');
-    await validate('0.1.0+2'); 
+    await validate('0.1.0+2');
     repo.makeCommit(`Commit ${i++}`);
     await validate('0.1.0+3');
     repo.exec('git tag v1.0.0');

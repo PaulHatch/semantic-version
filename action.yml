@@ -83,7 +83,7 @@ outputs:
     description: "Indicates the previous version"
   current_commit:
     description: "The current commit hash"
-  
+
 runs:
   using: "node16"
   main: "dist/index.js"

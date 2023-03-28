@@ -40,7 +40,7 @@ test('Name of test goes here', async () => {
     // an optional second parameter can be used to specify the path of the file to commit,
     // which will be created if it does not exist already
     repo.makeCommit('Initial Commit', 'subdir');
-    
+
     // the exec method runs an arbitrary command in the repository
     repo.exec('git tag 0.0.1')
 

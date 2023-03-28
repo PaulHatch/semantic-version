@@ -8,11 +8,13 @@ export class DefaultTagFormatter implements TagFormatter {
   private tagPrefix: string;
   private namespace: string;
   private namespaceSeperator: string;
+  private prereleaseName: string;
 
   constructor(config: ActionConfig) {
     this.namespace = config.namespace;
     this.tagPrefix = config.tagPrefix;
     this.namespaceSeperator = '-'; // maybe make configurable in the future
+    this.prereleaseName = config.prereleaseName;
   }
 
   public Format(versionInfo: VersionInformation): string {
@@ -29,6 +31,10 @@ export class DefaultTagFormatter implements TagFormatter {
 
     if (!!this.namespace) {
       return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]${this.namespaceSeperator}${this.namespace}`;
+    }
+
+    if (!!this.prereleaseName) {
+      return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]-${this.prereleaseName}.*[0-9]`;
     }
 
     return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]`;
@@ -69,6 +75,10 @@ export class DefaultTagFormatter implements TagFormatter {
 
     if (!!this.namespace) {
       return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
+    }
+
+    if (!!this.prereleaseName) {
+      return new RegExp(`^${this.tagPrefix}[0-9]+\.[0-9]+\.[0-9]+-${this.prereleaseName}\.[0-9]+$`).test(tag);
     }
 
     return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);

@@ -254,6 +254,7 @@ class DefaultTagFormatter {
         this.namespace = config.namespace;
         this.tagPrefix = config.tagPrefix;
         this.namespaceSeperator = '-'; // maybe make configurable in the future
+        this.prereleaseName = config.prereleaseName;
     }
     Format(versionInfo) {
         const result = `${this.tagPrefix}${versionInfo.major}.${versionInfo.minor}.${versionInfo.patch}`;
@@ -265,6 +266,9 @@ class DefaultTagFormatter {
     GetPattern() {
         if (!!this.namespace) {
             return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]${this.namespaceSeperator}${this.namespace}`;
+        }
+        if (!!this.prereleaseName) {
+            return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]-${this.prereleaseName}.*[0-9]`;
         }
         return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]`;
     }
@@ -296,6 +300,9 @@ class DefaultTagFormatter {
         const namespace = regexEscape(this.namespace);
         if (!!this.namespace) {
             return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
+        }
+        if (!!this.prereleaseName) {
+            return new RegExp(`^${this.tagPrefix}[0-9]+\.[0-9]+\.[0-9]+-${this.prereleaseName}\.[0-9]+$`).test(tag);
         }
         return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);
     }
@@ -434,6 +441,7 @@ function run() {
             searchCommitBody: core.getInput('search_commit_body') === 'true',
             userFormatType: core.getInput('user_format_type'),
             enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
+            prereleaseName: core.getInput('prerelease_name'),
         };
         if (config.versionFormat === '' && core.getInput('format') !== '') {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
@@ -1624,8 +1632,8 @@ class OidcClient {
             const res = yield httpclient
                 .getJson(id_token_url)
                 .catch(error => {
-                throw new Error(`Failed to get ID Token. \n 
-        Error Code : ${error.statusCode}\n 
+                throw new Error(`Failed to get ID Token. \n
+        Error Code : ${error.statusCode}\n
         Error Message: ${error.result.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
@@ -5139,7 +5147,7 @@ module.exports = require("util");
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -5153,7 +5161,7 @@ module.exports = require("util");
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
@@ -5162,24 +5170,24 @@ module.exports = require("util");
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
-/******/ 	
+/******/
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
+/******/
 /************************************************************************/
-/******/ 	
+/******/
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
-/******/ 	
+/******/
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

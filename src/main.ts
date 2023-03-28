@@ -51,6 +51,7 @@ export async function run() {
     searchCommitBody: core.getInput('search_commit_body') === 'true',
     userFormatType: core.getInput('user_format_type'),
     enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
+    prereleaseName: core.getInput('prerelease_name'),
   };
 
   if (config.versionFormat === '' && core.getInput('format') !== '') {
