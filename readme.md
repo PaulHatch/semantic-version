@@ -1,6 +1,6 @@
-![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
+![Build](https://github.com/t3rn/semantic-version/workflows/Build/badge.svg)
 
-> *Version 5 GA now available!*
+> *Version 6 GA now available!*
 
 See [contributing.md](contributing.md) for information on how to get help or contribute to this project.
 
