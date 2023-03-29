@@ -110,6 +110,6 @@ export class DefaultVersionClassifier implements VersionClassifier {
         }
 
 
-        return new VersionClassification(type, increment, changed, major, minor, patch);
+        return new VersionClassification(type, type !== VersionType.None ? 0 : increment, changed, major, minor, patch);
     }
 }

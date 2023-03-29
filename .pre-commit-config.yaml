@@ -3,6 +3,6 @@ repos:
   rev: v1.1.1
   hooks:
   - id: trailing-whitespace
-    exclude: ^version.json
+    exclude: ^dist/*
 
 
