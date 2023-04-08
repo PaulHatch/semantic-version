@@ -635,13 +635,29 @@ test('Correct previous version is returned', async () => {
     const repo = createTestRepo();
 
     repo.makeCommit('Initial Commit');
-    repo.exec('git tag v2.0.1')
+    repo.exec('git tag v2.0.1');
     repo.makeCommit(`Second Commit`);
     repo.makeCommit(`Third Commit`);
     const result = await repo.runAction();
 
     expect(result.formattedVersion).toBe('2.0.2+1');
     expect(result.previousVersion).toBe('2.0.1');
+}, timeout);
+
+test('Correct previous version is returned when multiple tags are present', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v1.0.1');
+    repo.makeCommit(`Second Commit`);
+    repo.exec('git tag v2.0.1');
+    repo.makeCommit(`Third Commit`);
+    repo.exec('git tag v3.0.1');
+    repo.makeCommit(`Fourth Commit`);
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('3.0.2+0');
+    expect(result.previousVersion).toBe('3.0.1');
 }, timeout);
 
 test('Correct previous version is returned when using branches', async () => {
@@ -671,6 +687,21 @@ test('Correct previous version is returned when directly tagged', async () => {
 
     expect(result.previousVersion).toBe('2.0.1');
     expect(result.formattedVersion).toBe('2.0.2+1');
+}, timeout);
+
+test('Correct previous version is returned when directly tagged with multiple previous tags', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v2.0.1')
+    repo.makeCommit(`Second Commit`);
+    repo.exec('git tag v2.0.2')
+    repo.makeCommit(`Third Commit`);
+    repo.exec('git tag v2.0.3')
+    const result = await repo.runAction();
+
+    expect(result.previousVersion).toBe('2.0.2');
+    expect(result.formattedVersion).toBe('2.0.3+0');
 }, timeout);
 
 test('Prerelease suffixes are ignored', async () => {
@@ -897,4 +928,26 @@ test('Tagged commit is flagged as release', async () => {
     result = await repo.runAction();
     expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
     expect(result.isTagged).toBe(true);
+}, timeout);
+
+
+test('Highest tag is chosen when multiple tags are present', async () => {
+    const repo = createTestRepo();
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v2.0.0');
+    repo.exec('git tag v1.0.0');
+    repo.exec('git tag v1.5.0');    
+    var result = await repo.runAction();
+    expect(result.formattedVersion).toBe('2.0.0+0');
+
+    repo.exec('git tag v3.0.0');
+    repo.exec('git tag v2.1.0');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('3.0.0+0');
+
+    repo.makeCommit('Additional Commit');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('3.0.1+0');
+
 }, timeout);

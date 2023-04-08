@@ -37,7 +37,6 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 tag = await cmd(command);
                 tag = tag
                     .split('\n')
-                    .reverse()
                     .find(t => tagFormatter.IsValid(t) && t !== currentTag) || '';
 
             } else {
