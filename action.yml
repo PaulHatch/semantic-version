@@ -75,6 +75,8 @@ outputs:
     description: "The version tag"
   changed:
     description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
+  is_tagged:
+    description: "Indicates that the commit had a tag that matched the 'versionTag' format"
   authors:
     description: "List of users contributing commits to this version"
   previous_commit:
