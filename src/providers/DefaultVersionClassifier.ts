@@ -20,8 +20,10 @@ export class DefaultVersionClassifier implements VersionClassifier {
     }
 
     protected parsePattern(pattern: string, flags: string, searchBody: boolean): (pattern: CommitInfo) => boolean {
-        if (pattern.startsWith('/') && pattern.endsWith('/')) {
-            var regex = new RegExp(pattern.slice(1, -1), flags);
+        if (/^\/.+\/[i]*$/.test(pattern)) {
+            const regexEnd = pattern.lastIndexOf('/');
+            const parsedFlags = pattern.slice(pattern.lastIndexOf('/') + 1);
+            const regex = new RegExp(pattern.slice(1, regexEnd), parsedFlags || flags);
             return searchBody ?
                 (commit: CommitInfo) => regex.test(commit.subject) || regex.test(commit.body) :
                 (commit: CommitInfo) => regex.test(commit.subject);

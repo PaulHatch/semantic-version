@@ -11,7 +11,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const commitsProvider = configurationProvider.GetCommitsProvider();
   const versionClassifier = configurationProvider.GetVersionClassifier();
   const versionFormatter = configurationProvider.GetVersionFormatter();
-  const tagFormmater = configurationProvider.GetTagFormatter();
+  const tagFormatter = configurationProvider.GetTagFormatter();
   const userFormatter = configurationProvider.GetUserFormatter();
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
@@ -23,7 +23,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
       versionInfo.increment,
       versionInfo.type,
       versionFormatter.Format(versionInfo),
-      tagFormmater.Format(versionInfo),
+      tagFormatter.Format(versionInfo),
       versionInfo.changed,
       versionInfo.isTagged,
       userFormatter.Format('author', []),
@@ -34,7 +34,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   }
 
   const currentCommit = await currentCommitResolver.ResolveAsync();
-  const lastRelease = await lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
+  const lastRelease = await lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
   const commitSet = await commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
   const classification = await versionClassifier.ClassifyAsync(lastRelease, commitSet);
 
@@ -65,7 +65,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     versionInfo.increment,
     versionInfo.type,
     versionFormatter.Format(versionInfo),
-    tagFormmater.Format(versionInfo),
+    tagFormatter.Format(versionInfo),
     versionInfo.changed,
     versionInfo.isTagged,
     userFormatter.Format('author', authors),

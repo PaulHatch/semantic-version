@@ -805,6 +805,89 @@ test('Patch increments each time when bump each commit is set', async () => {
 
 }, timeout);
 
+test('Patch does not increment on bump each commit if a patch pattern is set', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}+${increment}", bumpEachCommit: true, bumpEachCommitPatchPattern: '(PATCH)' });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag 0.0.1');
+    const firstResult = await repo.runAction();
+    repo.makeCommit('Second Commit');
+    const secondResult = await repo.runAction();
+    repo.makeCommit('Third Commit');
+    const thirdResult = await repo.runAction();
+    repo.makeCommit('fourth Commit');
+    const fourthResult = await repo.runAction();
+
+
+    expect(firstResult.formattedVersion).toBe('0.0.1+0');
+    expect(secondResult.formattedVersion).toBe('0.0.1+1');
+    expect(thirdResult.formattedVersion).toBe('0.0.1+2');
+    expect(fourthResult.formattedVersion).toBe('0.0.1+3');
+
+}, timeout);
+
+test('Patch pattern increment is correct on empty repo', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}+${increment}", bumpEachCommit: true, bumpEachCommitPatchPattern: '(PATCH)' });
+
+    
+    const initialResult = await repo.runAction();
+    repo.makeCommit('Initial Commit');
+    const firstResult = await repo.runAction();
+    repo.makeCommit('Second Commit');
+    const secondResult = await repo.runAction();
+    repo.makeCommit('Third Commit');
+    const thirdResult = await repo.runAction();
+    repo.makeCommit('fourth Commit');
+    const fourthResult = await repo.runAction();
+
+    expect(initialResult.formattedVersion).toBe('0.0.0+0');
+    expect(firstResult.formattedVersion).toBe('0.0.1+0');
+    expect(secondResult.formattedVersion).toBe('0.0.1+1');
+    expect(thirdResult.formattedVersion).toBe('0.0.1+2');
+    expect(fourthResult.formattedVersion).toBe('0.0.1+3');
+
+}, timeout);
+
+test('Patch pattern increment is correct/matches non-bumped on empty repo', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}+${increment}", bumpEachCommit: true, bumpEachCommitPatchPattern: '(PATCH)' });
+
+    
+    repo.makeCommit('Initial Commit');
+    const firstResult = await repo.runAction();
+    repo.makeCommit('Second Commit');
+    const secondResult = await repo.runAction();
+    repo.makeCommit('Third Commit');
+    const thirdResult = await repo.runAction();
+    repo.makeCommit('fourth Commit');
+    const fourthResult = await repo.runAction();
+
+    expect(firstResult.formattedVersion).toBe('0.0.1+0');
+    expect(secondResult.formattedVersion).toBe('0.0.1+1');
+    expect(thirdResult.formattedVersion).toBe('0.0.1+2');
+    expect(fourthResult.formattedVersion).toBe('0.0.1+3');
+
+}, timeout);
+
+test('Patch pattern applied when present', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}+${increment}", bumpEachCommit: true, bumpEachCommitPatchPattern: '(PATCH)' });
+
+    
+    repo.makeCommit('Initial Commit');
+    const firstResult = await repo.runAction();
+    repo.makeCommit('Second Commit');
+    const secondResult = await repo.runAction();
+    repo.makeCommit('Third Commit (PATCH)');
+    const thirdResult = await repo.runAction();
+    repo.makeCommit('fourth Commit');
+    const fourthResult = await repo.runAction();
+
+    expect(firstResult.formattedVersion).toBe('0.0.1+0');
+    expect(secondResult.formattedVersion).toBe('0.0.1+1');
+    expect(thirdResult.formattedVersion).toBe('0.0.2+0');
+    expect(fourthResult.formattedVersion).toBe('0.0.2+3');
+
+}, timeout);
+
 test('Current commit is provided', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}" });
 
