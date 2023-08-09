@@ -97,6 +97,8 @@ it will be given the new version if the build were to be retriggered, for exampl
     namespace: my-service
     # If this is set to true, *every* commit will be treated as a new version.
     bump_each_commit: false
+    # If bump_each_commit is also set to true, setting this value will cause the version to increment only if the pattern specified is matched.
+    bump_each_commit_patch_pattern: ""
     # If true, the body of commits will also be searched for major/minor patterns to determine the version type.
     search_commit_body: false
     # The output method used to generate list of users, 'csv' or 'json'.

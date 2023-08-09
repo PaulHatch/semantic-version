@@ -55,9 +55,13 @@ inputs:
     required: true
     default: "csv"
   enable_prerelease_mode:
-    description: Prevents pre-v1.0.0 version from automatically incrementing the major version. If enabled, when the major version is 0, major releases will be treated as minor and minor as patch. Note that the version_type output is unchanged.
+    description: "Prevents pre-v1.0.0 version from automatically incrementing the major version. If enabled, when the major version is 0, major releases will be treated as minor and minor as patch. Note that the version_type output is unchanged."
     required: true
     default: "false"
+  bump_each_commit_patch_pattern:
+    description: "If bump_each_commit is also set to true, setting this value will cause the version to increment only if the pattern specified is matched."
+    required: true
+    default: ""
 outputs:
   major:
     description: "Current major number"
