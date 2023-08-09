@@ -884,7 +884,7 @@ test('Patch pattern applied when present', async () => {
     expect(firstResult.formattedVersion).toBe('0.0.1+0');
     expect(secondResult.formattedVersion).toBe('0.0.1+1');
     expect(thirdResult.formattedVersion).toBe('0.0.2+0');
-    expect(fourthResult.formattedVersion).toBe('0.0.2+3');
+    expect(fourthResult.formattedVersion).toBe('0.0.2+1');
 
 }, timeout);
 
