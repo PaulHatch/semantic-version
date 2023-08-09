@@ -1,5 +1,6 @@
 # Configuration Guide
 
+WIP
 
 ## Choosing a Release Strategy
 
@@ -25,19 +26,14 @@ The only real limitation of this strategy is that it does not allow for multiple
 
 Tags should generally not be created automatically as part of the build, which can cause strange behavior unless you've taken care to prevent race conditions. Creating tags automatically also largely negates the purpose of this strategy as only build automated test.
 
+ > Remaining strategies are still a work in progress.
 
 ## Branch Versioning
 
 Moving past tag versioning is where things get a little more complicated, as there are many different ways to version branches.
+
 ### Version Branches with Tag Versioning
-
-It is possible to use version branches while still
-
-
 ### Version from Branch Name (Non-Predictive)
-
-
-
 ### Version from Branch Name (Predictive)
 
 ## Branch Versioning: GitFlow
