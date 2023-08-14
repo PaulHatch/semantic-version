@@ -1,7 +1,5 @@
 ![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
-> *Version 5 GA now available!*
-
 See [contributing.md](contributing.md) for information on how to get help or contribute to this project.
 
 # Git-Based Semantic Versioning
@@ -75,7 +73,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v5.0.2
+- uses: paulhatch/semantic-version@v5.1.0
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -153,12 +151,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v5.0.2
+  uses: paulhatch/semantic-version@v5.1.0
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v5.0.2
+  uses: paulhatch/semantic-version@v5.1.0
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
