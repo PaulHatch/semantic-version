@@ -1,8 +1,15 @@
 // Using require instead of import to support integration testing
 import * as exec from '@actions/exec';
-import * as core from '@actions/core';
+import { DebugManager } from './DebugManager';
+
+const debugManager = DebugManager.getInstance();
 
 export const cmd = async (command: string, ...args: any): Promise<string> => {
+
+    if (debugManager.isReplayMode()) {
+        return debugManager.replayCommand(command, args);
+    }
+
     let output = '', errors = '';
     const options = {
         silent: true,
@@ -14,15 +21,14 @@ export const cmd = async (command: string, ...args: any): Promise<string> => {
         }
     };
 
+    let caughtError: any = null;
     try {
         await exec.exec(command, args, options);
     } catch (err) {
-        //core.info(`The command cd '${command} ${args.join(' ')}' failed: ${err}`);
+        caughtError = err;
     }
 
-    if (errors !== '') {
-        //core.info(`stderr: ${errors}`);
-    }
+    debugManager.recordCommand(command, args, output, errors, caughtError);
 
     return output;
 };

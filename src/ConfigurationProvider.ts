@@ -15,11 +15,13 @@ import { DefaultLastReleaseResolver } from './providers/DefaultLastReleaseResolv
 import { VersionClassifier } from './providers/VersionClassifier'
 import { BumpAlwaysVersionClassifier } from './providers/BumpAlwaysVersionClassifier'
 import { ActionConfig } from './ActionConfig';
+import { DebugManager } from './DebugManager';
 
 export class ConfigurationProvider {
 
   constructor(config: ActionConfig) {
     this.config = config;
+    DebugManager.getInstance().initializeConfig(config);
   }
 
   private config: ActionConfig;

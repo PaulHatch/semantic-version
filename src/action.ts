@@ -3,6 +3,7 @@ import { VersionResult } from './VersionResult';
 import { VersionType } from './providers/VersionType';
 import { UserInfo } from './providers/UserInfo';
 import { VersionInformation } from './providers/VersionInformation';
+import { DebugManager } from './DebugManager';
 
 export async function runAction(configurationProvider: ConfigurationProvider): Promise<VersionResult> {
 
@@ -13,6 +14,8 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const versionFormatter = configurationProvider.GetVersionFormatter();
   const tagFormatter = configurationProvider.GetTagFormatter();
   const userFormatter = configurationProvider.GetUserFormatter();
+
+  const debugManager = DebugManager.getInstance();
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
     const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false, false);
@@ -29,7 +32,8 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
       userFormatter.Format('author', []),
       '',
       '',
-      '0.0.0'
+      '0.0.0',
+      debugManager.getDebugOutput(true)
     );
   }
 
@@ -71,6 +75,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     userFormatter.Format('author', authors),
     currentCommit,
     lastRelease.hash,
-    `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`
+    `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`,
+    debugManager.getDebugOutput()
   );
 }

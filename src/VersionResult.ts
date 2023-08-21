@@ -18,6 +18,7 @@ export class VersionResult {
    * @param currentCommit - The current commit hash 
    * @param previousCommit - The previous commit hash
    * @param previousVersion - The previous version
+   * @param debugOutput - Diagnostic information, if debug is enabled
    */
   constructor(
     public major: number,
@@ -32,5 +33,6 @@ export class VersionResult {
     public authors: string,
     public currentCommit: string,
     public previousCommit: string,
-    public previousVersion: string) { }
+    public previousVersion: string,
+    public debugOutput: string) { }
 }

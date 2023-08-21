@@ -42,7 +42,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cmd = void 0;
 // Using require instead of import to support integration testing
 const exec = __importStar(__nccwpck_require__(1514));
+const DebugManager_1 = __nccwpck_require__(1823);
+const debugManager = DebugManager_1.DebugManager.getInstance();
 const cmd = (command, ...args) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debugManager.isReplayMode()) {
+        return debugManager.replayCommand(command, args);
+    }
     let output = '', errors = '';
     const options = {
         silent: true,
@@ -53,15 +58,14 @@ const cmd = (command, ...args) => __awaiter(void 0, void 0, void 0, function* ()
             silent: true
         }
     };
+    let caughtError = null;
     try {
         yield exec.exec(command, args, options);
     }
     catch (err) {
-        //core.info(`The command cd '${command} ${args.join(' ')}' failed: ${err}`);
+        caughtError = err;
     }
-    if (errors !== '') {
-        //core.info(`stderr: ${errors}`);
-    }
+    debugManager.recordCommand(command, args, output, errors, caughtError);
     return output;
 });
 exports.cmd = cmd;
@@ -85,9 +89,11 @@ const DefaultCurrentCommitResolver_1 = __nccwpck_require__(35);
 const DefaultVersionClassifier_1 = __nccwpck_require__(5527);
 const DefaultLastReleaseResolver_1 = __nccwpck_require__(8337);
 const BumpAlwaysVersionClassifier_1 = __nccwpck_require__(6482);
+const DebugManager_1 = __nccwpck_require__(1823);
 class ConfigurationProvider {
     constructor(config) {
         this.config = config;
+        DebugManager_1.DebugManager.getInstance().setDebugEnabled(config.debug);
     }
     GetCurrentCommitResolver() { return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config); }
     GetLastReleaseResolver() { return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config); }
@@ -110,6 +116,110 @@ class ConfigurationProvider {
     }
 }
 exports.ConfigurationProvider = ConfigurationProvider;
+
+
+/***/ }),
+
+/***/ 1823:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DebugManager = void 0;
+/** Utility class for managing debug mode and diagnostic information */
+class DebugManager {
+    constructor() {
+        this.debugEnabled = false;
+        this.replayMode = false;
+        this.diagnosticInfo = null;
+    }
+    /** Returns the singleton instance of the DebugManager */
+    static getInstance() {
+        if (!DebugManager.instance) {
+            DebugManager.instance = new DebugManager();
+        }
+        return DebugManager.instance;
+    }
+    /** Returns true if debug mode is enabled */
+    isDebugEnabled() {
+        return this.debugEnabled;
+    }
+    /** Returns true if replay mode is enabled */
+    isReplayMode() {
+        return this.replayMode;
+    }
+    initializeConfig(config) {
+        if (config.debug) {
+            this.setDebugEnabled(true);
+        }
+        else if (!!config.replay) {
+            this.replayFromDiagnostics(config.replay);
+        }
+    }
+    /** Enables or disables debug mode, also clears any existing diagnostics info */
+    setDebugEnabled(enableDebug = true) {
+        this.debugEnabled = enableDebug;
+        this.replayMode = false;
+        this.diagnosticInfo = new DiagnosticInfo();
+    }
+    ;
+    /** Enables replay mode and loads the diagnostic information from the specified string */
+    replayFromDiagnostics(diagnostics) {
+        this.debugEnabled = false;
+        this.replayMode = true;
+        this.diagnosticInfo = JSON.parse(diagnostics);
+    }
+    /** Returns a JSON string containing the diagnostic information for this run */
+    getDebugOutput(emptyRepo = false) {
+        return this.isDebugEnabled() ? JSON.stringify(this.diagnosticInfo) : '';
+    }
+    /** Records a command and its output for diagnostic purposes */
+    recordCommand(command, args, output, stderr, error) {
+        var _a;
+        if (this.isDebugEnabled()) {
+            (_a = this.diagnosticInfo) === null || _a === void 0 ? void 0 : _a.recordCommand(command, args, output, stderr, error);
+        }
+    }
+    /** Replays the specified command and returns the output */
+    replayCommand(command, args) {
+        if (this.diagnosticInfo === null) {
+            throw new Error('No diagnostic information available for replay');
+        }
+        const commandResult = this.diagnosticInfo.commands.find(c => c.command === command && JSON.stringify(c.args) === JSON.stringify(args));
+        if (!commandResult) {
+            throw new Error(`No result found in diagnostic for command "${command}"`);
+        }
+        if (commandResult.error) {
+            throw commandResult.error;
+        }
+        if (commandResult.stderr) {
+            console.error(commandResult.stderr);
+        }
+        return commandResult.output;
+    }
+}
+exports.DebugManager = DebugManager;
+/** Represents a CLI command result */
+class CommandResult {
+    constructor(command, args, output, stderr, error) {
+        this.command = command;
+        this.args = args;
+        this.output = output;
+        this.stderr = stderr;
+        this.error = error;
+    }
+}
+/** Represents the result of the commands executed for a run */
+class DiagnosticInfo {
+    constructor() {
+        this.commands = [];
+        this.empty = false;
+    }
+    recordCommand(command, args, output, stderr, error) {
+        this.commands.push(new CommandResult(command, args, output, stderr, error));
+    }
+}
 
 
 /***/ }),
@@ -138,8 +248,9 @@ class VersionResult {
      * @param currentCommit - The current commit hash
      * @param previousCommit - The previous commit hash
      * @param previousVersion - The previous version
+     * @param debugOutput - Diagnostic information, if debug is enabled
      */
-    constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion) {
+    constructor(major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -153,6 +264,7 @@ class VersionResult {
         this.currentCommit = currentCommit;
         this.previousCommit = previousCommit;
         this.previousVersion = previousVersion;
+        this.debugOutput = debugOutput;
     }
 }
 exports.VersionResult = VersionResult;
@@ -180,6 +292,7 @@ const VersionResult_1 = __nccwpck_require__(2010);
 const VersionType_1 = __nccwpck_require__(895);
 const UserInfo_1 = __nccwpck_require__(5907);
 const VersionInformation_1 = __nccwpck_require__(5686);
+const DebugManager_1 = __nccwpck_require__(1823);
 function runAction(configurationProvider) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentCommitResolver = configurationProvider.GetCurrentCommitResolver();
@@ -187,14 +300,15 @@ function runAction(configurationProvider) {
         const commitsProvider = configurationProvider.GetCommitsProvider();
         const versionClassifier = configurationProvider.GetVersionClassifier();
         const versionFormatter = configurationProvider.GetVersionFormatter();
-        const tagFormmater = configurationProvider.GetTagFormatter();
+        const tagFormatter = configurationProvider.GetTagFormatter();
         const userFormatter = configurationProvider.GetUserFormatter();
+        const debugManager = DebugManager_1.DebugManager.getInstance();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
             const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false, false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', '0.0.0');
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', '0.0.0', debugManager.getDebugOutput(true));
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
-        const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormmater);
+        const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
         const commitSet = yield commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
         const classification = yield versionClassifier.ClassifyAsync(lastRelease, commitSet);
         const { isTagged } = lastRelease;
@@ -213,7 +327,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormmater.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`);
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`, debugManager.getDebugOutput());
     });
 }
 exports.runAction = runAction;
@@ -434,6 +548,9 @@ function run() {
             searchCommitBody: core.getInput('search_commit_body') === 'true',
             userFormatType: core.getInput('user_format_type'),
             enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
+            bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
+            debug: core.getInput('debug') === 'true',
+            replay: ''
         };
         if (config.versionFormat === '' && core.getInput('format') !== '') {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
@@ -475,7 +592,9 @@ const VersionType_1 = __nccwpck_require__(895);
 class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVersionClassifier {
     constructor(config) {
         super(config);
-        // Placeholder for consistency
+        this.patchPattern = !config.bumpEachCommitPatchPattern ?
+            _ => true :
+            this.parsePattern(config.bumpEachCommitPatchPattern, "", config.searchCommitBody);
     }
     ClassifyAsync(lastRelease, commitSet) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -484,6 +603,7 @@ class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVers
             }
             let { major, minor, patch } = lastRelease;
             let type = VersionType_1.VersionType.None;
+            let increment = 0;
             if (commitSet.commits.length === 0) {
                 return new VersionClassification_1.VersionClassification(type, 0, false, major, minor, patch);
             }
@@ -493,18 +613,28 @@ class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVers
                     minor = 0;
                     patch = 0;
                     type = VersionType_1.VersionType.Major;
+                    increment = 0;
                 }
                 else if (this.minorPattern(commit)) {
                     minor += 1;
                     patch = 0;
                     type = VersionType_1.VersionType.Minor;
+                    increment = 0;
                 }
                 else {
-                    patch += 1;
-                    type = VersionType_1.VersionType.Patch;
+                    if (this.patchPattern(commit) ||
+                        (major === 0 && minor === 0 && patch === 0 && commitSet.commits.length > 0)) {
+                        patch += 1;
+                        type = VersionType_1.VersionType.Patch;
+                        increment = 0;
+                    }
+                    else {
+                        type = VersionType_1.VersionType.None;
+                        increment++;
+                    }
                 }
             }
-            return new VersionClassification_1.VersionClassification(type, 0, true, major, minor, patch);
+            return new VersionClassification_1.VersionClassification(type, increment, true, major, minor, patch);
         });
     }
 }
@@ -826,8 +956,10 @@ class DefaultVersionClassifier {
         this.enablePrereleaseMode = config.enablePrereleaseMode;
     }
     parsePattern(pattern, flags, searchBody) {
-        if (pattern.startsWith('/') && pattern.endsWith('/')) {
-            var regex = new RegExp(pattern.slice(1, -1), flags);
+        if (/^\/.+\/[i]*$/.test(pattern)) {
+            const regexEnd = pattern.lastIndexOf('/');
+            const parsedFlags = pattern.slice(pattern.lastIndexOf('/') + 1);
+            const regex = new RegExp(pattern.slice(1, regexEnd), parsedFlags || flags);
             return searchBody ?
                 (commit) => regex.test(commit.subject) || regex.test(commit.body) :
                 (commit) => regex.test(commit.subject);

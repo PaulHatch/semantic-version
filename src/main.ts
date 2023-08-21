@@ -51,7 +51,9 @@ export async function run() {
     searchCommitBody: core.getInput('search_commit_body') === 'true',
     userFormatType: core.getInput('user_format_type'),
     enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
-    bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern')
+    bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
+    debug: core.getInput('debug') === 'true',
+    replay: ''
   };
 
   if (config.versionFormat === '' && core.getInput('format') !== '') {

@@ -62,6 +62,10 @@ inputs:
     description: "If bump_each_commit is also set to true, setting this value will cause the version to increment only if the pattern specified is matched."
     required: true
     default: ""
+  debug:
+    description: "If enabled, diagnostic information will be added to the action output"
+    required: true
+    default: "false"
 outputs:
   major:
     description: "Current major number"
@@ -89,6 +93,8 @@ outputs:
     description: "Indicates the previous version"
   current_commit:
     description: "The current commit hash"
+  debug_output:
+    description: "Diagnostic information, if debug is enabled"
   
 runs:
   using: "node16"

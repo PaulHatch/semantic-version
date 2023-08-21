@@ -30,4 +30,8 @@ export class ActionConfig {
     public enablePrereleaseMode: boolean = false;
     /** If bump_each_commit is also set to true, setting this value will cause the version to increment only if the pattern specified is matched. */
     public bumpEachCommitPatchPattern: string = "";
+    /** If enabled, diagnostic information will be added to the action output. */
+    public debug: boolean = false;
+    /** Diagnostics to replay */
+    public replay: string = '';
 }
