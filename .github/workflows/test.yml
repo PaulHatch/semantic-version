@@ -27,3 +27,7 @@ jobs:
       - name: Run Action
         uses: ./
         id: run
+      - name: Print Diagnostic Output
+        run: echo $DEBUG_OUTPUT
+        env:
+          DEBUG_OUTPUT: ${{ steps.run.outputs.debug_output }}
