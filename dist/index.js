@@ -93,7 +93,7 @@ const DebugManager_1 = __nccwpck_require__(1823);
 class ConfigurationProvider {
     constructor(config) {
         this.config = config;
-        DebugManager_1.DebugManager.getInstance().setDebugEnabled(config.debug);
+        DebugManager_1.DebugManager.getInstance().initializeConfig(config);
     }
     GetCurrentCommitResolver() { return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config); }
     GetLastReleaseResolver() { return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config); }
@@ -153,7 +153,7 @@ class DebugManager {
         if (config.debug) {
             this.setDebugEnabled(true);
         }
-        else if (!!config.replay) {
+        else if (config.replay.length > 0) {
             this.replayFromDiagnostics(config.replay);
         }
     }
@@ -508,7 +508,7 @@ const ConfigurationProvider_1 = __nccwpck_require__(2614);
 const core = __importStar(__nccwpck_require__(2186));
 const VersionType_1 = __nccwpck_require__(895);
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion } = versionResult;
+    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
         core.info('No changes detected for this commit');
@@ -530,6 +530,7 @@ function setOutput(versionResult) {
     core.setOutput("previous_commit", previousCommit);
     core.setOutput("previous_version", previousVersion);
     core.setOutput("current_commit", currentCommit);
+    core.setOutput("debug_output", debugOutput);
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {

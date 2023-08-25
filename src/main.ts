@@ -6,7 +6,7 @@ import * as core from '@actions/core';
 import { VersionType } from './providers/VersionType';
 
 function setOutput(versionResult: VersionResult) {
-  const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion } = versionResult;
+  const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
 
   const repository = process.env.GITHUB_REPOSITORY;
 
@@ -32,6 +32,7 @@ function setOutput(versionResult: VersionResult) {
   core.setOutput("previous_commit", previousCommit);
   core.setOutput("previous_version", previousVersion);
   core.setOutput("current_commit", currentCommit);
+  core.setOutput("debug_output", debugOutput);
 }
 
 export async function run() {
