@@ -21,11 +21,13 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         let currentTag = (await cmd(
             `git tag --points-at ${current} ${releasePattern}`
         )).trim();
-        
+
         currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
         const isTagged = currentTag !== '';
 
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+
+        let tagsCount = 0;
 
         let tag = '';
         try {
@@ -34,16 +36,16 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 // If we already have the current branch tagged, we are checking for the previous one
                 // so that we will have an accurate increment (assuming the new tag is the expected one)
                 const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
-                tag = await cmd(command);
-                tag = tag
-                    .split('\n')
+                const tags = (await cmd(command)).split('\n')
+                tagsCount = tags.length;
+                tag = tags
                     .find(t => tagFormatter.IsValid(t) && t !== currentTag) || '';
 
             } else {
                 const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
-                let tags = await cmd(command);
+                const tags = (await cmd(command)).split('\n')
+                tagsCount = tags.length;
                 tag = tags
-                    .split('\n')
                     .find(t => tagFormatter.IsValid(t)) || '';
             }
 
@@ -60,7 +62,11 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 // practice this isn't likely to happen, but it keeps the test output from being
                 // polluted with a bunch of warnings.
 
-                core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+                if (tagsCount > 0) {
+                    core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using.`);
+                } else {
+                    core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+                }
             }
             // no release tags yet, use the initial commit as the root
             return new ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch, isTagged);
