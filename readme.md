@@ -73,7 +73,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v5.1.0
+- uses: paulhatch/semantic-version@v5.2.3
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -104,6 +104,8 @@ it will be given the new version if the build were to be retriggered, for exampl
     # Prevents pre-v1.0.0 version from automatically incrementing the major version.
     # If enabled, when the major version is 0, major releases will be treated as minor and minor as patch. Note that the version_type output is unchanged.
     enable_prerelease_mode: true
+    # If enabled, diagnostic information will be added to the action output.
+    debug: false
 ```
 
 ## Outputs 
@@ -119,6 +121,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 - *current_commit* is the current commit hash.
 - *previous_commit* is the previous commit hash.
 - *previous_version* is the previous version.
+- *debug_output* will show diagnostic information, if debug is enabled
 
 There are two types of "version" string, one is the semantic version output that can be used to identify a build and can include prerelease data and metadata specific to the commit such as `v2.0.1-pre001+cf6e75` (you would produce this string yourself using the version information from this action plus whatever metadata you wanted to add), the other is the tag version string, which identifies a specific commit as being a specific version.
 
@@ -151,12 +154,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v5.1.0
+  uses: paulhatch/semantic-version@v5.2.2
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v5.1.0
+  uses: paulhatch/semantic-version@v5.2.2
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
