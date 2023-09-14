@@ -10,9 +10,34 @@ Fixes and enhancements are welcome, but if you are planning to do a lot of work,
 
 ## Getting Help
 
+If you have found or believe you have found a bug please open a ticket. If you are having trouble using the action and need help please use the discussions page.
+
+Since nearly all questions are related to a specific repository it can be difficult to diagnose issues from a description alone. There are a few ways to provide additional information that can help diagnose the problem.
+
+### Creating Diagnostic Information
+
+There is a debug option which produces diagnostic information. This information can be used to troubleshoot and even to rerun the action without access to the original repository, for example with a debugger attached. To enable this option set the `debug` input to `true` and then use the `debug_output` output to access the information. The following configuration will print the debug output to the console:
+
+```
+- name: Version
+  uses: paulhatch/semantic-version@v5.2.1
+  id: version
+  with:
+    tag_prefix: ""
+    version_format: "${major}.${minor}.${patch}.${increment}"
+    debug: true
+
+- name: Print Diagnostic Output
+  run: echo "$DEBUG_OUTPUT"
+  env:
+    DEBUG_OUTPUT: ${{ steps.version.outputs.debug_output }}
+```
+
+Please review the information before posting it to avoid disclosing any sensitive information. In particular the output may contain names and email addresses of the committers, as well as commit messages for recent commits.
+
 ### Providing a Test Case
 
-If you are planning to open a ticket, it is extremely helpful if you can provide a test case that demonstrates the problem. This project includes a test helper than makes it very easy to create new tests with just a few lines of code.
+If you are planning to open a ticket or post to discussions, it is extremely helpful if you can provide a test case that demonstrates the problem. This project includes a test helper than makes it very easy to create new tests with just a few lines of code.
 
 To get started simply:
 
