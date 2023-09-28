@@ -9,10 +9,12 @@ import { VersionType } from "./VersionType";
 export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
 
     protected patchPattern: (commit: CommitInfo) => boolean;
+    protected enablePrereleaseMode: boolean;
 
     constructor(config: ActionConfig) {
         super(config);
 
+        this.enablePrereleaseMode = config.enablePrereleaseMode;
         this.patchPattern = !config.bumpEachCommitPatchPattern ?
             _ => true :
             this.parsePattern(config.bumpEachCommitPatchPattern, "", config.searchCommitBody);
@@ -33,28 +35,55 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
         }
 
         for (let commit of commitSet.commits.reverse()) {
+
             if (this.majorPattern(commit)) {
-                major += 1;
-                minor = 0;
-                patch = 0;
                 type = VersionType.Major;
-                increment = 0;
             } else if (this.minorPattern(commit)) {
-                minor += 1;
-                patch = 0;
                 type = VersionType.Minor;
-                increment = 0;
             } else {
                 if (this.patchPattern(commit) ||
                     (major === 0 && minor === 0 && patch === 0 && commitSet.commits.length > 0)) {
-                    patch += 1;
                     type = VersionType.Patch;
-                    increment = 0;
                 } else {
                     type = VersionType.None;
                     increment++;
                 }
             }
+
+            if (this.enablePrereleaseMode && major === 0) {
+                switch (type) {
+                    case VersionType.Major:
+                    case VersionType.Minor:
+                        minor += 1;
+                        patch = 0;
+                        increment = 0;
+                        break;
+                    case VersionType.Patch:
+                        patch += 1;
+                        increment = 0;
+                        break;
+                    default: break;
+                }
+            } else {
+                switch (type) {
+                    case VersionType.Major:
+                        major += 1;
+                        minor = 0;
+                        patch = 0;
+                        increment = 0;
+                        break;
+                    case VersionType.Minor:
+                        minor += 1;
+                        patch = 0;
+                        break;
+                    case VersionType.Patch:
+                        patch += 1;
+                        increment = 0;
+                        break;
+                    default: break;
+                }
+            }
+
         }
 
         return new VersionClassification(type, increment, true, major, minor, patch);

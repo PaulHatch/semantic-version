@@ -1015,6 +1015,40 @@ test('Tagged commit is flagged as release', async () => {
 }, timeout);
 
 
+test('Pre-release mode with bump each commit does not update major version if major version is 0', async () => {
+    const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}", enablePrereleaseMode: true, bumpEachCommit: true });
+
+    repo.makeCommit('Initial Commit');
+    expect((await repo.runAction()).formattedVersion).toBe('0.0.1');
+    repo.makeCommit('Second Commit (MINOR)');
+    expect((await repo.runAction()).formattedVersion).toBe('0.1.0');
+    repo.makeCommit('Third Commit (MAJOR)');
+    expect((await repo.runAction()).formattedVersion).toBe('0.2.0');
+    repo.exec('git tag 0.1.0');
+    repo.makeCommit('Fourth Commit (MAJOR)');
+    expect((await repo.runAction()).formattedVersion).toBe('0.2.0');
+}, timeout);
+
+test('Pre-release mode with bump each commit does not update major version if major version is 0, respecting patch pattern', async () => {
+    const repo = createTestRepo({
+        tagPrefix: '', 
+        versionFormat: "${major}.${minor}.${patch}.${increment}",
+        enablePrereleaseMode: true,
+        bumpEachCommit: true,
+        bumpEachCommitPatchPattern: '(PATCH)',
+    });
+
+    repo.makeCommit('Initial Commit');
+    expect((await repo.runAction()).formattedVersion).toBe('0.0.1.0');
+    repo.makeCommit('Second Commit');
+    expect((await repo.runAction()).formattedVersion).toBe('0.0.1.1');
+    repo.makeCommit('Third Commit');
+    expect((await repo.runAction()).formattedVersion).toBe('0.0.1.2');
+    repo.makeCommit('Fourth Commit (MAJOR)');
+    expect((await repo.runAction()).formattedVersion).toBe('0.1.0.0');
+}, timeout);
+
+
 test('Highest tag is chosen when multiple tags are present', async () => {
     const repo = createTestRepo();
 

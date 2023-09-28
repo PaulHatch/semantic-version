@@ -698,6 +698,7 @@ const VersionType_1 = __nccwpck_require__(895);
 class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVersionClassifier {
     constructor(config) {
         super(config);
+        this.enablePrereleaseMode = config.enablePrereleaseMode;
         this.patchPattern = !config.bumpEachCommitPatchPattern ?
             _ => true :
             this.parsePattern(config.bumpEachCommitPatchPattern, "", config.searchCommitBody);
@@ -715,28 +716,53 @@ class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVers
             }
             for (let commit of commitSet.commits.reverse()) {
                 if (this.majorPattern(commit)) {
-                    major += 1;
-                    minor = 0;
-                    patch = 0;
                     type = VersionType_1.VersionType.Major;
-                    increment = 0;
                 }
                 else if (this.minorPattern(commit)) {
-                    minor += 1;
-                    patch = 0;
                     type = VersionType_1.VersionType.Minor;
-                    increment = 0;
                 }
                 else {
                     if (this.patchPattern(commit) ||
                         (major === 0 && minor === 0 && patch === 0 && commitSet.commits.length > 0)) {
-                        patch += 1;
                         type = VersionType_1.VersionType.Patch;
-                        increment = 0;
                     }
                     else {
                         type = VersionType_1.VersionType.None;
                         increment++;
+                    }
+                }
+                if (this.enablePrereleaseMode && major === 0) {
+                    switch (type) {
+                        case VersionType_1.VersionType.Major:
+                        case VersionType_1.VersionType.Minor:
+                            minor += 1;
+                            patch = 0;
+                            increment = 0;
+                            break;
+                        case VersionType_1.VersionType.Patch:
+                            patch += 1;
+                            increment = 0;
+                            break;
+                        default: break;
+                    }
+                }
+                else {
+                    switch (type) {
+                        case VersionType_1.VersionType.Major:
+                            major += 1;
+                            minor = 0;
+                            patch = 0;
+                            increment = 0;
+                            break;
+                        case VersionType_1.VersionType.Minor:
+                            minor += 1;
+                            patch = 0;
+                            break;
+                        case VersionType_1.VersionType.Patch:
+                            patch += 1;
+                            increment = 0;
+                            break;
+                        default: break;
                     }
                 }
             }
