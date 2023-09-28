@@ -36,6 +36,10 @@ export class DefaultTagFormatter implements TagFormatter {
 
   public Parse(tag: string): [major: number, minor: number, patch: number] {
 
+    if(tag === '') {
+      return [0, 0, 0];
+    }
+
     let tagParts = tag
       .replace(this.tagPrefix, '<--!PREFIX!-->')
       .replace(this.namespace, '<--!NAMESPACE!-->')

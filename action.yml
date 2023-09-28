@@ -13,7 +13,11 @@ inputs:
     required: false
     default: "v"
   use_branches:
-    description: "Use branches instead of tags"
+    description: "(Deprecated) Use branches instead of tags"
+    required: false
+    default: "false"
+  version_from_branch:
+    description: If true, the branch will be used to select the maximum version
     required: false
     default: "false"
   major_pattern:

@@ -68,8 +68,9 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                     core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
                 }
             }
+            const [major, minor, patch] = tagFormatter.Parse('');
             // no release tags yet, use the initial commit as the root
-            return new ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch, isTagged);
+            return new ReleaseInformation(major, minor, patch, '', currentMajor, currentMinor, currentPatch, isTagged);
         }
 
         // parse the version tag

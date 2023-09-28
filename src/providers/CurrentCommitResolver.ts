@@ -10,4 +10,10 @@ export interface CurrentCommitResolver {
    * @returns True if the repository is empty
    */
   IsEmptyRepoAsync(): Promise<boolean>;
+
+  /**
+   * Returns the current branch
+   * @returns The current branch
+   */
+  ResolveBranchNameAsync(): Promise<string>;
 }

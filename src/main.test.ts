@@ -1057,4 +1057,63 @@ test('Debug records and replays expected data', async () => {
 
 }, timeout);
 
+test('Version branch using major version ignores other tags', async () => {
+    const repo = createTestRepo({ versionFromBranch: true });
 
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit(`Second Commit`);
+    repo.exec("git checkout -b release/v3");
+    repo.exec('git tag v3.0.0');
+    repo.makeCommit(`Third Commit`);
+    repo.exec('git tag v4.0.0');
+    repo.makeCommit(`Fourth Commit`);
+    repo.makeCommit(`Fifth Commit`);
+
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('3.0.1+2');
+
+}, timeout);
+
+test('Versioning from branch always takes version from branch name even without tags', async () => {
+    const repo = createTestRepo({ versionFromBranch: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.makeCommit(`Second Commit`);
+    repo.exec("git checkout -b release/v3.2");
+    repo.makeCommit(`Third Commit`);
+    repo.makeCommit(`Fourth Commit`);
+    repo.makeCommit(`Fifth Commit`);
+
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('3.2.1+4');
+
+}, timeout);
+
+
+test('Prerelease mode does not increment to 1.x.x', async () => {
+    const repo = createTestRepo({ tagPrefix: 'v', versionFormat: "${major}.${minor}.${patch}-prerelease.${increment}", enablePrereleaseMode: true });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec('git tag v1.0.0');
+    var result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.0-prerelease.0');
+    expect(result.isTagged).toBe(true);
+
+    repo.makeCommit('Second Commit');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.0.1-prerelease.0')
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Third Commit (MINOR)');
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.0');
+    expect(result.isTagged).toBe(false);
+
+    repo.makeCommit('Fourth Commit (MINOR)');
+    repo.exec('git tag v1.1.0')
+    result = await repo.runAction();
+    expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
+    expect(result.isTagged).toBe(true);
+}, timeout);

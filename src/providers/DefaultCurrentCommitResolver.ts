@@ -22,4 +22,14 @@ export class DefaultCurrentCommitResolver implements CurrentCommitResolver {
         let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
         return lastCommitAll === '';
     }
+
+    public async ResolveBranchNameAsync(): Promise<string> {
+        const branchName =
+            this.branch == 'HEAD' ?
+                process.env.GITHUB_REF_NAME || await cmd('git', 'rev-parse', '--abbrev-ref', 'HEAD')
+                : this.branch;
+
+
+        return branchName.trim();
+    }
 }

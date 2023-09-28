@@ -4,8 +4,10 @@ export class ActionConfig {
     public branch: string = "HEAD";
     /** The prefix to use to identify tags */
     public tagPrefix: string = "v";
-    /** Use branches instead of tags */
+    /** (Deprecated) Use branches instead of tags */
     public useBranches: boolean = false;
+    /** If true, the branch will be used to select the maximum version. */
+    public versionFromBranch: string | boolean = false;
     /** A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression. */
     public majorPattern: string = "(MAJOR)";
     /** A string which indicates the flags used by the `majorPattern` regular expression. */

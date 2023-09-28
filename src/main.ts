@@ -37,10 +37,30 @@ function setOutput(versionResult: VersionResult) {
 
 export async function run() {
 
+  function toBool(value: string): boolean {
+    if (!value || value.toLowerCase() === 'false') {
+      return false;
+    } else if (value.toLowerCase() === 'true') {
+      return true;
+    }
+    return false;
+  }
+  
+  function toStringOrBool(value: string): string | boolean {
+    if (!value || value === 'false') {
+      return false;
+    }
+    if (value === 'true') {
+      return true;
+    }
+    return value;
+  }  
+
   const config: ActionConfig = {
     branch: core.getInput('branch'),
     tagPrefix: core.getInput('tag_prefix'),
-    useBranches: core.getInput('use_branches') === 'true',
+    useBranches: toBool(core.getInput('use_branches')),
+    versionFromBranch: toStringOrBool(core.getInput('version_from_branch')),
     majorPattern: core.getInput('major_pattern'),
     minorPattern: core.getInput('minor_pattern'),
     majorFlags: core.getInput('major_regexp_flags'),
@@ -48,14 +68,18 @@ export async function run() {
     versionFormat: core.getInput('version_format'),
     changePath: core.getInput('change_path'),
     namespace: core.getInput('namespace'),
-    bumpEachCommit: core.getInput('bump_each_commit') === 'true',
-    searchCommitBody: core.getInput('search_commit_body') === 'true',
+    bumpEachCommit: toBool(core.getInput('bump_each_commit')),
+    searchCommitBody: toBool(core.getInput('search_commit_body')),
     userFormatType: core.getInput('user_format_type'),
-    enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
+    enablePrereleaseMode: toBool(core.getInput('enable_prerelease_mode')),
     bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
-    debug: core.getInput('debug') === 'true',
+    debug: toBool(core.getInput('debug')),
     replay: ''
   };
+
+  if (config.useBranches) {
+    core.warning(`The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`);
+  }
 
   if (config.versionFormat === '' && core.getInput('format') !== '') {
     core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);

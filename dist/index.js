@@ -81,6 +81,7 @@ exports.cmd = cmd;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConfigurationProvider = void 0;
 const CsvUserFormatter_1 = __nccwpck_require__(9105);
+const BranchVersioningTagFormatter_1 = __nccwpck_require__(807);
 const DefaultTagFormatter_1 = __nccwpck_require__(4808);
 const DefaultVersionFormatter_1 = __nccwpck_require__(8524);
 const JsonUserFormatter_1 = __nccwpck_require__(7892);
@@ -105,7 +106,12 @@ class ConfigurationProvider {
         return new DefaultVersionClassifier_1.DefaultVersionClassifier(this.config);
     }
     GetVersionFormatter() { return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config); }
-    GetTagFormatter() { return new DefaultTagFormatter_1.DefaultTagFormatter(this.config); }
+    GetTagFormatter(branchName) {
+        if (this.config.versionFromBranch) {
+            return new BranchVersioningTagFormatter_1.BranchVersioningTagFormatter(this.config, branchName);
+        }
+        return new DefaultTagFormatter_1.DefaultTagFormatter(this.config);
+    }
     GetUserFormatter() {
         switch (this.config.userFormatType) {
             case 'json': return new JsonUserFormatter_1.JsonUserFormatter(this.config);
@@ -300,12 +306,12 @@ function runAction(configurationProvider) {
         const commitsProvider = configurationProvider.GetCommitsProvider();
         const versionClassifier = configurationProvider.GetVersionClassifier();
         const versionFormatter = configurationProvider.GetVersionFormatter();
-        const tagFormatter = configurationProvider.GetTagFormatter();
+        const tagFormatter = configurationProvider.GetTagFormatter(yield currentCommitResolver.ResolveBranchNameAsync());
         const userFormatter = configurationProvider.GetUserFormatter();
         const debugManager = DebugManager_1.DebugManager.getInstance();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
             const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false, false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', '0.0.0', debugManager.getDebugOutput(true));
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', tagFormatter.Parse(tagFormatter.Format(versionInfo)).join('.'), debugManager.getDebugOutput(true));
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
@@ -331,6 +337,80 @@ function runAction(configurationProvider) {
     });
 }
 exports.runAction = runAction;
+
+
+/***/ }),
+
+/***/ 807:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BranchVersioningTagFormatter = void 0;
+const DefaultTagFormatter_1 = __nccwpck_require__(4808);
+/** Default tag formatter which allows a prefix to be specified */
+class BranchVersioningTagFormatter extends DefaultTagFormatter_1.DefaultTagFormatter {
+    getRegex(pattern) {
+        if (/^\/.+\/[i]*$/.test(pattern)) {
+            const regexEnd = pattern.lastIndexOf('/');
+            const parsedFlags = pattern.slice(pattern.lastIndexOf('/') + 1);
+            return new RegExp(pattern.slice(1, regexEnd), parsedFlags);
+        }
+        return new RegExp(pattern);
+    }
+    constructor(config, branchName) {
+        super(config);
+        this.branchName = branchName;
+        const pattern = config.versionFromBranch === true ?
+            new RegExp("[0-9]+.[0-9]+$|[0-9]+$") :
+            this.getRegex(config.versionFromBranch);
+        const result = pattern.exec(branchName);
+        let branchVersion;
+        switch (result === null || result === void 0 ? void 0 : result.length) {
+            case 1:
+                branchVersion = result[0];
+                break;
+            case 2:
+                branchVersion = result[1];
+                break;
+            default:
+                throw new Error(`Unable to parse version from branch named '${branchName}' using pattern '${pattern}'`);
+        }
+        const versionValues = branchVersion.split('.');
+        if (versionValues.length > 2) {
+            throw new Error(`The version string '${branchVersion}' parsed from branch '${branchName}' is invalid. It must be in the format 'major.minor' or 'major'`);
+        }
+        this.major = parseInt(versionValues[0]);
+        if (isNaN(this.major)) {
+            throw new Error(`The major version '${versionValues[0]}' parsed from branch '${branchName}' is invalid. It must be a number.`);
+        }
+        if (versionValues.length > 1) {
+            this.minor = parseInt(versionValues[1]);
+            if (isNaN(this.minor)) {
+                throw new Error(`The minor version '${versionValues[1]}' parsed from branch '${branchName}' is invalid. It must be a number.`);
+            }
+        }
+    }
+    IsValid(tag) {
+        if (!super.IsValid(tag)) {
+            return false;
+        }
+        const parsed = super.Parse(tag);
+        if (parsed[0] !== this.major) {
+            return false;
+        }
+        if (this.minor !== undefined && parsed[1] !== this.minor) {
+            return false;
+        }
+        return true;
+    }
+    Parse(tag) {
+        const parsed = super.Parse(tag);
+        return [this.major, this.minor || parsed[1], parsed[2]];
+    }
+}
+exports.BranchVersioningTagFormatter = BranchVersioningTagFormatter;
 
 
 /***/ }),
@@ -383,6 +463,9 @@ class DefaultTagFormatter {
         return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]`;
     }
     Parse(tag) {
+        if (tag === '') {
+            return [0, 0, 0];
+        }
         let tagParts = tag
             .replace(this.tagPrefix, '<--!PREFIX!-->')
             .replace(this.namespace, '<--!NAMESPACE!-->')
@@ -534,10 +617,29 @@ function setOutput(versionResult) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        function toBool(value) {
+            if (!value || value.toLowerCase() === 'false') {
+                return false;
+            }
+            else if (value.toLowerCase() === 'true') {
+                return true;
+            }
+            return false;
+        }
+        function toStringOrBool(value) {
+            if (!value || value === 'false') {
+                return false;
+            }
+            if (value === 'true') {
+                return true;
+            }
+            return value;
+        }
         const config = {
             branch: core.getInput('branch'),
             tagPrefix: core.getInput('tag_prefix'),
-            useBranches: core.getInput('use_branches') === 'true',
+            useBranches: toBool(core.getInput('use_branches')),
+            versionFromBranch: toStringOrBool(core.getInput('version_from_branch')),
             majorPattern: core.getInput('major_pattern'),
             minorPattern: core.getInput('minor_pattern'),
             majorFlags: core.getInput('major_regexp_flags'),
@@ -545,14 +647,17 @@ function run() {
             versionFormat: core.getInput('version_format'),
             changePath: core.getInput('change_path'),
             namespace: core.getInput('namespace'),
-            bumpEachCommit: core.getInput('bump_each_commit') === 'true',
-            searchCommitBody: core.getInput('search_commit_body') === 'true',
+            bumpEachCommit: toBool(core.getInput('bump_each_commit')),
+            searchCommitBody: toBool(core.getInput('search_commit_body')),
             userFormatType: core.getInput('user_format_type'),
-            enablePrereleaseMode: core.getInput('enable_prerelease_mode') === 'true',
+            enablePrereleaseMode: toBool(core.getInput('enable_prerelease_mode')),
             bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
-            debug: core.getInput('debug') === 'true',
+            debug: toBool(core.getInput('debug')),
             replay: ''
         };
+        if (config.useBranches) {
+            core.warning(`The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`);
+        }
         if (config.versionFormat === '' && core.getInput('format') !== '') {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
             config.versionFormat = core.getInput('format');
@@ -825,6 +930,14 @@ class DefaultCurrentCommitResolver {
             return lastCommitAll === '';
         });
     }
+    ResolveBranchNameAsync() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const branchName = this.branch == 'HEAD' ?
+                process.env.GITHUB_REF_NAME || (yield (0, CommandRunner_1.cmd)('git', 'rev-parse', '--abbrev-ref', 'HEAD'))
+                : this.branch;
+            return branchName.trim();
+        });
+    }
 }
 exports.DefaultCurrentCommitResolver = DefaultCurrentCommitResolver;
 
@@ -922,8 +1035,9 @@ class DefaultLastReleaseResolver {
                         core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
                     }
                 }
+                const [major, minor, patch] = tagFormatter.Parse('');
                 // no release tags yet, use the initial commit as the root
-                return new ReleaseInformation_1.ReleaseInformation(0, 0, 0, '', currentMajor, currentMinor, currentPatch, isTagged);
+                return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, '', currentMajor, currentMinor, currentPatch, isTagged);
             }
             // parse the version tag
             const [major, minor, patch] = tagFormatter.Parse(tag);
@@ -4713,7 +4827,7 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 807:
+/***/ 8292:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -4831,7 +4945,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 
-var _rng = _interopRequireDefault(__nccwpck_require__(807));
+var _rng = _interopRequireDefault(__nccwpck_require__(8292));
 
 var _stringify = _interopRequireDefault(__nccwpck_require__(8950));
 
@@ -5053,7 +5167,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 
-var _rng = _interopRequireDefault(__nccwpck_require__(807));
+var _rng = _interopRequireDefault(__nccwpck_require__(8292));
 
 var _stringify = _interopRequireDefault(__nccwpck_require__(8950));
 

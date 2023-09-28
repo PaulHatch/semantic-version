@@ -12,12 +12,13 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   const commitsProvider = configurationProvider.GetCommitsProvider();
   const versionClassifier = configurationProvider.GetVersionClassifier();
   const versionFormatter = configurationProvider.GetVersionFormatter();
-  const tagFormatter = configurationProvider.GetTagFormatter();
+  const tagFormatter = configurationProvider.GetTagFormatter(await currentCommitResolver.ResolveBranchNameAsync());
   const userFormatter = configurationProvider.GetUserFormatter();
 
   const debugManager = DebugManager.getInstance();
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
+
     const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false, false);
     return new VersionResult(
       versionInfo.major,
@@ -32,7 +33,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
       userFormatter.Format('author', []),
       '',
       '',
-      '0.0.0',
+      tagFormatter.Parse(tagFormatter.Format(versionInfo)).join('.'),
       debugManager.getDebugOutput(true)
     );
   }

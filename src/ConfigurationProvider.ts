@@ -1,4 +1,5 @@
 import { CsvUserFormatter } from './formatting/CsvUserFormatter'
+import { BranchVersioningTagFormatter } from './formatting/BranchVersioningTagFormatter'
 import { DefaultTagFormatter } from './formatting/DefaultTagFormatter'
 import { DefaultVersionFormatter } from './formatting/DefaultVersionFormatter'
 import { JsonUserFormatter } from './formatting/JsonUserFormatter'
@@ -41,7 +42,12 @@ export class ConfigurationProvider {
 
   public GetVersionFormatter(): VersionFormatter { return new DefaultVersionFormatter(this.config); }
 
-  public GetTagFormatter(): TagFormatter { return new DefaultTagFormatter(this.config); }
+  public GetTagFormatter(branchName: string): TagFormatter {
+    if (this.config.versionFromBranch) {
+      return new BranchVersioningTagFormatter(this.config, branchName);
+    }
+    return new DefaultTagFormatter(this.config);
+  }
 
   public GetUserFormatter(): UserFormatter {
     switch (this.config.userFormatType) {
