@@ -2,9 +2,9 @@
 import * as exec from '@actions/exec';
 import { DebugManager } from './DebugManager';
 
-const debugManager = DebugManager.getInstance();
-
 export const cmd = async (command: string, ...args: any): Promise<string> => {
+
+    const debugManager = DebugManager.getInstance();
 
     if (debugManager.isReplayMode()) {
         return debugManager.replayCommand(command, args);

@@ -107,8 +107,8 @@ export class DefaultVersionClassifier implements VersionClassifier {
             // - commit 4 - v2.0.1+0
 
             const versionsMatch = lastRelease.currentMajor === major && lastRelease.currentMinor === minor && lastRelease.currentPatch === patch;
-            const currentIncremement = versionsMatch ? increment : 0;
-            return new VersionClassification(VersionType.None, currentIncremement, false, <number>lastRelease.currentMajor, <number>lastRelease.currentMinor, <number>lastRelease.currentPatch);
+            const currentIncrement = versionsMatch ? increment : 0;
+            return new VersionClassification(VersionType.None, currentIncrement, false, <number>lastRelease.currentMajor, <number>lastRelease.currentMinor, <number>lastRelease.currentPatch);
         }
 
 

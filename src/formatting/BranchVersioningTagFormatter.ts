@@ -5,6 +5,7 @@ import { DefaultTagFormatter } from './DefaultTagFormatter';
 /** Default tag formatter which allows a prefix to be specified */
 export class BranchVersioningTagFormatter extends DefaultTagFormatter {
 
+    private onVersionBranch: boolean;
     private major: number;
     private minor?: number;
 
@@ -17,12 +18,18 @@ export class BranchVersioningTagFormatter extends DefaultTagFormatter {
         return new RegExp(pattern);
     }
 
-    constructor(config: ActionConfig, private branchName: string) {
+    constructor(config: ActionConfig, branchName: string) {
         super(config);
         const pattern = config.versionFromBranch === true ?
             new RegExp("[0-9]+.[0-9]+$|[0-9]+$") :
             this.getRegex(config.versionFromBranch as string);
         const result = pattern.exec(branchName);
+
+        if (result === null) {
+            this.major = NaN;
+            this.onVersionBranch = false;
+            return;
+        }
 
         let branchVersion: string;
         switch (result?.length) {
@@ -35,6 +42,8 @@ export class BranchVersioningTagFormatter extends DefaultTagFormatter {
             default:
                 throw new Error(`Unable to parse version from branch named '${branchName}' using pattern '${pattern}'`);
         }
+
+        this.onVersionBranch = true;
 
         const versionValues = branchVersion.split('.');
         if (versionValues.length > 2) {
@@ -52,7 +61,24 @@ export class BranchVersioningTagFormatter extends DefaultTagFormatter {
         }
     }
 
+    public override GetPattern(): string {
+        let pattern = super.GetPattern();
+        if (!this.onVersionBranch) {
+            return pattern;
+        }
+
+        if(this.minor === undefined) {
+            return pattern.replace('*[0-9].*[0-9].*[0-9]', `${this.major}.*[0-9].*[0-9]`);
+        }
+
+        return pattern.replace('*[0-9].*[0-9].*[0-9]', `${this.major}.${this.minor}.*[0-9]`);
+    }
+
     override IsValid(tag: string): boolean {
+        if (!this.onVersionBranch) {
+            return super.IsValid(tag);
+        }
+
         if (!super.IsValid(tag)) {
             return false;
         }
@@ -66,8 +92,12 @@ export class BranchVersioningTagFormatter extends DefaultTagFormatter {
         }
         return true;
     }
-    
+
     override Parse(tag: string): [major: number, minor: number, patch: number] {
+        if (!this.onVersionBranch) {
+            return super.Parse(tag);
+        }
+
         const parsed = super.Parse(tag);
         return [this.major, this.minor || parsed[1], parsed[2]];
     }

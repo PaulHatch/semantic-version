@@ -1,10 +1,8 @@
-import exp from "constants";
 import { ActionConfig } from "./ActionConfig";
 
 
 /** Utility class for managing debug mode and diagnostic information */
 export class DebugManager {
-
     private constructor() { }
 
     private static instance: DebugManager;
@@ -15,6 +13,12 @@ export class DebugManager {
         }
         return DebugManager.instance;
     }
+
+    /** Clears the singleton instance of the DebugManager (used for testing) */
+    public static clearState() {
+        DebugManager.instance = new DebugManager();
+    }
+
 
     private debugEnabled: boolean = false;
     private replayMode: boolean = false;

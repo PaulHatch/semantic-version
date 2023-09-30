@@ -6,7 +6,7 @@ import { expect, test } from '@jest/globals'
 import { runAction } from '../src/action';
 import { ConfigurationProvider } from './ConfigurationProvider';
 import { ActionConfig } from './ActionConfig';
-import exp from 'constants';
+import { DebugManager } from './DebugManager';
 
 const windows = process.platform === "win32";
 const timeout = 30000;
@@ -42,6 +42,7 @@ const createTestRepo = (repoDefaultConfig?: Partial<ActionConfig>) => {
             run(`git merge ${branch}`);
         },
         runAction: async (inputs?: Partial<ActionConfig>) => {
+            DebugManager.clearState();
             let config = new ActionConfig();
             config = { ...config, ...{ versionFormat: "${major}.${minor}.${patch}+${increment}" }, ...repoDefaultConfig, ...inputs };
             process.chdir(repoDirectory);
@@ -186,32 +187,6 @@ test('Version pulled from last release branch', async () => {
 
     expect(result.formattedVersion).toBe('5.6.8+0');
 }, timeout);
-
-/* Removed for now
-test('Tags on branches are used', async () => {
-
-    // This test checks that tags are counted correctly even if they are not on
-    // the main branch:
-    //  master    o--o--o--o <- expecting v0.0.2
-    //                   \
-    //  release           o--o <- taged v0.0.1
-
-
-    const repo = createTestRepo(); // 0.0.0+0
-
-    repo.makeCommit('Initial Commit'); // 0.0.1+0
-    repo.makeCommit('Second Commit'); // 0.0.1+1
-    repo.makeCommit('Third Commit'); // 0.1.1+2
-    repo.exec('git checkout -b release/0.0.1')
-    repo.makeCommit('Fourth Commit'); // 0.1.1+3
-    repo.exec('git tag v0.0.1');
-    repo.exec('git checkout master');
-    repo.makeCommit('Fifth Commit'); // 0.0.2.0
-    const result = await repo.runAction();
-
-    expect(result.formattedVersion).toBe('0.0.2+0');
-});
-*/
 
 test('Merged tags do not affect version', async () => {
 

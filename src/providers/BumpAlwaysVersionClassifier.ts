@@ -40,15 +40,13 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
                 type = VersionType.Major;
             } else if (this.minorPattern(commit)) {
                 type = VersionType.Minor;
+            } else if (this.patchPattern(commit) ||
+                (major === 0 && minor === 0 && patch === 0 && commitSet.commits.length > 0)) {
+                type = VersionType.Patch;
             } else {
-                if (this.patchPattern(commit) ||
-                    (major === 0 && minor === 0 && patch === 0 && commitSet.commits.length > 0)) {
-                    type = VersionType.Patch;
-                } else {
-                    type = VersionType.None;
-                    increment++;
-                }
+                type = VersionType.None;
             }
+
 
             if (this.enablePrereleaseMode && major === 0) {
                 switch (type) {
@@ -62,7 +60,9 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
                         patch += 1;
                         increment = 0;
                         break;
-                    default: break;
+                    default:
+                        increment++;
+                        break;
                 }
             } else {
                 switch (type) {
@@ -80,7 +80,9 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
                         patch += 1;
                         increment = 0;
                         break;
-                    default: break;
+                    default:
+                        increment++;
+                        break;
                 }
             }
 
