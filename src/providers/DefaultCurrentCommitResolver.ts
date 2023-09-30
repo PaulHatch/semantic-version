@@ -25,9 +25,7 @@ export class DefaultCurrentCommitResolver implements CurrentCommitResolver {
 
     public async ResolveBranchNameAsync(): Promise<string> {
         const branchName =
-            this.branch == 'HEAD' ?
-                process.env.GITHUB_REF_NAME || await cmd('git', 'rev-parse', '--abbrev-ref', 'HEAD')
-                : this.branch;
+            this.branch == 'HEAD' ? await cmd('git', 'rev-parse', '--abbrev-ref', 'HEAD') : this.branch;
 
 
         return branchName.trim();
