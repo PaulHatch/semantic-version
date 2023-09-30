@@ -9,7 +9,7 @@
     "format-check": "prettier --check **/**.ts",
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "jest --config ./jest.config.js",
+    "test": "jest --runInBand --config ./jest.config.js",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
