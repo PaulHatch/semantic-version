@@ -106,6 +106,8 @@ it will be given the new version if the build were to be retriggered, for exampl
     enable_prerelease_mode: true
     # If enabled, diagnostic information will be added to the action output.
     debug: false
+    # If true, the branch will be used to select the maximum version.
+    version_from_branch: false
 ```
 
 ## Outputs 
