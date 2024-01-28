@@ -38,7 +38,7 @@ This strategy is the most common and is the best option for many projects. It al
 
 The only real limitation of this strategy is that it does not allow for multiple versions to receive ongoing updates, which may be necessary for certain types of projects which are distributed and receive ongoing maintenance of older versions. This is in contrast to projects that are developed only for a single deployment and are not distributed.
 
-Tags should generally not be created automatically as part of the build, which can cause strange behavior unless you've taken care to prevent race conditions. Creating tags automatically also largely negates the purpose of this strategy as only build automated test.
+Tags should generally not be created automatically as part of the build, which can cause strange behavior unless you've taken care to prevent race conditions. Creating tags automatically also largely negates the purpose of this strategy.
 
 _This is the default behavior, so no special options are required._
 
@@ -93,3 +93,13 @@ If your project contains multiple services which you wish to version independent
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+## Additional Configuration
+
+| Value | Description |
+| --- | --- |
+| `tag_prefix` | The prefix to use for the tag. Defaults to `v`, generally you will use either `v` or an empty string. Note that the tag format is distinct from the version. Tags used for versioning must always follow the pattern `{tag_prefix}{major}.{minor}.{patch}` with and optional `-{namespace}` suffix. |
+| `major_pattern` and `minor_pattern` | These strings are used to determine the type of version to create. If any commit message sincematches the `major_pattern` the major version will be incremented, if it matches the `minor_pattern` the minor version will be incremented. If neither pattern matches, the patch version will be incremented. These can be specified either as strings or as regular expression by wrapping the expression in `/`. |
+| `version_format` | A value such as `${major}.${minor}.${patch}-prerelease${increment}` that will be used to format the version value of the output, **formatting this value is the only effect of this input parameter!** It is not used for parsing or any other purpose. It is a convenient alternative to formatting the output in a subsequent step. |
+| `user_format_type` | Indicates the format of the `authors` output. Can be `json` or `yaml`. |
+| `enable_prerelease_mode` | If true, major changes to versions starting with 0 will result in a minor change, preventing ths initial version `1.0.0`` from being created automatically by someone checking in a commit with the major pattern. |
