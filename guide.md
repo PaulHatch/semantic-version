@@ -87,6 +87,7 @@ If your project contains multiple services which you wish to version independent
     change_path: "src/my-service"
     namespace: my-service
 - name: Cancel if Unchanged
+  if: ${{ ! steps.version.outputs.changed }}
   run: |
     gh run cancel ${{ github.run_id }}
     gh run watch ${{ github.run_id }}
