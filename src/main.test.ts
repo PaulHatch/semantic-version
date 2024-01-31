@@ -348,6 +348,23 @@ test('Namespace is tracked separately', async () => {
     expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
 }, timeout);
 
+
+test('Version Namespace is tracked separately', async () => {
+    const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
+
+    repo.makeCommit('Initial Commit'); // 0.0.1
+    repo.exec('git tag 0.0.1');
+    repo.makeCommit('Second Commit'); // 0.0.2
+    repo.exec('git tag subproject0.1.0');
+    repo.makeCommit('Third Commit'); // 0.0.2 / 0.1.1
+
+    const result = await repo.runAction();
+    const subprojectResult = await repo.runAction({ tagPrefix: "subproject" });
+
+    expect(result.formattedVersion).toBe('0.0.2+1');
+    expect(subprojectResult.formattedVersion).toBe('0.1.1+0');
+}, timeout);
+
 test('Namespace allows dashes', async () => {
     const repo = createTestRepo({ tagPrefix: '' }); // 0.0.0
 
@@ -844,23 +861,24 @@ test('Patch pattern increment is correct/matches non-bumped on empty repo', asyn
 
 }, timeout);
 
-test('Patch pattern applied when present', async () => {
+test('Patch pattern applied when present using tag as initial version', async () => {
     const repo = createTestRepo({ tagPrefix: '', versionFormat: "${major}.${minor}.${patch}+${increment}", bumpEachCommit: true, bumpEachCommitPatchPattern: '(PATCH)' });
 
 
     repo.makeCommit('Initial Commit');
-    const firstResult = await repo.runAction();
+    repo.exec('git tag 1.0.1');
+    const firstResult = await repo.runAction(); // 1.0.1+0
     repo.makeCommit('Second Commit');
-    const secondResult = await repo.runAction();
+    const secondResult = await repo.runAction(); // 1.0.1+1
     repo.makeCommit('Third Commit (PATCH)');
-    const thirdResult = await repo.runAction();
+    const thirdResult = await repo.runAction(); // 1.0.2+0
     repo.makeCommit('fourth Commit');
-    const fourthResult = await repo.runAction();
+    const fourthResult = await repo.runAction(); // 1.0.2+1
 
-    expect(firstResult.formattedVersion).toBe('0.0.1+0');
-    expect(secondResult.formattedVersion).toBe('0.0.1+1');
-    expect(thirdResult.formattedVersion).toBe('0.0.2+0');
-    expect(fourthResult.formattedVersion).toBe('0.0.2+1');
+    expect(firstResult.formattedVersion).toBe('1.0.1+0');
+    expect(secondResult.formattedVersion).toBe('1.0.1+1');
+    expect(thirdResult.formattedVersion).toBe('1.0.2+0');
+    expect(fourthResult.formattedVersion).toBe('1.0.2+1');
 
 }, timeout);
 
