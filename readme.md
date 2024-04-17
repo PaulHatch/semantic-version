@@ -1,6 +1,6 @@
 ![Build](https://github.com/PaulHatch/semantic-version/workflows/Build/badge.svg)
 
-See [contributing.md](contributing.md) for information on how to get help or contribute to this project.
+See the [configuration guide](guide.md) for help getting started, selecting a versioning strategy and example configurations, or [contributing.md](contributing.md) for information on how to get help or contribute to this project.
 
 # Git-Based Semantic Versioning
 
