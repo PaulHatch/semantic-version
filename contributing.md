@@ -20,7 +20,7 @@ There is a debug option which produces diagnostic information. This information 
 
 ```
 - name: Version
-  uses: paulhatch/semantic-version@v5.2.1
+  uses: paulhatch/semantic-version@v5.4.0
   id: version
   with:
     tag_prefix: ""
