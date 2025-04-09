@@ -1024,7 +1024,7 @@ test('Pre-release mode with bump each commit does not update major version if ma
 
 test('Pre-release mode with bump each commit does not update major version if major version is 0, respecting patch pattern', async () => {
     const repo = createTestRepo({
-        tagPrefix: '', 
+        tagPrefix: '',
         versionFormat: "${major}.${minor}.${patch}.${increment}",
         enablePrereleaseMode: true,
         bumpEachCommit: true,
@@ -1144,3 +1144,27 @@ test('Prerelease mode does not increment to 1.x.x', async () => {
     expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
     expect(result.isTagged).toBe(true);
 }, timeout);
+
+test('Trunk Based Branch for Release Variant', async () => {
+    // Based off of the discussion created here: https://github.com/PaulHatch/semantic-version/discussions/170
+    const repo = createTestRepo({ versionFromBranch: true });
+    repo.makeCommit('Initial Commit');
+    repo.exec("git checkout -b release/v0.0");
+    repo.exec('git tag v0.0.1')
+    repo.exec("git checkout master");
+    repo.exec("git checkout -b hotfix/1");
+    repo.makeCommit(`Hotfix Commit`);
+    repo.exec("git checkout master");
+    repo.merge('hotfix/1');
+    repo.exec("git checkout release/v0.0");
+    repo.exec("git cherry-pick master");
+    repo.exec('git tag v0.0.2')
+    repo.exec("git checkout master");
+    repo.exec("git checkout -b feature/2");
+    repo.makeCommit('New Feature');
+    repo.exec("git checkout master");
+    repo.exec("git merge feature/2");
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('0.1.1+0');
+})
