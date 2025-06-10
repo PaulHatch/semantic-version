@@ -4,7 +4,7 @@ import { VersionType } from './providers/VersionType';
 import { UserInfo } from './providers/UserInfo';
 import { VersionInformation } from './providers/VersionInformation';
 import { DebugManager } from './DebugManager';
-
+import * as core from '@actions/core';
 export async function runAction(configurationProvider: ConfigurationProvider): Promise<VersionResult> {
 
   const currentCommitResolver = configurationProvider.GetCurrentCommitResolver();
@@ -19,7 +19,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
 
   if (await currentCommitResolver.IsEmptyRepoAsync()) {
 
-    console.log("VAGO REPO WAS EMPTY, returning default version information");
+    core.info("VAGO REPO WAS EMPTY, returning default version information");
     const versionInfo = new VersionInformation(0, 0, 0, 0, VersionType.None, [], false, false);
     return new VersionResult(
       versionInfo.major,
@@ -40,14 +40,14 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
   }
 
   const currentCommit = await currentCommitResolver.ResolveAsync();
-  console.log("VAGO CURRENT COMMIT: " + currentCommit);
+  core.info("VAGO CURRENT COMMIT: " + currentCommit);
   const lastRelease = await lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
-  console.log("VAGO LAST RELEASE: " + lastRelease.hash + " " + lastRelease.major + "." + lastRelease.minor + "." + lastRelease.patch);
+  core.info("VAGO LAST RELEASE: " + lastRelease.hash + " " + lastRelease.major + "." + lastRelease.minor + "." + lastRelease.patch);
   const commitSet = await commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
-  console.log("VAGO commit set le:" + commitSet.commits.length)
-  console.log("VAGO commit set changed: " + commitSet.changed.toString());
+  core.info("VAGO commit set le:" + commitSet.commits.length)
+  core.info("VAGO commit set changed: " + commitSet.changed.toString());
   const classification = await versionClassifier.ClassifyAsync(lastRelease, commitSet);
-  console.log("VAGO classification: " + JSON.stringify(classification));
+  core.info("VAGO classification: " + JSON.stringify(classification));
 
   const { isTagged } = lastRelease;
   const { major, minor, patch, increment, type, changed } = classification;
