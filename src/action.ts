@@ -7,6 +7,7 @@ import { DebugManager } from './DebugManager';
 import * as core from '@actions/core';
 export async function runAction(configurationProvider: ConfigurationProvider): Promise<VersionResult> {
 
+  core.info("VAGO STARTING runAction");
   const currentCommitResolver = configurationProvider.GetCurrentCommitResolver();
   const lastReleaseResolver = configurationProvider.GetLastReleaseResolver();
   const commitsProvider = configurationProvider.GetCommitsProvider();
@@ -39,6 +40,7 @@ export async function runAction(configurationProvider: ConfigurationProvider): P
     );
   }
 
+  core.info("VAGO REPO IS NOT EMPTY, continuing with versioning");
   const currentCommit = await currentCommitResolver.ResolveAsync();
   core.info("VAGO CURRENT COMMIT: " + currentCommit);
   const lastRelease = await lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
