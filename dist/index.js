@@ -89,7 +89,7 @@ const BranchVersioningTagFormatter_1 = __nccwpck_require__(9894);
 const DefaultTagFormatter_1 = __nccwpck_require__(4808);
 const DefaultVersionFormatter_1 = __nccwpck_require__(8524);
 const JsonUserFormatter_1 = __nccwpck_require__(7892);
-const DefaultCommitsProvider_1 = __nccwpck_require__(42);
+const DefaultCommitsProvider_1 = __nccwpck_require__(6458);
 const DefaultCurrentCommitResolver_1 = __nccwpck_require__(35);
 const DefaultVersionClassifier_1 = __nccwpck_require__(5527);
 const DefaultLastReleaseResolver_1 = __nccwpck_require__(8337);
@@ -853,6 +853,180 @@ class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVers
     }
 }
 exports.BumpAlwaysVersionClassifier = BumpAlwaysVersionClassifier;
+
+
+/***/ }),
+
+/***/ 2142:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CommitInfo = void 0;
+/** Represents information about a commit */
+class CommitInfo {
+    /**
+     * Creates a new commit information instance
+     * @param hash - The hash of the commit
+     * @param subject - The subject of the commit message
+     * @param body - The body of the commit message
+     * @param author - The author's name
+     * @param authorEmail - The author's email
+     * @param authorDate - The date the commit was authored
+     * @param committer - The committer's name
+     * @param committerEmail - The committer's email
+     * @param committerDate - The date the commit was committed
+     * @param tags - List of any tags associated with this commit
+     */
+    constructor(hash, subject, body, author, authorEmail, authorDate, committer, committerEmail, committerDate, tags) {
+        this.hash = hash;
+        this.subject = subject;
+        this.body = body;
+        this.author = author;
+        this.authorEmail = authorEmail;
+        this.authorDate = authorDate;
+        this.committer = committer;
+        this.committerEmail = committerEmail;
+        this.committerDate = committerDate;
+        this.tags = tags;
+    }
+}
+exports.CommitInfo = CommitInfo;
+
+
+/***/ }),
+
+/***/ 6859:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CommitInfoSet = void 0;
+/** Represents information about a set of commits */
+class CommitInfoSet {
+    constructor(changed, commits) {
+        this.changed = changed;
+        this.commits = commits;
+    }
+}
+exports.CommitInfoSet = CommitInfoSet;
+
+
+/***/ }),
+
+/***/ 6458:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultCommitsProvider = void 0;
+const CommandRunner_1 = __nccwpck_require__(949);
+const CommitInfo_1 = __nccwpck_require__(2142);
+const CommitInfoSet_1 = __nccwpck_require__(6859);
+const core = __importStar(__nccwpck_require__(2186));
+class DefaultCommitsProvider {
+    constructor(config) {
+        this.changePath = config.changePath;
+    }
+    GetCommitsAsync(startHash, endHash) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const logSplitter = `@@@START_RECORD`;
+            const formatPlaceholders = Object.entries({
+                hash: '%H',
+                subject: '%s',
+                body: '%b',
+                author: '%an',
+                authorEmail: '%ae',
+                authorDate: '%aI',
+                committer: '%cn',
+                committerEmail: '%ce',
+                committerDate: '%cI',
+                tags: '%d'
+            });
+            const pretty = logSplitter + '%n' + formatPlaceholders
+                .map(x => `@@@${x[0]}%n${x[1]}`)
+                .join('%n');
+            var logCommand = `git log --pretty="${pretty}" --author-date-order ${(startHash === '' ? endHash : `${startHash}..${endHash}`)}`;
+            if (this.changePath !== '') {
+                core.info("VAGO Changepath was there: " + this.changePath);
+                logCommand += ` -- ${this.changePath}`;
+                core.info("VAGO logCommand: " + logCommand);
+            }
+            const log = yield (0, CommandRunner_1.cmd)(logCommand);
+            const entries = log
+                .split(logSplitter)
+                .slice(1);
+            const commits = entries.map(entry => {
+                const fields = entry
+                    .split(`@@@`)
+                    .slice(1)
+                    .reduce((acc, value) => {
+                    const firstLine = value.indexOf('\n');
+                    const key = value.substring(0, firstLine);
+                    acc[key] = value.substring(firstLine + 1).trim();
+                    return acc;
+                }, {});
+                const tags = fields.tags
+                    .split(',')
+                    .map((v) => v.trim())
+                    .filter((v) => v.startsWith('tags: '))
+                    .map((v) => v.substring(5).trim());
+                return new CommitInfo_1.CommitInfo(fields.hash, fields.subject, fields.body, fields.author, fields.authorEmail, new Date(fields.authorDate), fields.committer, fields.committerEmail, new Date(fields.committerDate), tags);
+            });
+            // check for changes
+            let changed = true;
+            if (this.changePath !== '') {
+                if (startHash === '') {
+                    const changedFiles = yield (0, CommandRunner_1.cmd)(`git log --name-only --oneline ${endHash} -- ${this.changePath}`);
+                    changed = changedFiles.length > 0;
+                }
+                else {
+                    core.info("VAGO diffing: " + logCommand);
+                    const changedFiles = yield (0, CommandRunner_1.cmd)(`git diff --name-only ${startHash}..${endHash} -- ${this.changePath}`);
+                    changed = changedFiles.length > 0;
+                    core.info("VAGO changedFiles le: " + changedFiles.length);
+                }
+            }
+            return new CommitInfoSet_1.CommitInfoSet(changed, commits);
+        });
+    }
+}
+exports.DefaultCommitsProvider = DefaultCommitsProvider;
 
 
 /***/ }),
@@ -5262,14 +5436,6 @@ function version(uuid) {
 
 var _default = version;
 exports["default"] = _default;
-
-/***/ }),
-
-/***/ 42:
-/***/ ((module) => {
-
-module.exports = eval("require")("./providers/DefaultCommitsProvider");
-
 
 /***/ }),
 
