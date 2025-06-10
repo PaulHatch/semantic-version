@@ -38,6 +38,7 @@ function setOutput(versionResult: VersionResult) {
 
 export async function run() {
 
+  core.info("VAGO Starting run action...");
   function toBool(value: string): boolean {
     if (!value || value.toLowerCase() === 'false') {
       return false;
@@ -91,6 +92,7 @@ export async function run() {
   }
 
   const configurationProvider = new ConfigurationProvider(config);
+  core.info("VAGO start await runAction(configurationProvider)");
   const result = await runAction(configurationProvider);
   setOutput(result);
 }
