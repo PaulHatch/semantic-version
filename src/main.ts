@@ -11,6 +11,7 @@ function setOutput(versionResult: VersionResult) {
   const repository = process.env.GITHUB_REPOSITORY;
 
   if (!changed) {
+    core.info("VAGOOO")
     core.info('No changes detected for this commit');
   }
 

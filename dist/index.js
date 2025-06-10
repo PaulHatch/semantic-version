@@ -619,6 +619,7 @@ function setOutput(versionResult) {
     const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
+        core.info("VAGOOO")
         core.info('No changes detected for this commit');
     }
     core.info(`Version is ${formattedVersion}`);
