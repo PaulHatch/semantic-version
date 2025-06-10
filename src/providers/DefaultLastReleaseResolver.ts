@@ -23,6 +23,7 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         )).trim();
 
         currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
+        core.info("VAGO check whether current tag is valid: " + currentTag);
         const isTagged = currentTag !== '';
 
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
