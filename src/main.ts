@@ -11,7 +11,7 @@ function setOutput(versionResult: VersionResult) {
   const repository = process.env.GITHUB_REPOSITORY;
 
   if (!changed) {
-    core.info("VAGOOO")
+    core.info("VAGOOO1")
     core.info('No changes detected for this commit');
   }
 
@@ -94,6 +94,7 @@ export async function run() {
   const configurationProvider = new ConfigurationProvider(config);
   core.info("VAGO start await runAction(configurationProvider)");
   const result = await runAction(configurationProvider);
+  core.info("VAGO before setOutput(result)");
   setOutput(result);
 }
 
