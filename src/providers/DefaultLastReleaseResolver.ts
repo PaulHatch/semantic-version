@@ -26,6 +26,7 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         const isTagged = currentTag !== '';
 
         const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+        core.info("VAGO DefaultLastReleaseResolver.ResolveAsync: currentTag: " + currentTag + ", currentMajor: " + currentMajor + ", currentMinor: " + currentMinor + ", currentPatch: " + currentPatch);
 
         let tagsCount = 0;
 
@@ -69,12 +70,14 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 }
             }
             const [major, minor, patch] = tagFormatter.Parse('');
+            core.info("VAGO tag was empty: " + major + ", " + minor + ", " + patch);
             // no release tags yet, use the initial commit as the root
             return new ReleaseInformation(major, minor, patch, '', currentMajor, currentMinor, currentPatch, isTagged);
         }
 
         // parse the version tag
         const [major, minor, patch] = tagFormatter.Parse(tag);
+        core.info("VAGO tag was not empty: "+ tag + ", " + major + ", " + minor + ", " + patch);
         const root = await cmd('git', `merge-base`, tag, current);
         return new ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch, isTagged);
     }
