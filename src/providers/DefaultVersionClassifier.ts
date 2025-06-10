@@ -96,7 +96,7 @@ export class DefaultVersionClassifier implements VersionClassifier {
         console.log("VAGO DefaultVersionClassifier.ClassifyAsync: type: " + VersionType[type] + ", increment: " + increment + ", changed: " + changed);
 
         const { major, minor, patch } = this.getNextVersion(lastRelease, type);
-        console.log("VAGO DefaultVersionClassifier.ClassifyAsync: major: " + major + ", minor: " + minor + ", patch: " + patch);
+        console.log("VAGOO DefaultVersionClassifier.ClassifyAsync: major: " + major + ", minor: " + minor + ", patch: " + patch);
 
         if (lastRelease.currentPatch !== null) {
             console.log("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentPatch is not null, using it to determine version classification");
