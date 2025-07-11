@@ -3,6 +3,7 @@ import { cmd } from "../CommandRunner";
 import { CommitInfo } from "./CommitInfo";
 import { CommitInfoSet } from "./CommitInfoSet";
 import { CommitsProvider } from "./CommitsProvider";
+import * as core from "@actions/core";
 
 export class DefaultCommitsProvider implements CommitsProvider {
 
@@ -35,7 +36,9 @@ export class DefaultCommitsProvider implements CommitsProvider {
         var logCommand = `git log --pretty="${pretty}" --author-date-order ${(startHash === '' ? endHash : `${startHash}..${endHash}`)}`;
 
         if (this.changePath !== '') {
+            core.info("VAGO Changepath was there: " + this.changePath);
             logCommand += ` -- ${this.changePath}`;
+            core.info("VAGO logCommand: " + logCommand);
         }
 
         const log = await cmd(logCommand);
@@ -83,8 +86,10 @@ export class DefaultCommitsProvider implements CommitsProvider {
                 const changedFiles = await cmd(`git log --name-only --oneline ${endHash} -- ${this.changePath}`);
                 changed = changedFiles.length > 0;
             } else {
+                core.info("VAGO diffing: " + logCommand);
                 const changedFiles = await cmd(`git diff --name-only ${startHash}..${endHash} -- ${this.changePath}`);
                 changed = changedFiles.length > 0;
+                core.info("VAGO changedFiles le: " + changedFiles.length);
             }
         }
 
