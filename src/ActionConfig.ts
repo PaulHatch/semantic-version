@@ -9,11 +9,11 @@ export class ActionConfig {
     /** If true, the branch will be used to select the maximum version. */
     public versionFromBranch: string | boolean = false;
     /** A string which, if present in a git commit, indicates that a change represents a major (breaking) change. Wrap with '/' to match using a regular expression. */
-    public majorPattern: string = "(MAJOR)";
+    public majorPattern: string = "/!:|BREAKING CHANGE:/";
     /** A string which indicates the flags used by the `majorPattern` regular expression. */
     public majorFlags: string = "";
     /** A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression. */
-    public minorPattern: string = "(MINOR)";
+    public minorPattern: string = "/feat:/";
     /** A string which indicates the flags used by the `minorPattern` regular expression. */
     public minorFlags: string = "";
     /** Pattern to use when formatting output version */
