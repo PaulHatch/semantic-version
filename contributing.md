@@ -88,7 +88,7 @@ If you are not able to provide a test case, it is still very helpful to provide 
 
 ## Forking the Project
 
-If want to do something that does not fit with the project goals, particually if you want to include information from an outside system, it is probably best to fork the project and create your own action. One of the goals of this project starting in 5.0.0 is to be easy to fork and customize, and to that end the action has been broken into individual providers than can be replaced. All providers have been implemented using async calls specifically to support calls to external systems.
+If want to do something that does not fit with the project goals, particularly if you want to include information from an outside system, it is probably best to fork the project and create your own action. One of the goals of this project starting in 5.0.0 is to be easy to fork and customize, and to that end the action has been broken into individual providers than can be replaced. All providers have been implemented using async calls specifically to support calls to external systems.
 
 The steps of this action are:
 
@@ -98,7 +98,7 @@ The steps of this action are:
 - Classify the release
 
 Additionally a few formatter provide modular behavior to these step:
-- A tag formmater is used to parse and format the version number
+- A tag formatter is used to parse and format the version number
 - A version formatter is used to format output version string
 - A user formatter is used to format the user information in the output (JSON and CSV are provided in the default implementation)
 
