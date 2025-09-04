@@ -1,9 +1,9 @@
+import * as core from '@actions/core';
+import { ActionConfig } from "../ActionConfig";
 import { cmd } from "../CommandRunner";
 import { TagFormatter } from "../formatting/TagFormatter";
 import { LastReleaseResolver } from "./LastReleaseResolver";
 import { ReleaseInformation } from "./ReleaseInformation";
-import { ActionConfig } from "../ActionConfig";
-import * as core from '@actions/core';
 
 export class DefaultLastReleaseResolver implements LastReleaseResolver {
 
@@ -50,6 +50,9 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
             }
 
             tag = tag.trim();
+            core.warning(`Use DefaultLast.js ! `)
+            core.warning(`releasePattern=${releasePattern}, currentTag=${currentTag}, isTagged=${isTagged}, currentMajor=${currentMajor}, currentMinor=${currentMinor}, currentPatch=${currentPatch}`);
+
         }
         catch (err) {
             tag = '';

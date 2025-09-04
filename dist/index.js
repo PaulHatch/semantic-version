@@ -1069,6 +1069,9 @@ class DefaultLastReleaseResolver {
                         .find(t => tagFormatter.IsValid(t)) || '';
                 }
                 tag = tag.trim();
+                core.warning(`Use index.js ! `)
+                core.warning(`releasePattern=${releasePattern}, currentTag=${currentTag}, isTagged=${isTagged}, currentMajor=${currentMajor}, currentMinor=${currentMinor}, currentPatch=${currentPatch}`);
+                
             }
             catch (err) {
                 tag = '';
