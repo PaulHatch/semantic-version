@@ -72,7 +72,7 @@ export class DefaultTagFormatter implements TagFormatter {
     const namespace = regexEscape(this.namespace);
 
     if (!!this.namespace) {
-      return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
+      new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
     }
 
     return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);

@@ -1,22 +1,40 @@
-import { runAction } from './action';
-import { ActionConfig } from './ActionConfig';
-import { ConfigurationProvider } from './ConfigurationProvider';
-import { VersionResult } from './VersionResult';
-import * as core from '@actions/core';
-import { VersionType } from './providers/VersionType';
+import { runAction } from "./action";
+import { ActionConfig } from "./ActionConfig";
+import { ConfigurationProvider } from "./ConfigurationProvider";
+import { VersionResult } from "./VersionResult";
+import * as core from "@actions/core";
+import { VersionType } from "./providers/VersionType";
 
 function setOutput(versionResult: VersionResult) {
-  const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
+  const {
+    major,
+    minor,
+    patch,
+    increment,
+    versionType,
+    formattedVersion,
+    versionTag,
+    changed,
+    isTagged,
+    authors,
+    currentCommit,
+    previousCommit,
+    previousVersion,
+    debugOutput,
+  } = versionResult;
 
   const repository = process.env.GITHUB_REPOSITORY;
 
   if (!changed) {
-    core.info('No changes detected for this commit');
+    core.info("VAGOOO1");
+    core.info("No changes detected for this commit");
   }
 
   core.info(`Version is ${formattedVersion}`);
   if (repository !== undefined) {
-    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split('/').slice(-1)[0]}`);
+    core.info(
+      `To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split("/").slice(-1)[0]}`,
+    );
   }
 
   core.setOutput("version", formattedVersion);
@@ -36,61 +54,67 @@ function setOutput(versionResult: VersionResult) {
 }
 
 export async function run() {
-
+  core.info("VAGO Starting run action...");
   function toBool(value: string): boolean {
-    if (!value || value.toLowerCase() === 'false') {
+    if (!value || value.toLowerCase() === "false") {
       return false;
-    } else if (value.toLowerCase() === 'true') {
+    } else if (value.toLowerCase() === "true") {
       return true;
     }
     return false;
   }
-  
+
   function toStringOrBool(value: string): string | boolean {
-    if (!value || value === 'false') {
+    if (!value || value === "false") {
       return false;
     }
-    if (value === 'true') {
+    if (value === "true") {
       return true;
     }
     return value;
-  }  
+  }
 
   const config: ActionConfig = {
-    branch: core.getInput('branch'),
-    tagPrefix: core.getInput('tag_prefix'),
-    useBranches: toBool(core.getInput('use_branches')),
-    versionFromBranch: toStringOrBool(core.getInput('version_from_branch')),
-    majorPattern: core.getInput('major_pattern'),
-    minorPattern: core.getInput('minor_pattern'),
-    majorFlags: core.getInput('major_regexp_flags'),
-    minorFlags: core.getInput('minor_regexp_flags'),
-    versionFormat: core.getInput('version_format'),
-    changePath: core.getInput('change_path'),
-    namespace: core.getInput('namespace'),
-    bumpEachCommit: toBool(core.getInput('bump_each_commit')),
-    searchCommitBody: toBool(core.getInput('search_commit_body')),
-    userFormatType: core.getInput('user_format_type'),
-    enablePrereleaseMode: toBool(core.getInput('enable_prerelease_mode')),
-    bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
-    debug: toBool(core.getInput('debug')),
-    replay: ''
+    branch: core.getInput("branch"),
+    tagPrefix: core.getInput("tag_prefix"),
+    useBranches: toBool(core.getInput("use_branches")),
+    versionFromBranch: toStringOrBool(core.getInput("version_from_branch")),
+    majorPattern: core.getInput("major_pattern"),
+    minorPattern: core.getInput("minor_pattern"),
+    majorFlags: core.getInput("major_regexp_flags"),
+    minorFlags: core.getInput("minor_regexp_flags"),
+    versionFormat: core.getInput("version_format"),
+    changePath: core.getInput("change_path"),
+    namespace: core.getInput("namespace"),
+    bumpEachCommit: toBool(core.getInput("bump_each_commit")),
+    searchCommitBody: toBool(core.getInput("search_commit_body")),
+    userFormatType: core.getInput("user_format_type"),
+    enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
+    bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
+    debug: toBool(core.getInput("debug")),
+    replay: "",
   };
 
   if (config.useBranches) {
-    core.warning(`The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`);
+    core.warning(
+      `The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`,
+    );
   }
 
-  if (config.versionFormat === '' && core.getInput('format') !== '') {
-    core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
-    config.versionFormat = core.getInput('format');
+  if (config.versionFormat === "" && core.getInput("format") !== "") {
+    core.warning(
+      `The 'format' input is deprecated, use 'versionFormat' instead`,
+    );
+    config.versionFormat = core.getInput("format");
   }
-  if (core.getInput('short_tags') !== '') {
+  if (core.getInput("short_tags") !== "") {
     core.warning(`The 'short_tags' input option is no longer supported`);
   }
 
   const configurationProvider = new ConfigurationProvider(config);
+  core.info("VAGO start await runAction(configurationProvider)");
   const result = await runAction(configurationProvider);
+  core.info("VAGO before setOutput(result)");
   setOutput(result);
 }
 

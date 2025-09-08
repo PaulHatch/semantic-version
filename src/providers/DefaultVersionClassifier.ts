@@ -5,6 +5,7 @@ import { ReleaseInformation } from "./ReleaseInformation";
 import { VersionClassification } from "./VersionClassification";
 import { VersionClassifier } from "./VersionClassifier";
 import { VersionType } from "./VersionType";
+import * as core from '@actions/core';
 
 export class DefaultVersionClassifier implements VersionClassifier {
 
@@ -91,12 +92,15 @@ export class DefaultVersionClassifier implements VersionClassifier {
     }
 
     public async ClassifyAsync(lastRelease: ReleaseInformation, commitSet: CommitInfoSet): Promise<VersionClassification> {
-
+        core.info("VAGO DefaultVersionClassifier.ClassifyAsync called");
         const { type, increment, changed } = this.resolveCommitType(commitSet);
+        core.info("VAGO DefaultVersionClassifier.ClassifyAsync: type: " + VersionType[type] + ", increment: " + increment + ", changed: " + changed);
 
         const { major, minor, patch } = this.getNextVersion(lastRelease, type);
+        core.info("VAGOO DefaultVersionClassifier.ClassifyAsync: major: " + major + ", minor: " + minor + ", patch: " + patch);
 
         if (lastRelease.currentPatch !== null) {
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentPatch is not null, using it to determine version classification");
             // If the current commit is tagged, we must use that version. Here we check if the version we have resolved from the
             // previous commits is the same as the current version. If it is, we will use the increment value, otherwise we reset
             // to zero. For example:
@@ -108,6 +112,10 @@ export class DefaultVersionClassifier implements VersionClassifier {
 
             const versionsMatch = lastRelease.currentMajor === major && lastRelease.currentMinor === minor && lastRelease.currentPatch === patch;
             const currentIncrement = versionsMatch ? increment : 0;
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: versionsMatch: " + versionsMatch + ", currentIncrement: " + currentIncrement);
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentMajor: " + <number>lastRelease.currentMajor);
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentMinor: " + <number>lastRelease.currentMinor);
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentPatch: " + <number>lastRelease.currentPatch);
             return new VersionClassification(VersionType.None, currentIncrement, false, <number>lastRelease.currentMajor, <number>lastRelease.currentMinor, <number>lastRelease.currentPatch);
         }
 

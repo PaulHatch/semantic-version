@@ -48,15 +48,19 @@ const cmd = (command, ...args) => __awaiter(void 0, void 0, void 0, function* ()
     if (debugManager.isReplayMode()) {
         return debugManager.replayCommand(command, args);
     }
-    let output = '', errors = '';
+    let output = "", errors = "";
     const options = {
         silent: true,
         listeners: {
-            stdout: (data) => { output += data.toString(); },
-            stderr: (data) => { errors += data.toString(); },
+            stdout: (data) => {
+                output += data.toString();
+            },
+            stderr: (data) => {
+                errors += data.toString();
+            },
             ignoreReturnCode: true,
-            silent: true
-        }
+            silent: true,
+        },
     };
     let caughtError = null;
     try {
@@ -81,7 +85,7 @@ exports.cmd = cmd;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConfigurationProvider = void 0;
 const CsvUserFormatter_1 = __nccwpck_require__(9105);
-const BranchVersioningTagFormatter_1 = __nccwpck_require__(807);
+const BranchVersioningTagFormatter_1 = __nccwpck_require__(9894);
 const DefaultTagFormatter_1 = __nccwpck_require__(4808);
 const DefaultVersionFormatter_1 = __nccwpck_require__(8524);
 const JsonUserFormatter_1 = __nccwpck_require__(7892);
@@ -96,16 +100,24 @@ class ConfigurationProvider {
         this.config = config;
         DebugManager_1.DebugManager.getInstance().initializeConfig(config);
     }
-    GetCurrentCommitResolver() { return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config); }
-    GetLastReleaseResolver() { return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config); }
-    GetCommitsProvider() { return new DefaultCommitsProvider_1.DefaultCommitsProvider(this.config); }
+    GetCurrentCommitResolver() {
+        return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config);
+    }
+    GetLastReleaseResolver() {
+        return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config);
+    }
+    GetCommitsProvider() {
+        return new DefaultCommitsProvider_1.DefaultCommitsProvider(this.config);
+    }
     GetVersionClassifier() {
         if (this.config.bumpEachCommit) {
             return new BumpAlwaysVersionClassifier_1.BumpAlwaysVersionClassifier(this.config);
         }
         return new DefaultVersionClassifier_1.DefaultVersionClassifier(this.config);
     }
-    GetVersionFormatter() { return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config); }
+    GetVersionFormatter() {
+        return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config);
+    }
     GetTagFormatter(branchName) {
         if (this.config.versionFromBranch) {
             return new BranchVersioningTagFormatter_1.BranchVersioningTagFormatter(this.config, branchName);
@@ -114,8 +126,10 @@ class ConfigurationProvider {
     }
     GetUserFormatter() {
         switch (this.config.userFormatType) {
-            case 'json': return new JsonUserFormatter_1.JsonUserFormatter(this.config);
-            case 'csv': return new CsvUserFormatter_1.CsvUserFormatter(this.config);
+            case "json":
+                return new JsonUserFormatter_1.JsonUserFormatter(this.config);
+            case "csv":
+                return new CsvUserFormatter_1.CsvUserFormatter(this.config);
             default:
                 throw new Error(`Unknown user format type: ${this.config.userFormatType}, supported types: json, csv`);
         }
@@ -173,7 +187,6 @@ class DebugManager {
         this.replayMode = false;
         this.diagnosticInfo = new DiagnosticInfo();
     }
-    ;
     /** Enables replay mode and loads the diagnostic information from the specified string */
     replayFromDiagnostics(diagnostics) {
         this.debugEnabled = false;
@@ -182,7 +195,7 @@ class DebugManager {
     }
     /** Returns a JSON string containing the diagnostic information for this run */
     getDebugOutput(emptyRepo = false) {
-        return this.isDebugEnabled() ? JSON.stringify(this.diagnosticInfo) : '';
+        return this.isDebugEnabled() ? JSON.stringify(this.diagnosticInfo) : "";
     }
     /** Records a command and its output for diagnostic purposes */
     recordCommand(command, args, output, stderr, error) {
@@ -194,9 +207,10 @@ class DebugManager {
     /** Replays the specified command and returns the output */
     replayCommand(command, args) {
         if (this.diagnosticInfo === null) {
-            throw new Error('No diagnostic information available for replay');
+            throw new Error("No diagnostic information available for replay");
         }
-        const commandResult = this.diagnosticInfo.commands.find(c => c.command === command && JSON.stringify(c.args) === JSON.stringify(args));
+        const commandResult = this.diagnosticInfo.commands.find((c) => c.command === command &&
+            JSON.stringify(c.args) === JSON.stringify(args));
         if (!commandResult) {
             throw new Error(`No result found in diagnostic for command "${command}"`);
         }
@@ -287,6 +301,29 @@ exports.VersionResult = VersionResult;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -303,8 +340,10 @@ const VersionType_1 = __nccwpck_require__(895);
 const UserInfo_1 = __nccwpck_require__(5907);
 const VersionInformation_1 = __nccwpck_require__(5686);
 const DebugManager_1 = __nccwpck_require__(1823);
+const core = __importStar(__nccwpck_require__(2186));
 function runAction(configurationProvider) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.info("VAGO STARTING runAction");
         const currentCommitResolver = configurationProvider.GetCurrentCommitResolver();
         const lastReleaseResolver = configurationProvider.GetLastReleaseResolver();
         const commitsProvider = configurationProvider.GetCommitsProvider();
@@ -314,21 +353,34 @@ function runAction(configurationProvider) {
         const userFormatter = configurationProvider.GetUserFormatter();
         const debugManager = DebugManager_1.DebugManager.getInstance();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
+            core.info("VAGO REPO WAS EMPTY, returning default version information");
             const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false, false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', tagFormatter.Parse(tagFormatter.Format(versionInfo)).join('.'), debugManager.getDebugOutput(true));
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format("author", []), "", "", tagFormatter.Parse(tagFormatter.Format(versionInfo)).join("."), debugManager.getDebugOutput(true));
         }
+        core.info("VAGO REPO IS NOT EMPTY, continuing with versioning");
         const currentCommit = yield currentCommitResolver.ResolveAsync();
+        core.info("VAGO CURRENT COMMIT: " + currentCommit);
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
+        core.info("VAGO LAST RELEASE: " +
+            lastRelease.hash +
+            " " +
+            lastRelease.major +
+            "." +
+            lastRelease.minor +
+            "." +
+            lastRelease.patch);
         const commitSet = yield commitsProvider.GetCommitsAsync(lastRelease.hash, currentCommit);
+        core.info("VAGO commit set le:" + commitSet.commits.length);
+        core.info("VAGO commit set changed: " + commitSet.changed.toString());
         const classification = yield versionClassifier.ClassifyAsync(lastRelease, commitSet);
+        core.info("VAGO classification: " + JSON.stringify(classification));
         const { isTagged } = lastRelease;
         const { major, minor, patch, increment, type, changed } = classification;
         // At this point all necessary data has been pulled from the database, create
         // version information to be used by the formatters
         let versionInfo = new VersionInformation_1.VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed, isTagged);
         // Group all the authors together, count the number of commits per author
-        const allAuthors = versionInfo.commits
-            .reduce((acc, commit) => {
+        const allAuthors = versionInfo.commits.reduce((acc, commit) => {
             const key = `${commit.author} <${commit.authorEmail}>`;
             acc[key] = acc[key] || { n: commit.author, e: commit.authorEmail, c: 0 };
             acc[key].c++;
@@ -337,7 +389,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`, debugManager.getDebugOutput());
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format("author", authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`, debugManager.getDebugOutput());
     });
 }
 exports.runAction = runAction;
@@ -345,7 +397,7 @@ exports.runAction = runAction;
 
 /***/ }),
 
-/***/ 807:
+/***/ 9894:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -616,14 +668,15 @@ const ConfigurationProvider_1 = __nccwpck_require__(2614);
 const core = __importStar(__nccwpck_require__(2186));
 const VersionType_1 = __nccwpck_require__(895);
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
+    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput, } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
-        core.info('No changes detected for this commit');
+        core.info("VAGOOO1");
+        core.info("No changes detected for this commit");
     }
     core.info(`Version is ${formattedVersion}`);
     if (repository !== undefined) {
-        core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split('/').slice(-1)[0]}`);
+        core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split("/").slice(-1)[0]}`);
     }
     core.setOutput("version", formattedVersion);
     core.setOutput("major", major.toString());
@@ -642,56 +695,59 @@ function setOutput(versionResult) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        core.info("VAGO Starting run action...");
         function toBool(value) {
-            if (!value || value.toLowerCase() === 'false') {
+            if (!value || value.toLowerCase() === "false") {
                 return false;
             }
-            else if (value.toLowerCase() === 'true') {
+            else if (value.toLowerCase() === "true") {
                 return true;
             }
             return false;
         }
         function toStringOrBool(value) {
-            if (!value || value === 'false') {
+            if (!value || value === "false") {
                 return false;
             }
-            if (value === 'true') {
+            if (value === "true") {
                 return true;
             }
             return value;
         }
         const config = {
-            branch: core.getInput('branch'),
-            tagPrefix: core.getInput('tag_prefix'),
-            useBranches: toBool(core.getInput('use_branches')),
-            versionFromBranch: toStringOrBool(core.getInput('version_from_branch')),
-            majorPattern: core.getInput('major_pattern'),
-            minorPattern: core.getInput('minor_pattern'),
-            majorFlags: core.getInput('major_regexp_flags'),
-            minorFlags: core.getInput('minor_regexp_flags'),
-            versionFormat: core.getInput('version_format'),
-            changePath: core.getInput('change_path'),
-            namespace: core.getInput('namespace'),
-            bumpEachCommit: toBool(core.getInput('bump_each_commit')),
-            searchCommitBody: toBool(core.getInput('search_commit_body')),
-            userFormatType: core.getInput('user_format_type'),
-            enablePrereleaseMode: toBool(core.getInput('enable_prerelease_mode')),
-            bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
-            debug: toBool(core.getInput('debug')),
-            replay: ''
+            branch: core.getInput("branch"),
+            tagPrefix: core.getInput("tag_prefix"),
+            useBranches: toBool(core.getInput("use_branches")),
+            versionFromBranch: toStringOrBool(core.getInput("version_from_branch")),
+            majorPattern: core.getInput("major_pattern"),
+            minorPattern: core.getInput("minor_pattern"),
+            majorFlags: core.getInput("major_regexp_flags"),
+            minorFlags: core.getInput("minor_regexp_flags"),
+            versionFormat: core.getInput("version_format"),
+            changePath: core.getInput("change_path"),
+            namespace: core.getInput("namespace"),
+            bumpEachCommit: toBool(core.getInput("bump_each_commit")),
+            searchCommitBody: toBool(core.getInput("search_commit_body")),
+            userFormatType: core.getInput("user_format_type"),
+            enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
+            bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
+            debug: toBool(core.getInput("debug")),
+            replay: "",
         };
         if (config.useBranches) {
             core.warning(`The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`);
         }
-        if (config.versionFormat === '' && core.getInput('format') !== '') {
+        if (config.versionFormat === "" && core.getInput("format") !== "") {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
-            config.versionFormat = core.getInput('format');
+            config.versionFormat = core.getInput("format");
         }
-        if (core.getInput('short_tags') !== '') {
+        if (core.getInput("short_tags") !== "") {
             core.warning(`The 'short_tags' input option is no longer supported`);
         }
         const configurationProvider = new ConfigurationProvider_1.ConfigurationProvider(config);
+        core.info("VAGO start await runAction(configurationProvider)");
         const result = yield (0, action_1.runAction)(configurationProvider);
+        core.info("VAGO before setOutput(result)");
         setOutput(result);
     });
 }
@@ -865,6 +921,29 @@ exports.CommitInfoSet = CommitInfoSet;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -879,6 +958,7 @@ exports.DefaultCommitsProvider = void 0;
 const CommandRunner_1 = __nccwpck_require__(949);
 const CommitInfo_1 = __nccwpck_require__(2142);
 const CommitInfoSet_1 = __nccwpck_require__(6859);
+const core = __importStar(__nccwpck_require__(2186));
 class DefaultCommitsProvider {
     constructor(config) {
         this.changePath = config.changePath;
@@ -903,7 +983,9 @@ class DefaultCommitsProvider {
                 .join('%n');
             var logCommand = `git log --pretty="${pretty}" --author-date-order ${(startHash === '' ? endHash : `${startHash}..${endHash}`)}`;
             if (this.changePath !== '') {
+                core.info("VAGO Changepath was there: " + this.changePath);
                 logCommand += ` -- ${this.changePath}`;
+                core.info("VAGO logCommand: " + logCommand);
             }
             const log = yield (0, CommandRunner_1.cmd)(logCommand);
             const entries = log
@@ -934,8 +1016,10 @@ class DefaultCommitsProvider {
                     changed = changedFiles.length > 0;
                 }
                 else {
+                    core.info("VAGO diffing: " + logCommand);
                     const changedFiles = yield (0, CommandRunner_1.cmd)(`git diff --name-only ${startHash}..${endHash} -- ${this.changePath}`);
                     changed = changedFiles.length > 0;
+                    core.info("VAGO changedFiles le: " + changedFiles.length);
                 }
             }
             return new CommitInfoSet_1.CommitInfoSet(changed, commits);
@@ -1048,6 +1132,7 @@ class DefaultLastReleaseResolver {
             currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
             const isTagged = currentTag !== '';
             const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+            core.info("VAGO DefaultLastReleaseResolver.ResolveAsync: currentTag: " + currentTag + ", currentMajor: " + currentMajor + ", currentMinor: " + currentMinor + ", currentPatch: " + currentPatch);
             let tagsCount = 0;
             let tag = '';
             try {
@@ -1086,11 +1171,13 @@ class DefaultLastReleaseResolver {
                     }
                 }
                 const [major, minor, patch] = tagFormatter.Parse('');
+                core.info("VAGO tag was empty: " + major + ", " + minor + ", " + patch);
                 // no release tags yet, use the initial commit as the root
                 return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, '', currentMajor, currentMinor, currentPatch, isTagged);
             }
             // parse the version tag
             const [major, minor, patch] = tagFormatter.Parse(tag);
+            core.info("VAGO tag was not empty: " + tag + ", " + major + ", " + minor + ", " + patch);
             const root = yield (0, CommandRunner_1.cmd)('git', `merge-base`, tag, current);
             return new ReleaseInformation_1.ReleaseInformation(major, minor, patch, root.trim(), currentMajor, currentMinor, currentPatch, isTagged);
         });
@@ -1106,6 +1193,29 @@ exports.DefaultLastReleaseResolver = DefaultLastReleaseResolver;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1119,6 +1229,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DefaultVersionClassifier = void 0;
 const VersionClassification_1 = __nccwpck_require__(7457);
 const VersionType_1 = __nccwpck_require__(895);
+const core = __importStar(__nccwpck_require__(2186));
 class DefaultVersionClassifier {
     constructor(config) {
         const searchBody = config.searchCommitBody;
@@ -1192,9 +1303,13 @@ class DefaultVersionClassifier {
     }
     ClassifyAsync(lastRelease, commitSet) {
         return __awaiter(this, void 0, void 0, function* () {
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync called");
             const { type, increment, changed } = this.resolveCommitType(commitSet);
+            core.info("VAGO DefaultVersionClassifier.ClassifyAsync: type: " + VersionType_1.VersionType[type] + ", increment: " + increment + ", changed: " + changed);
             const { major, minor, patch } = this.getNextVersion(lastRelease, type);
+            core.info("VAGOO DefaultVersionClassifier.ClassifyAsync: major: " + major + ", minor: " + minor + ", patch: " + patch);
             if (lastRelease.currentPatch !== null) {
+                core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentPatch is not null, using it to determine version classification");
                 // If the current commit is tagged, we must use that version. Here we check if the version we have resolved from the
                 // previous commits is the same as the current version. If it is, we will use the increment value, otherwise we reset
                 // to zero. For example:
@@ -1204,6 +1319,10 @@ class DefaultVersionClassifier {
                 // - commit 4 - v2.0.1+0
                 const versionsMatch = lastRelease.currentMajor === major && lastRelease.currentMinor === minor && lastRelease.currentPatch === patch;
                 const currentIncrement = versionsMatch ? increment : 0;
+                core.info("VAGO DefaultVersionClassifier.ClassifyAsync: versionsMatch: " + versionsMatch + ", currentIncrement: " + currentIncrement);
+                core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentMajor: " + lastRelease.currentMajor);
+                core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentMinor: " + lastRelease.currentMinor);
+                core.info("VAGO DefaultVersionClassifier.ClassifyAsync: lastRelease.currentPatch: " + lastRelease.currentPatch);
                 return new VersionClassification_1.VersionClassification(VersionType_1.VersionType.None, currentIncrement, false, lastRelease.currentMajor, lastRelease.currentMinor, lastRelease.currentPatch);
             }
             return new VersionClassification_1.VersionClassification(type, increment, changed, major, minor, patch);
@@ -1371,7 +1490,7 @@ var VersionType;
 
 /***/ }),
 
-/***/ 5241:
+/***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1505,7 +1624,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getIDToken = exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
-const command_1 = __nccwpck_require__(5241);
+const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
 const os = __importStar(__nccwpck_require__(2037));
@@ -2513,7 +2632,7 @@ const os = __importStar(__nccwpck_require__(2037));
 const events = __importStar(__nccwpck_require__(2361));
 const child = __importStar(__nccwpck_require__(2081));
 const path = __importStar(__nccwpck_require__(1017));
-const io = __importStar(__nccwpck_require__(7351));
+const io = __importStar(__nccwpck_require__(7436));
 const ioUtil = __importStar(__nccwpck_require__(1962));
 const timers_1 = __nccwpck_require__(9512);
 /* eslint-disable @typescript-eslint/unbound-method */
@@ -4091,7 +4210,7 @@ exports.getCmdPath = getCmdPath;
 
 /***/ }),
 
-/***/ 7351:
+/***/ 7436:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -4875,7 +4994,7 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 8292:
+/***/ 807:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -4993,7 +5112,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 
-var _rng = _interopRequireDefault(__nccwpck_require__(8292));
+var _rng = _interopRequireDefault(__nccwpck_require__(807));
 
 var _stringify = _interopRequireDefault(__nccwpck_require__(8950));
 
@@ -5215,7 +5334,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 
-var _rng = _interopRequireDefault(__nccwpck_require__(8292));
+var _rng = _interopRequireDefault(__nccwpck_require__(807));
 
 var _stringify = _interopRequireDefault(__nccwpck_require__(8950));
 
