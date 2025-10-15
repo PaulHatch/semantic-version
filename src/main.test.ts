@@ -1144,3 +1144,35 @@ test('Prerelease mode does not increment to 1.x.x', async () => {
     expect(result.formattedVersion).toBe('1.1.0-prerelease.1');
     expect(result.isTagged).toBe(true);
 }, timeout);
+
+test('Versioning from branch always ignores major commit pattern', async () => {
+    const repo = createTestRepo({
+        versionFromBranch: true,
+        majorPattern: "(MAJOR)"
+    });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec("git checkout -b release/v3.2");
+    repo.makeCommit(`(MAJOR) Second Commit`);
+
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('3.2.1+1');
+
+}, timeout);
+
+test('Versioning from branch always ignores minor commit pattern', async () => {
+    const repo = createTestRepo({
+        versionFromBranch: true,
+        minorPattern: "(MINOR)"
+    });
+
+    repo.makeCommit('Initial Commit');
+    repo.exec("git checkout -b release/v3.2");
+    repo.makeCommit(`(MINOR) Second Commit`);
+
+    const result = await repo.runAction();
+
+    expect(result.formattedVersion).toBe('3.2.1+1');
+
+}, timeout);
