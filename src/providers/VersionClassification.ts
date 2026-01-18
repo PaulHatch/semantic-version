@@ -1,4 +1,4 @@
-import { VersionType } from './VersionType';
+import { VersionType } from "./VersionType";
 
 /** The result of a version classification */
 export class VersionClassification {
@@ -17,5 +17,6 @@ export class VersionClassification {
     public changed: boolean,
     public major: number,
     public minor: number,
-    public patch: number) { }
+    public patch: number,
+  ) {}
 }

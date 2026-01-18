@@ -13,5 +13,8 @@ export interface VersionClassifier {
    * @param commitSet - The commits to classify, ordered from most recent to oldest
    * @returns - The version classification
    */
-  ClassifyAsync(lastRelease: ReleaseInformation, commitSet: CommitInfoSet): Promise<VersionClassification>;
+  ClassifyAsync(
+    lastRelease: ReleaseInformation,
+    commitSet: CommitInfoSet,
+  ): Promise<VersionClassification>;
 }

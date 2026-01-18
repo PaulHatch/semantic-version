@@ -25,5 +25,6 @@ export class VersionInformation {
     public type: VersionType,
     public commits: CommitInfo[],
     public changed: boolean,
-    public isTagged: boolean) { }
+    public isTagged: boolean,
+  ) {}
 }
