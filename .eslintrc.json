@@ -1,18 +1,21 @@
 {
+  "parser": "@typescript-eslint/parser",
   "plugins": ["jest"],
   "env": {
-    "commonjs": true,
     "es6": true,
     "node": true,
     "jest/globals": true
   },
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 2018,
+    "sourceType": "module"
   },
-  "rules": {}
+  "rules": {
+    "no-unused-vars": "off"
+  }
 }

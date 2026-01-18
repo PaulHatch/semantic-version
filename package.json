@@ -1,9 +1,21 @@
 {
-  "name": "semantic-version",
+  "name": "@semanticversion/cli",
   "version": "0.0.0",
-  "description": "Semantic Version GitHub Action",
+  "description": "Automated semantic versioning based on git history - CLI tool and GitHub Action",
   "main": "lib/main.js",
+  "bin": {
+    "git-sv": "lib/cli.js",
+    "git-semantic-version": "lib/cli.js"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc",
     "format": "prettier --write **/**.ts",
     "format-check": "prettier --check **/**.ts",
@@ -17,9 +29,12 @@
     "url": "git+https://github.com/paulhatch/semantic-version.git"
   },
   "keywords": [
-    "GitHub",
-    "Actions",
-    "JavaScript"
+    "semantic-version",
+    "semver",
+    "git",
+    "versioning",
+    "cli",
+    "github-actions"
   ],
   "author": "Paul Hatcherian",
   "license": "MIT",
@@ -29,7 +44,8 @@
   "homepage": "https://github.com/paulhatch/semantic-version#readme",
   "dependencies": {
     "@actions/core": "^1.10.1",
-    "@actions/exec": "^1.1.1"
+    "@actions/exec": "^1.1.1",
+    "commander": "^14.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.13",

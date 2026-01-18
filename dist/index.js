@@ -48,15 +48,19 @@ const cmd = (command, ...args) => __awaiter(void 0, void 0, void 0, function* ()
     if (debugManager.isReplayMode()) {
         return debugManager.replayCommand(command, args);
     }
-    let output = '', errors = '';
+    let output = "", errors = "";
     const options = {
         silent: true,
         listeners: {
-            stdout: (data) => { output += data.toString(); },
-            stderr: (data) => { errors += data.toString(); },
+            stdout: (data) => {
+                output += data.toString();
+            },
+            stderr: (data) => {
+                errors += data.toString();
+            },
             ignoreReturnCode: true,
-            silent: true
-        }
+            silent: true,
+        },
     };
     let caughtError = null;
     try {
@@ -96,16 +100,24 @@ class ConfigurationProvider {
         this.config = config;
         DebugManager_1.DebugManager.getInstance().initializeConfig(config);
     }
-    GetCurrentCommitResolver() { return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config); }
-    GetLastReleaseResolver() { return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config); }
-    GetCommitsProvider() { return new DefaultCommitsProvider_1.DefaultCommitsProvider(this.config); }
+    GetCurrentCommitResolver() {
+        return new DefaultCurrentCommitResolver_1.DefaultCurrentCommitResolver(this.config);
+    }
+    GetLastReleaseResolver() {
+        return new DefaultLastReleaseResolver_1.DefaultLastReleaseResolver(this.config);
+    }
+    GetCommitsProvider() {
+        return new DefaultCommitsProvider_1.DefaultCommitsProvider(this.config);
+    }
     GetVersionClassifier() {
         if (this.config.bumpEachCommit) {
             return new BumpAlwaysVersionClassifier_1.BumpAlwaysVersionClassifier(this.config);
         }
         return new DefaultVersionClassifier_1.DefaultVersionClassifier(this.config);
     }
-    GetVersionFormatter() { return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config); }
+    GetVersionFormatter() {
+        return new DefaultVersionFormatter_1.DefaultVersionFormatter(this.config);
+    }
     GetTagFormatter(branchName) {
         if (this.config.versionFromBranch) {
             return new BranchVersioningTagFormatter_1.BranchVersioningTagFormatter(this.config, branchName);
@@ -114,8 +126,10 @@ class ConfigurationProvider {
     }
     GetUserFormatter() {
         switch (this.config.userFormatType) {
-            case 'json': return new JsonUserFormatter_1.JsonUserFormatter(this.config);
-            case 'csv': return new CsvUserFormatter_1.CsvUserFormatter(this.config);
+            case "json":
+                return new JsonUserFormatter_1.JsonUserFormatter(this.config);
+            case "csv":
+                return new CsvUserFormatter_1.CsvUserFormatter(this.config);
             default:
                 throw new Error(`Unknown user format type: ${this.config.userFormatType}, supported types: json, csv`);
         }
@@ -173,7 +187,6 @@ class DebugManager {
         this.replayMode = false;
         this.diagnosticInfo = new DiagnosticInfo();
     }
-    ;
     /** Enables replay mode and loads the diagnostic information from the specified string */
     replayFromDiagnostics(diagnostics) {
         this.debugEnabled = false;
@@ -182,7 +195,7 @@ class DebugManager {
     }
     /** Returns a JSON string containing the diagnostic information for this run */
     getDebugOutput(emptyRepo = false) {
-        return this.isDebugEnabled() ? JSON.stringify(this.diagnosticInfo) : '';
+        return this.isDebugEnabled() ? JSON.stringify(this.diagnosticInfo) : "";
     }
     /** Records a command and its output for diagnostic purposes */
     recordCommand(command, args, output, stderr, error) {
@@ -194,9 +207,10 @@ class DebugManager {
     /** Replays the specified command and returns the output */
     replayCommand(command, args) {
         if (this.diagnosticInfo === null) {
-            throw new Error('No diagnostic information available for replay');
+            throw new Error("No diagnostic information available for replay");
         }
-        const commandResult = this.diagnosticInfo.commands.find(c => c.command === command && JSON.stringify(c.args) === JSON.stringify(args));
+        const commandResult = this.diagnosticInfo.commands.find((c) => c.command === command &&
+            JSON.stringify(c.args) === JSON.stringify(args));
         if (!commandResult) {
             throw new Error(`No result found in diagnostic for command "${command}"`);
         }
@@ -315,7 +329,7 @@ function runAction(configurationProvider) {
         const debugManager = DebugManager_1.DebugManager.getInstance();
         if (yield currentCommitResolver.IsEmptyRepoAsync()) {
             const versionInfo = new VersionInformation_1.VersionInformation(0, 0, 0, 0, VersionType_1.VersionType.None, [], false, false);
-            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', []), '', '', tagFormatter.Parse(tagFormatter.Format(versionInfo)).join('.'), debugManager.getDebugOutput(true));
+            return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format("author", []), "", "", tagFormatter.Parse(tagFormatter.Format(versionInfo)).join("."), debugManager.getDebugOutput(true));
         }
         const currentCommit = yield currentCommitResolver.ResolveAsync();
         const lastRelease = yield lastReleaseResolver.ResolveAsync(currentCommit, tagFormatter);
@@ -327,8 +341,7 @@ function runAction(configurationProvider) {
         // version information to be used by the formatters
         let versionInfo = new VersionInformation_1.VersionInformation(major, minor, patch, increment, type, commitSet.commits, changed, isTagged);
         // Group all the authors together, count the number of commits per author
-        const allAuthors = versionInfo.commits
-            .reduce((acc, commit) => {
+        const allAuthors = versionInfo.commits.reduce((acc, commit) => {
             const key = `${commit.author} <${commit.authorEmail}>`;
             acc[key] = acc[key] || { n: commit.author, e: commit.authorEmail, c: 0 };
             acc[key].c++;
@@ -337,7 +350,7 @@ function runAction(configurationProvider) {
         const authors = Object.values(allAuthors)
             .map((u) => new UserInfo_1.UserInfo(u.n, u.e, u.c))
             .sort((a, b) => b.commits - a.commits);
-        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format('author', authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`, debugManager.getDebugOutput());
+        return new VersionResult_1.VersionResult(versionInfo.major, versionInfo.minor, versionInfo.patch, versionInfo.increment, versionInfo.type, versionFormatter.Format(versionInfo), tagFormatter.Format(versionInfo), versionInfo.changed, versionInfo.isTagged, userFormatter.Format("author", authors), currentCommit, lastRelease.hash, `${lastRelease.major}.${lastRelease.minor}.${lastRelease.patch}`, debugManager.getDebugOutput());
     });
 }
 exports.runAction = runAction;
@@ -472,18 +485,18 @@ class DefaultTagFormatter {
     constructor(config) {
         this.namespace = config.namespace;
         this.tagPrefix = config.tagPrefix;
-        this.namespaceSeperator = '-'; // maybe make configurable in the future
+        this.namespaceSeparator = '-'; // maybe make configurable in the future
     }
     Format(versionInfo) {
         const result = `${this.tagPrefix}${versionInfo.major}.${versionInfo.minor}.${versionInfo.patch}`;
-        if (!!this.namespace) {
-            return `${result}${this.namespaceSeperator}${this.namespace}`;
+        if (this.namespace) {
+            return `${result}${this.namespaceSeparator}${this.namespace}`;
         }
         return result;
     }
     GetPattern() {
-        if (!!this.namespace) {
-            return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]${this.namespaceSeperator}${this.namespace}`;
+        if (this.namespace) {
+            return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]${this.namespaceSeparator}${this.namespace}`;
         }
         return `${this.tagPrefix}*[0-9].*[0-9].*[0-9]`;
     }
@@ -510,16 +523,15 @@ class DefaultTagFormatter {
         }
         return [major, minor, patch];
     }
-    ;
     IsValid(tag) {
         const regexEscape = (literal) => literal.replace(/\W/g, '\\$&');
         const tagPrefix = regexEscape(this.tagPrefix);
-        const namespaceSeperator = regexEscape(this.namespaceSeperator);
+        const namespaceSeparator = regexEscape(this.namespaceSeparator);
         const namespace = regexEscape(this.namespace);
-        if (!!this.namespace) {
-            return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+${namespaceSeperator}${namespace}$`).test(tag);
+        if (this.namespace) {
+            return new RegExp(`^${tagPrefix}[0-9]+\\.[0-9]+\\.[0-9]+${namespaceSeparator}${namespace}$`).test(tag);
         }
-        return new RegExp(`^${tagPrefix}[0-9]+\.[0-9]+\.[0-9]+$`).test(tag);
+        return new RegExp(`^${tagPrefix}[0-9]+\\.[0-9]+\\.[0-9]+$`).test(tag);
     }
 }
 exports.DefaultTagFormatter = DefaultTagFormatter;
@@ -616,15 +628,12 @@ const ConfigurationProvider_1 = __nccwpck_require__(2614);
 const core = __importStar(__nccwpck_require__(2186));
 const VersionType_1 = __nccwpck_require__(895);
 function setOutput(versionResult) {
-    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput } = versionResult;
+    const { major, minor, patch, increment, versionType, formattedVersion, versionTag, changed, isTagged, authors, currentCommit, previousCommit, previousVersion, debugOutput, } = versionResult;
     const repository = process.env.GITHUB_REPOSITORY;
     if (!changed) {
-        core.info('No changes detected for this commit');
+        core.info("No changes detected for this commit");
     }
     core.info(`Version is ${formattedVersion}`);
-    if (repository !== undefined) {
-        core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${versionTag}&target=${currentCommit.split('/').slice(-1)[0]}`);
-    }
     core.setOutput("version", formattedVersion);
     core.setOutput("major", major.toString());
     core.setOutput("minor", minor.toString());
@@ -643,51 +652,51 @@ function setOutput(versionResult) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         function toBool(value) {
-            if (!value || value.toLowerCase() === 'false') {
+            if (!value || value.toLowerCase() === "false") {
                 return false;
             }
-            else if (value.toLowerCase() === 'true') {
+            else if (value.toLowerCase() === "true") {
                 return true;
             }
             return false;
         }
         function toStringOrBool(value) {
-            if (!value || value === 'false') {
+            if (!value || value === "false") {
                 return false;
             }
-            if (value === 'true') {
+            if (value === "true") {
                 return true;
             }
             return value;
         }
         const config = {
-            branch: core.getInput('branch'),
-            tagPrefix: core.getInput('tag_prefix'),
-            useBranches: toBool(core.getInput('use_branches')),
-            versionFromBranch: toStringOrBool(core.getInput('version_from_branch')),
-            majorPattern: core.getInput('major_pattern'),
-            minorPattern: core.getInput('minor_pattern'),
-            majorFlags: core.getInput('major_regexp_flags'),
-            minorFlags: core.getInput('minor_regexp_flags'),
-            versionFormat: core.getInput('version_format'),
-            changePath: core.getInput('change_path'),
-            namespace: core.getInput('namespace'),
-            bumpEachCommit: toBool(core.getInput('bump_each_commit')),
-            searchCommitBody: toBool(core.getInput('search_commit_body')),
-            userFormatType: core.getInput('user_format_type'),
-            enablePrereleaseMode: toBool(core.getInput('enable_prerelease_mode')),
-            bumpEachCommitPatchPattern: core.getInput('bump_each_commit_patch_pattern'),
-            debug: toBool(core.getInput('debug')),
-            replay: ''
+            branch: core.getInput("branch"),
+            tagPrefix: core.getInput("tag_prefix"),
+            useBranches: toBool(core.getInput("use_branches")),
+            versionFromBranch: toStringOrBool(core.getInput("version_from_branch")),
+            majorPattern: core.getInput("major_pattern"),
+            minorPattern: core.getInput("minor_pattern"),
+            majorFlags: core.getInput("major_regexp_flags"),
+            minorFlags: core.getInput("minor_regexp_flags"),
+            versionFormat: core.getInput("version_format"),
+            changePath: core.getInput("change_path"),
+            namespace: core.getInput("namespace"),
+            bumpEachCommit: toBool(core.getInput("bump_each_commit")),
+            searchCommitBody: toBool(core.getInput("search_commit_body")),
+            userFormatType: core.getInput("user_format_type"),
+            enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
+            bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
+            debug: toBool(core.getInput("debug")),
+            replay: "",
         };
         if (config.useBranches) {
             core.warning(`The 'use_branches' input option is deprecated, please see the documentation for more information on how to use branches`);
         }
-        if (config.versionFormat === '' && core.getInput('format') !== '') {
+        if (config.versionFormat === "" && core.getInput("format") !== "") {
             core.warning(`The 'format' input is deprecated, use 'versionFormat' instead`);
-            config.versionFormat = core.getInput('format');
+            config.versionFormat = core.getInput("format");
         }
-        if (core.getInput('short_tags') !== '') {
+        if (core.getInput("short_tags") !== "") {
             core.warning(`The 'short_tags' input option is no longer supported`);
         }
         const configurationProvider = new ConfigurationProvider_1.ConfigurationProvider(config);
@@ -1047,12 +1056,12 @@ class DefaultLastReleaseResolver {
             let currentTag = (yield (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
             currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
             const isTagged = currentTag !== '';
-            const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+            const [currentMajor, currentMinor, currentPatch] = currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
             let tagsCount = 0;
             let tag = '';
             try {
                 const refPrefixPattern = this.useBranches ? 'refs/heads/' : 'refs/tags/';
-                if (!!currentTag) {
+                if (currentTag) {
                     // If we already have the current branch tagged, we are checking for the previous one
                     // so that we will have an accurate increment (assuming the new tag is the expected one)
                     const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
@@ -1079,10 +1088,10 @@ class DefaultLastReleaseResolver {
                     // practice this isn't likely to happen, but it keeps the test output from being
                     // polluted with a bunch of warnings.
                     if (tagsCount > 0) {
-                        core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using.`);
+                        core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using. If you have not yet tagged this repo with a version tag, this can be ignored.`);
                     }
                     else {
-                        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+                        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote. If you have not yet tagged this repo with a version tag, this can be ignored.');
                     }
                 }
                 const [major, minor, patch] = tagFormatter.Parse('');

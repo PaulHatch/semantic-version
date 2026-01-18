@@ -25,14 +25,14 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         currentTag = tagFormatter.IsValid(currentTag) ? currentTag : '';
         const isTagged = currentTag !== '';
 
-        const [currentMajor, currentMinor, currentPatch] = !!currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
+        const [currentMajor, currentMinor, currentPatch] = currentTag ? tagFormatter.Parse(currentTag) : [null, null, null];
 
         let tagsCount = 0;
 
         let tag = '';
         try {
             const refPrefixPattern = this.useBranches ? 'refs/heads/' : 'refs/tags/';
-            if (!!currentTag) {
+            if (currentTag) {
                 // If we already have the current branch tagged, we are checking for the previous one
                 // so that we will have an accurate increment (assuming the new tag is the expected one)
                 const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
@@ -63,9 +63,9 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
                 // polluted with a bunch of warnings.
 
                 if (tagsCount > 0) {
-                    core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using.`);
+                    core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using. If you have not yet tagged this repo with a version tag, this can be ignored.`);
                 } else {
-                    core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+                    core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote. If you have not yet tagged this repo with a version tag, this can be ignored.');
                 }
             }
             const [major, minor, patch] = tagFormatter.Parse('');
