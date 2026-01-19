@@ -182,7 +182,8 @@ zero to pull the full history and tags.
   - name: Checkout
     uses: actions/checkout@v2
     with:
-      fetch-depth: 0
+      fetch-depth: 0    # fetch all history
+      filter: blob:none # exclude file contents for faster checkout
 ```
 
 Alternatively, you can set this number to a value high enough to pull all the commits
