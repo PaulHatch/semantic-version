@@ -168,7 +168,8 @@ export class DefaultVersionClassifier implements VersionClassifier {
     commitSet: CommitInfoSet,
   ): Promise<VersionClassification> {
     const filteredCommitSet = this.filterIgnoredCommits(commitSet);
-    const { type, increment, changed } = this.resolveCommitType(filteredCommitSet);
+    const { type, increment, changed } =
+      this.resolveCommitType(filteredCommitSet);
 
     const { major, minor, patch } = this.getNextVersion(lastRelease, type);
 
