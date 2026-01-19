@@ -23,5 +23,6 @@ export class CommitInfo {
     public committer: string,
     public committerEmail: string,
     public committerDate: Date,
-    public tags: string[]) { }
+    public tags: string[],
+  ) {}
 }

@@ -99,7 +99,7 @@ outputs:
     description: "The current commit hash"
   debug_output:
     description: "Diagnostic information, if debug is enabled"
-  
+
 runs:
   using: "node20"
   main: "dist/index.js"

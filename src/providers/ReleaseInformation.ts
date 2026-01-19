@@ -19,5 +19,6 @@ export class ReleaseInformation {
     public currentMajor: number | null,
     public currentMinor: number | null,
     public currentPatch: number | null,
-    public isTagged: boolean,) { }
+    public isTagged: boolean,
+  ) {}
 }
