@@ -1431,5 +1431,140 @@ testInterfaces.forEach((testInterface) => {
       },
       timeout,
     );
+
+    test(
+      "Empty major pattern disables major version bumps",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          majorPattern: "",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("fix!: breaking fix");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Empty major pattern still allows normal behavior to verify test",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("fix!: breaking fix");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("2.0.0+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Empty minor pattern disables minor version bumps",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          minorPattern: "",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("feat: Feature Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Empty major and minor patterns result in only patch bumps",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          majorPattern: "",
+          minorPattern: "",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("feat!: Breaking Change");
+        repo.makeCommit("feat: New Feature");
+        repo.makeCommit("Regular Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+2");
+      },
+      timeout,
+    );
+
+    test(
+      "Commits matching ignore pattern are excluded from version calculation",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          ignoreCommitsPattern: "/^chore:|^docs:|^style:/",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("chore: update dependencies");
+        repo.makeCommit("docs: update readme");
+        repo.makeCommit("style: fix formatting");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.0+0");
+        expect(result.changed).toBe(false);
+      },
+      timeout,
+    );
+
+    test(
+      "Non-ignored commits still trigger version bumps",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          ignoreCommitsPattern: "/^chore:|^docs:/",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("chore: update dependencies");
+        repo.makeCommit("fix: bug fix");
+        repo.makeCommit("docs: update readme");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Ignored commits do not affect major/minor detection",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          ignoreCommitsPattern: "/^chore:/",
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("chore: update dependencies");
+        repo.makeCommit("feat: new feature");
+        repo.makeCommit("chore: cleanup");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.1.0+0");
+      },
+      timeout,
+    );
   });
 });

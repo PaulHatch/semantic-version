@@ -38,15 +38,17 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
       );
     }
 
+    const filteredCommitSet = this.filterIgnoredCommits(commitSet);
+
     let { major, minor, patch } = lastRelease;
     let type = VersionType.None;
     let increment = 0;
 
-    if (commitSet.commits.length === 0) {
+    if (filteredCommitSet.commits.length === 0) {
       return new VersionClassification(type, 0, false, major, minor, patch);
     }
 
-    for (let commit of commitSet.commits.reverse()) {
+    for (let commit of filteredCommitSet.commits.reverse()) {
       if (this.majorPattern(commit)) {
         type = VersionType.Major;
       } else if (this.minorPattern(commit)) {

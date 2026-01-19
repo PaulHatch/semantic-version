@@ -84,6 +84,7 @@ export async function run() {
     userFormatType: core.getInput("user_format_type"),
     enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
     bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
+    ignoreCommitsPattern: core.getInput("ignore_commits_pattern"),
     debug: toBool(core.getInput("debug")),
     replay: "",
   };

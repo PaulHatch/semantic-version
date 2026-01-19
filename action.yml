@@ -36,6 +36,10 @@ inputs:
     description: "A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs"
     required: false
     default: ""
+  ignore_commits_pattern:
+    description: "A pattern to match commits that should be ignored when calculating the version. Commits matching this pattern will not trigger any version bump. Wrap with '/' to use a regular expression."
+    required: false
+    default: ""
   version_format:
     description: "Pattern to use when formatting output version"
     required: true

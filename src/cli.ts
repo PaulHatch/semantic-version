@@ -37,6 +37,11 @@ program
   )
   .option("--minor-flags <flags>", "Flags for minor pattern regex", "")
   .option(
+    "-i, --ignore-commits-pattern <pattern>",
+    "Pattern to match commits that should be ignored when calculating version",
+    "",
+  )
+  .option(
     "--version-format <format>",
     "Version format template",
     "${major}.${minor}.${patch}",
@@ -81,6 +86,7 @@ program
       config.majorFlags = options.majorFlags || "";
       config.minorPattern = options.minorPattern;
       config.minorFlags = options.minorFlags || "";
+      config.ignoreCommitsPattern = options.ignoreCommitsPattern || "";
       config.bumpEachCommit = options.bumpEachCommit;
       config.bumpEachCommitPatchPattern =
         options.bumpEachCommitPatchPattern || "";
