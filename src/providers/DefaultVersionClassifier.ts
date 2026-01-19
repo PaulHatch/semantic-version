@@ -9,6 +9,7 @@ import { VersionType } from "./VersionType";
 export class DefaultVersionClassifier implements VersionClassifier {
   protected majorPattern: (commit: CommitInfo) => boolean;
   protected minorPattern: (commit: CommitInfo) => boolean;
+  protected ignorePattern: ((commit: CommitInfo) => boolean) | null;
   protected enablePrereleaseMode: boolean;
 
   constructor(config: ActionConfig) {
@@ -23,7 +24,21 @@ export class DefaultVersionClassifier implements VersionClassifier {
       config.minorFlags,
       searchBody,
     );
+    this.ignorePattern = config.ignoreCommitsPattern
+      ? this.parsePattern(config.ignoreCommitsPattern, "", searchBody)
+      : null;
     this.enablePrereleaseMode = config.enablePrereleaseMode;
+  }
+
+  protected filterIgnoredCommits(commitSet: CommitInfoSet): CommitInfoSet {
+    if (!this.ignorePattern) {
+      return commitSet;
+    }
+    const filteredCommits = commitSet.commits.filter(
+      (commit) => !this.ignorePattern!(commit),
+    );
+    const changed = filteredCommits.length > 0 ? commitSet.changed : false;
+    return new CommitInfoSet(changed, filteredCommits);
   }
 
   protected parsePattern(
@@ -31,6 +46,9 @@ export class DefaultVersionClassifier implements VersionClassifier {
     flags: string,
     searchBody: boolean,
   ): (pattern: CommitInfo) => boolean {
+    if (pattern === "") {
+      return (_commit: CommitInfo) => false;
+    }
     if (/^\/.+\/[i]*$/.test(pattern)) {
       const regexEnd = pattern.lastIndexOf("/");
       const parsedFlags = pattern.slice(pattern.lastIndexOf("/") + 1);
@@ -149,7 +167,9 @@ export class DefaultVersionClassifier implements VersionClassifier {
     lastRelease: ReleaseInformation,
     commitSet: CommitInfoSet,
   ): Promise<VersionClassification> {
-    const { type, increment, changed } = this.resolveCommitType(commitSet);
+    const filteredCommitSet = this.filterIgnoredCommits(commitSet);
+    const { type, increment, changed } =
+      this.resolveCommitType(filteredCommitSet);
 
     const { major, minor, patch } = this.getNextVersion(lastRelease, type);
 
