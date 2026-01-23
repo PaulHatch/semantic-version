@@ -13,7 +13,7 @@ export class ActionConfig {
   /** A string which indicates the flags used by the `majorPattern` regular expression. */
   public majorFlags: string = "";
   /** A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression. */
-  public minorPattern: string = "/^feat(\(.+\))?:/";
+  public minorPattern: string = "/^feat(\\(.+\\))?:/";
   /** A string which indicates the flags used by the `minorPattern` regular expression. */
   public minorFlags: string = "";
   /** Pattern to use when formatting output version */
