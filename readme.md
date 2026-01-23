@@ -51,7 +51,7 @@ _Unless the current commit is already tagged, the version produced by this actio
 ## Major and Minor Versions
 
 The commit messages for the span of commits from the last tag are checked for the
-presence of version bump patterns. By default, `feat:` triggers a minor version bump,
+presence of version bump patterns. By default, `feat:` or `feat(scope):` trigger a minor version bump,
 while `!:` (e.g., `feat!:`, `fix!:`) or `BREAKING CHANGE:` triggers a major version bump. If a pattern
 is encountered that commit is treated as the start of a major or minor version
 instead of the default patch level. As with normal commits the implied version
