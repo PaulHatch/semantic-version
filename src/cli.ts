@@ -33,7 +33,7 @@ program
   .option(
     "-m, --minor-pattern <pattern>",
     "Regex pattern for minor version bumps",
-    "/feat:/",
+    "/^feat(\(.+\))?:/",
   )
   .option("--minor-flags <flags>", "Flags for minor pattern regex", "")
   .option(

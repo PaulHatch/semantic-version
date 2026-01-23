@@ -14,8 +14,8 @@ release. To accomplish this, the next version number is calculated along with
 a commit increment indicating the number of commits for this version. The
 commit messages are inspected to determine the type of version change the next
 version represents. By default, this action follows [Conventional Commits](https://www.conventionalcommits.org/)
-patterns: commits with `feat:` trigger minor version bumps, and commits with a `!` suffix
-(e.g., `feat!:`, `fix!:`) or containing `BREAKING CHANGE:` trigger major version bumps.
+patterns: commits with `feat:` or `feat(scope):` trigger minor version bumps, and commits with a `!` suffix
+(e.g., `feat!:`, `fix!:`, `refactor(scope)!:`) or containing `BREAKING CHANGE:` trigger major version bumps.
 
 # Background
 
@@ -85,7 +85,7 @@ it will be given the new version if the build were to be retriggered, for exampl
     # A string which indicates the flags used by the `major_pattern` regular expression. Supported flags: idgs
     major_regexp_flags: ""
     # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
-    minor_pattern: "/feat:/"
+    minor_pattern: "/^feat(\\(.+\\))?:/"
     # A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs
     minor_regexp_flags: ""
     # A string to determine the format of the version output

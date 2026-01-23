@@ -31,7 +31,7 @@ inputs:
   minor_pattern:
     description: "A string which, if present in a git commit, indicates that a change represents a minor (feature) change. Wrap with '/' to match using a regular expression."
     required: true
-    default: "/feat:/"
+    default: "/^feat(\\(.+\\))?:/"
   minor_regexp_flags:
     description: "A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs"
     required: false
