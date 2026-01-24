@@ -1,11 +1,10 @@
 {
   "name": "@semanticversion/cli",
-  "version": "0.0.0",
   "description": "Automated semantic versioning based on git history - CLI tool and GitHub Action",
   "main": "lib/main.js",
   "bin": {
-    "git-sv": "lib/cli.js",
-    "git-semantic-version": "lib/cli.js"
+    "sv": "lib/cli.js",
+    "semver": "lib/cli.js"
   },
   "files": [
     "lib/**/*.js",

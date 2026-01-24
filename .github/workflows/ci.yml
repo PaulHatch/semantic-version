@@ -57,7 +57,7 @@ jobs:
   create-tag:
     name: Create Version Tag
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
