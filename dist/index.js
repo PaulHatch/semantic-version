@@ -705,6 +705,7 @@ function run() {
             userFormatType: core.getInput("user_format_type"),
             enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
             bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
+            ignoreCommitsPattern: core.getInput("ignore_commits_pattern"),
             debug: toBool(core.getInput("debug")),
             replay: "",
         };
@@ -760,13 +761,14 @@ class BumpAlwaysVersionClassifier extends DefaultVersionClassifier_1.DefaultVers
             if (lastRelease.currentPatch !== null) {
                 return new VersionClassification_1.VersionClassification(VersionType_1.VersionType.None, 0, false, lastRelease.currentMajor, lastRelease.currentMinor, lastRelease.currentPatch);
             }
+            const filteredCommitSet = this.filterIgnoredCommits(commitSet);
             let { major, minor, patch } = lastRelease;
             let type = VersionType_1.VersionType.None;
             let increment = 0;
-            if (commitSet.commits.length === 0) {
+            if (filteredCommitSet.commits.length === 0) {
                 return new VersionClassification_1.VersionClassification(type, 0, false, major, minor, patch);
             }
-            for (let commit of commitSet.commits.reverse()) {
+            for (let commit of filteredCommitSet.commits.reverse()) {
                 if (this.majorPattern(commit)) {
                     type = VersionType_1.VersionType.Major;
                 }
@@ -1158,6 +1160,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DefaultVersionClassifier = void 0;
+const CommitInfoSet_1 = __nccwpck_require__(8546);
 const VersionClassification_1 = __nccwpck_require__(3797);
 const VersionType_1 = __nccwpck_require__(8945);
 class DefaultVersionClassifier {
@@ -1165,9 +1168,23 @@ class DefaultVersionClassifier {
         const searchBody = config.searchCommitBody;
         this.majorPattern = this.parsePattern(config.majorPattern, config.majorFlags, searchBody);
         this.minorPattern = this.parsePattern(config.minorPattern, config.minorFlags, searchBody);
+        this.ignorePattern = config.ignoreCommitsPattern
+            ? this.parsePattern(config.ignoreCommitsPattern, "", searchBody)
+            : null;
         this.enablePrereleaseMode = config.enablePrereleaseMode;
     }
+    filterIgnoredCommits(commitSet) {
+        if (!this.ignorePattern) {
+            return commitSet;
+        }
+        const filteredCommits = commitSet.commits.filter((commit) => !this.ignorePattern(commit));
+        const changed = filteredCommits.length > 0 ? commitSet.changed : false;
+        return new CommitInfoSet_1.CommitInfoSet(changed, filteredCommits);
+    }
     parsePattern(pattern, flags, searchBody) {
+        if (pattern === "") {
+            return (_commit) => false;
+        }
         if (/^\/.+\/[i]*$/.test(pattern)) {
             const regexEnd = pattern.lastIndexOf("/");
             const parsedFlags = pattern.slice(pattern.lastIndexOf("/") + 1);
@@ -1266,7 +1283,8 @@ class DefaultVersionClassifier {
     }
     ClassifyAsync(lastRelease, commitSet) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { type, increment, changed } = this.resolveCommitType(commitSet);
+            const filteredCommitSet = this.filterIgnoredCommits(commitSet);
+            const { type, increment, changed } = this.resolveCommitType(filteredCommitSet);
             const { major, minor, patch } = this.getNextVersion(lastRelease, type);
             if (lastRelease.currentPatch !== null) {
                 // If the current commit is tagged, we must use that version. Here we check if the version we have resolved from the
