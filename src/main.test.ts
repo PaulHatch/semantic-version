@@ -218,6 +218,20 @@ testInterfaces.forEach((testInterface) => {
     );
 
     test(
+      "Minor commits with conventional commit scopes bump minor version",
+      async () => {
+        const repo = createTestRepo(testRunner); // 0.0.0+0
+
+        repo.makeCommit("Initial Commit"); // 0.0.1+0
+        repo.makeCommit("feat(scope): Second Commit"); // 0.1.0+0
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("0.1.0+0");
+      },
+      timeout,
+    );
+
+    test(
       "Tags start new version",
       async () => {
         const repo = createTestRepo(testRunner); // 0.0.0+0
