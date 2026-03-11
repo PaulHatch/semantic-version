@@ -11,7 +11,7 @@
     "lib/**/*.d.ts"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "scripts": {
     "prepublishOnly": "npm run build",
@@ -46,7 +46,7 @@
     "commander": "^14.0.2"
   },
   "devDependencies": {
-    "@types/node": "^22.19.7",
+    "@types/node": "^24.1.0",
     "@vercel/ncc": "^0.38.4",
     "jest": "^30.2.0",
     "js-yaml": "^4.1.1",
