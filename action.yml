@@ -105,5 +105,5 @@ outputs:
     description: "Diagnostic information, if debug is enabled"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
