@@ -20,11 +20,15 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
   ): Promise<ReleaseInformation> {
     const releasePattern = tagFormatter.GetPattern();
 
-    let currentTag = (
-      await cmd(`git tag --points-at ${current} ${releasePattern}`)
-    ).trim();
-
-    currentTag = tagFormatter.IsValid(currentTag) ? currentTag : "";
+    const currentTags = (
+      await cmd(
+        `git tag --sort=-version:refname --points-at ${current} ${releasePattern}`,
+      )
+    )
+      .trim()
+      .split("\n");
+    const currentTag =
+      currentTags.find((tag) => tagFormatter.IsValid(tag)) || "";
     const isTagged = currentTag !== "";
 
     const [currentMajor, currentMinor, currentPatch] = currentTag
@@ -43,7 +47,9 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         const tags = (await cmd(command)).split("\n");
         tagsCount = tags.length;
         tag =
-          tags.find((t) => tagFormatter.IsValid(t) && t !== currentTag) || "";
+          tags.find(
+            (t) => tagFormatter.IsValid(t) && !currentTags.includes(t),
+          ) || "";
       } else {
         const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
         const tags = (await cmd(command)).split("\n");

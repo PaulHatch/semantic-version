@@ -1050,8 +1050,10 @@ class DefaultLastReleaseResolver {
     }
     async ResolveAsync(current, tagFormatter) {
         const releasePattern = tagFormatter.GetPattern();
-        let currentTag = (await (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
-        currentTag = tagFormatter.IsValid(currentTag) ? currentTag : "";
+        const currentTags = (await (0, CommandRunner_1.cmd)(`git tag --sort=-version:refname --points-at ${current} ${releasePattern}`))
+            .trim()
+            .split("\n");
+        const currentTag = currentTags.find((tag) => tagFormatter.IsValid(tag)) || "";
         const isTagged = currentTag !== "";
         const [currentMajor, currentMinor, currentPatch] = currentTag
             ? tagFormatter.Parse(currentTag)
@@ -1067,7 +1069,7 @@ class DefaultLastReleaseResolver {
                 const tags = (await (0, CommandRunner_1.cmd)(command)).split("\n");
                 tagsCount = tags.length;
                 tag =
-                    tags.find((t) => tagFormatter.IsValid(t) && t !== currentTag) || "";
+                    tags.find((t) => tagFormatter.IsValid(t) && !currentTags.includes(t)) || "";
             }
             else {
                 const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
