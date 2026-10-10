@@ -881,6 +881,31 @@ testInterfaces.forEach((testInterface) => {
       timeout,
     );
 
+    test.each([
+      ["v2.0.9", "v2.0.10"],
+      ["v2.0.10", "v2.0.9"],
+    ])(
+      "Multiple current tags select the highest version (%s, %s)",
+      async (first, second) => {
+        const repo = createTestRepo(testRunner);
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag v2.0.8");
+        const previousCommit = repo.exec("git rev-parse HEAD").trim();
+        repo.makeCommit("Second Commit");
+        repo.makeCommit("Third Commit");
+        repo.exec(`git tag ${first}`);
+        repo.exec(`git tag -a ${second} -m release`);
+        repo.exec("git tag v9.0.0-rc.1");
+        const result = await repo.runAction();
+        expect(result.isTagged).toBe(true);
+        expect(result.versionTag).toBe("v2.0.10");
+        expect(result.previousVersion).toBe("2.0.8");
+        expect(result.previousCommit).toBe(previousCommit);
+        expect(result.formattedVersion).toBe("2.0.10+0");
+      },
+      timeout,
+    );
+
     test(
       "Correct previous version is returned when directly tagged with multiple previous tags",
       async () => {
