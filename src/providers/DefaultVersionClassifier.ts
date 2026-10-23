@@ -118,6 +118,49 @@ export class DefaultVersionClassifier implements VersionClassifier {
     }
   }
 
+  /**
+   * Moves a bumped version past the highest version tagged in the repository when that tag is outside the current
+   * history, applying the same kind of bump to it. An unchanged version is kept, since it is the last release's own.
+   */
+  protected bumpPastHighestTag(
+    lastRelease: ReleaseInformation,
+    next: { major: number; minor: number; patch: number },
+  ): { major: number; minor: number; patch: number } {
+    const highest = lastRelease.highestTag;
+    if (highest === null) {
+      return next;
+    }
+
+    const majorChanged = next.major !== lastRelease.major;
+    const minorChanged = next.minor !== lastRelease.minor;
+    if (!majorChanged && !minorChanged && next.patch === lastRelease.patch) {
+      return next;
+    }
+
+    const [highestMajor, highestMinor, highestPatch] = highest;
+    const aboveHighest =
+      next.major !== highestMajor
+        ? next.major > highestMajor
+        : next.minor !== highestMinor
+          ? next.minor > highestMinor
+          : next.patch > highestPatch;
+    if (aboveHighest) {
+      return next;
+    }
+
+    if (majorChanged) {
+      return { major: highestMajor + 1, minor: 0, patch: 0 };
+    }
+    if (minorChanged) {
+      return { major: highestMajor, minor: highestMinor + 1, patch: 0 };
+    }
+    return {
+      major: highestMajor,
+      minor: highestMinor,
+      patch: highestPatch + 1,
+    };
+  }
+
   private resolveCommitType(commitsSet: CommitInfoSet): {
     type: VersionType;
     increment: number;
@@ -198,13 +241,15 @@ export class DefaultVersionClassifier implements VersionClassifier {
       );
     }
 
+    const next = this.bumpPastHighestTag(lastRelease, { major, minor, patch });
+
     return new VersionClassification(
       type,
       increment,
       changed,
-      major,
-      minor,
-      patch,
+      next.major,
+      next.minor,
+      next.patch,
     );
   }
 }

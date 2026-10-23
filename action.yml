@@ -70,6 +70,10 @@ inputs:
     description: "If bump_each_commit is also set to true, setting this value will cause the version to increment only if the pattern specified is matched."
     required: true
     default: ""
+  include_unmerged_tags:
+    description: "If true, version tags on commits outside the current commit's history (other branches, or commits dropped by a force-push) also count when choosing the next version, so a version already tagged elsewhere is not resolved again."
+    required: true
+    default: "false"
   debug:
     description: "If enabled, diagnostic information will be added to the action output"
     required: true

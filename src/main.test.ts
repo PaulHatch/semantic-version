@@ -1580,5 +1580,224 @@ testInterfaces.forEach((testInterface) => {
       },
       timeout,
     );
+
+    test(
+      "Tags outside the current history are ignored by default",
+      async () => {
+        const repo = createTestRepo(testRunner, { tagPrefix: "" });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Second Commit");
+        repo.exec("git tag 1.0.1");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("Replacement Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Unmerged tags left by a rewritten branch are not resolved again",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Second Commit");
+        repo.exec("git tag 1.0.1");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("Replacement Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.2+0");
+        expect(result.previousVersion).toBe("1.0.0");
+      },
+      timeout,
+    );
+
+    test(
+      "Unmerged tags on other branches are not resolved again",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.exec("git checkout -b feature/branch");
+        repo.makeCommit("Branch Commit");
+        repo.exec("git tag 1.0.3");
+        repo.exec("git checkout master");
+        repo.makeCommit("Master Commit 1");
+        repo.makeCommit("Master Commit 2");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.4+1");
+      },
+      timeout,
+    );
+
+    test(
+      "Minor bump is applied past the highest unmerged tag",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("feat: dropped feature");
+        repo.exec("git tag 1.1.0");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("feat: replacement feature");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.2.0+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Major bump is applied past the highest unmerged tag",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Dropped Commit");
+        repo.exec("git tag 2.0.0");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("feat!: replacement change");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("3.0.0+0");
+      },
+      timeout,
+    );
+
+    test(
+      "A version already above unmerged tags is unchanged",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Dropped Commit");
+        repo.exec("git tag 1.0.1");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("feat: replacement feature");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.1.0+0");
+      },
+      timeout,
+    );
+
+    test(
+      "Unmerged tags do not change a version with no changes",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+          changePath: "project",
+        });
+
+        repo.exec("mkdir project");
+        repo.makeCommit("Initial Commit", "project");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Dropped Commit", "project");
+        repo.exec("git tag 1.0.1");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("Unrelated Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.0+0");
+        expect(result.changed).toBe(false);
+      },
+      timeout,
+    );
+
+    test(
+      "Unmerged tags of other namespaces are ignored",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          namespace: "service",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0-service");
+        repo.makeCommit("Dropped Commit");
+        repo.exec("git tag 5.0.0-other");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("Replacement Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+        expect(result.versionTag).toBe("1.0.1-service");
+      },
+      timeout,
+    );
+
+    test(
+      "Tagged commit keeps its version when unmerged tags are higher",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Dropped Commit");
+        repo.exec("git tag 1.0.5");
+        repo.exec("git reset --hard HEAD~1");
+        repo.makeCommit("Replacement Commit");
+        repo.exec("git tag 1.0.1");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.1+0");
+        expect(result.isTagged).toBe(true);
+      },
+      timeout,
+    );
+
+    test(
+      "Bump each commit continues past unmerged tags",
+      async () => {
+        const repo = createTestRepo(testRunner, {
+          tagPrefix: "",
+          bumpEachCommit: true,
+          includeUnmergedTags: true,
+        });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag 1.0.0");
+        repo.makeCommit("Dropped Commit 1");
+        repo.makeCommit("Dropped Commit 2");
+        repo.exec("git tag 1.0.2");
+        repo.exec("git reset --hard HEAD~2");
+        repo.makeCommit("Replacement Commit");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.3+0");
+      },
+      timeout,
+    );
   });
 });

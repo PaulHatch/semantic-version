@@ -104,13 +104,15 @@ export class BumpAlwaysVersionClassifier extends DefaultVersionClassifier {
       }
     }
 
+    const next = this.bumpPastHighestTag(lastRelease, { major, minor, patch });
+
     return new VersionClassification(
       type,
       increment,
       true,
-      major,
-      minor,
-      patch,
+      next.major,
+      next.minor,
+      next.patch,
     );
   }
 }

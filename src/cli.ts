@@ -68,6 +68,11 @@ program
     false,
   )
   .option(
+    "--include-unmerged-tags",
+    "Also count version tags outside the current commit's history when choosing the next version",
+    false,
+  )
+  .option(
     "--user-format-type <type>",
     "Output format for users (csv, json)",
     "csv",
@@ -94,6 +99,7 @@ program
       // versionFromBranch can be true (flag only) or a string (custom pattern)
       config.versionFromBranch = options.versionFromBranch ?? false;
       config.enablePrereleaseMode = options.enablePrereleaseMode;
+      config.includeUnmergedTags = options.includeUnmergedTags;
       config.userFormatType = options.userFormatType;
       config.debug = options.debug;
 

@@ -8,10 +8,12 @@ import * as core from "@actions/core";
 export class DefaultLastReleaseResolver implements LastReleaseResolver {
   private changePath: string;
   private useBranches: boolean;
+  private includeUnmergedTags: boolean;
 
   constructor(config: ActionConfig) {
     this.changePath = config.changePath;
     this.useBranches = config.useBranches;
+    this.includeUnmergedTags = config.includeUnmergedTags;
   }
 
   async ResolveAsync(
@@ -30,6 +32,12 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
     const [currentMajor, currentMinor, currentPatch] = currentTag
       ? tagFormatter.Parse(currentTag)
       : [null, null, null];
+
+    // A tagged commit keeps its own version, so tags outside its history cannot change the result
+    const highestTag =
+      this.includeUnmergedTags && !isTagged
+        ? await this.ResolveHighestTagAsync(tagFormatter)
+        : null;
 
     let tagsCount = 0;
 
@@ -83,6 +91,7 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
         currentMinor,
         currentPatch,
         isTagged,
+        highestTag,
       );
     }
 
@@ -98,6 +107,24 @@ export class DefaultLastReleaseResolver implements LastReleaseResolver {
       currentMinor,
       currentPatch,
       isTagged,
+      highestTag,
     );
+  }
+
+  /** Finds the highest version tag in the repository, including tags on commits outside the current history */
+  private async ResolveHighestTagAsync(
+    tagFormatter: TagFormatter,
+  ): Promise<[major: number, minor: number, patch: number] | null> {
+    try {
+      const refPrefixPattern = this.useBranches ? "refs/heads/" : "refs/tags/";
+      const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) ${refPrefixPattern}${tagFormatter.GetPattern()}`;
+      const tag = (await cmd(command))
+        .split("\n")
+        .map((t) => t.trim())
+        .find((t) => tagFormatter.IsValid(t));
+      return tag ? tagFormatter.Parse(tag) : null;
+    } catch (err) {
+      return null;
+    }
   }
 }
