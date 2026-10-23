@@ -10,6 +10,7 @@ export class ReleaseInformation {
    * @param currentMinor - the minor version number from the current commit
    * @param currentPatch - the patch version number from the current commit
    * @param isTagged - whether the current commit is tagged with a version
+   * @param highestTag - the highest version tagged anywhere in the repository, when unmerged tags are included
    */
   constructor(
     public major: number,
@@ -20,5 +21,7 @@ export class ReleaseInformation {
     public currentMinor: number | null,
     public currentPatch: number | null,
     public isTagged: boolean,
+    public highestTag:
+      [major: number, minor: number, patch: number] | null = null,
   ) {}
 }
