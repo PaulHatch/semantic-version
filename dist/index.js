@@ -1050,8 +1050,11 @@ class DefaultLastReleaseResolver {
     }
     async ResolveAsync(current, tagFormatter) {
         const releasePattern = tagFormatter.GetPattern();
-        let currentTag = (await (0, CommandRunner_1.cmd)(`git tag --points-at ${current} ${releasePattern}`)).trim();
-        currentTag = tagFormatter.IsValid(currentTag) ? currentTag : "";
+        // A commit may have several tags, use the highest one which is a valid version tag
+        const currentTag = (await (0, CommandRunner_1.cmd)(`git tag --points-at ${current} --sort=-v:refname ${releasePattern}`))
+            .split("\n")
+            .map((t) => t.trim())
+            .find((t) => tagFormatter.IsValid(t)) || "";
         const isTagged = currentTag !== "";
         const [currentMajor, currentMinor, currentPatch] = currentTag
             ? tagFormatter.Parse(currentTag)

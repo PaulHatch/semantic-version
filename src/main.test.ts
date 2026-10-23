@@ -1303,6 +1303,22 @@ testInterfaces.forEach((testInterface) => {
     );
 
     test(
+      "Commit with multiple tags is flagged as release",
+      async () => {
+        const repo = createTestRepo(testRunner, { tagPrefix: "v" });
+
+        repo.makeCommit("Initial Commit");
+        repo.exec("git tag v1.0.0-rc.1");
+        repo.exec("git tag v1.0.0");
+        const result = await repo.runAction();
+
+        expect(result.formattedVersion).toBe("1.0.0+0");
+        expect(result.isTagged).toBe(true);
+      },
+      timeout,
+    );
+
+    test(
       "Pre-release mode with bump each commit does not update major version if major version is 0",
       async () => {
         const repo = createTestRepo(testRunner, {
