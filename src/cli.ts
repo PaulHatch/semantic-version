@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name("semantic-version")
   .description("Automated semantic versioning for Git repositories")
-  .version(process.env.SEMANTIC_VERSION || "0.0.0-dev")
+  .version(require("../package.json").version ?? "0.0.0-dev")
   .option(
     "-B, --branch <branch>",
     "Specific branch to analyze (default: current HEAD)",

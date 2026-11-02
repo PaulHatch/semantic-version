@@ -6,8 +6,6 @@ on:
     branches:
       - master
       - "feature/*"
-    tags:
-      - "v*"
 
 jobs:
   build:
@@ -54,13 +52,15 @@ jobs:
         env:
           DEBUG_OUTPUT: ${{ steps.run.outputs.debug_output }}
 
-  create-tag:
-    name: Create Version Tag
+  version:
+    name: Version
     needs: build
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      major: ${{ steps.version.outputs.major }}
+      exists: ${{ steps.check.outputs.exists }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,23 +81,18 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create and push tag
-        if: steps.check.outputs.exists == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
-
   release:
-    name: Publish Release
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: Publish Release v${{ needs.version.outputs.version }}
+    needs: version
+    if: needs.version.outputs.exists == 'false'
     runs-on: ubuntu-latest
     environment: release
     permissions:
       contents: write
       id-token: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      MAJOR: ${{ needs.version.outputs.major }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,38 +115,32 @@ jobs:
       - name: Package
         run: npm run package
 
-      - name: Extract version from tag
-        id: tag
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "major=$(echo $VERSION | cut -d. -f1)" >> $GITHUB_OUTPUT
-
       - name: Update package.json version
-        run: npm version ${{ steps.tag.outputs.version }} --no-git-tag-version
+        run: npm version "$VERSION" --no-git-tag-version
 
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Update major version tag
+      - name: Create and push tags
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -fa v${{ steps.tag.outputs.major }} -m "Update v${{ steps.tag.outputs.major }} to ${{ steps.tag.outputs.version }}"
-          git push origin v${{ steps.tag.outputs.major }} --force
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git tag -fa "v$MAJOR" -m "Update v$MAJOR to $VERSION"
+          git push origin "v$VERSION"
+          git push origin "v$MAJOR" --force
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.version.outputs.version }}
           generate_release_notes: true
           body: |
             ## Installation
 
             ### GitHub Action
             ```yaml
-            - uses: paulhatch/semantic-version@v${{ steps.tag.outputs.major }}
+            - uses: paulhatch/semantic-version@v${{ needs.version.outputs.major }}
             ```
 
             ### CLI
