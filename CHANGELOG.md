@@ -5,6 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.7] - 2026-11-02
+
+### Fixed
+
+- CLI `--version` now reports the installed package version instead of `0.0.0-dev`
+- Corrected repository URL casing in `package.json` so npm provenance verification passes
+
+### Changed
+
+- Releases are now published from CI through a gated `release` environment using npm trusted publishing; the version tag, `v6` major tag, npm package and GitHub release are all created by the same approved job
+- Updated dependencies
+
+## [6.0.6] - 2026-11-02
+
+### Fixed
+
+- Trailing empty lines are trimmed from command output
+
+## [6.0.5] - 2026-10-23
+
+### Fixed
+
+- The current tag is resolved correctly when a commit carries multiple tags (#161)
+
+## [6.0.4] - 2026-09-08
+
+### Changed
+
+- Updated dependencies
+
+## [6.0.3] - 2026-07-16
+
+### Fixed
+
+- Updated dependencies to resolve the undici denial-of-service advisory (CVE-2026-12151)
+
+## [6.0.2] - 2026-03-17
+
+### Changed
+
+- Updated to Node.js v24 runtime
+
+## [6.0.1] - 2026-01-24
+
+### Added
+
+- The default minor pattern now accepts an optional Conventional Commits scope, so `feat(api):` bumps the minor version like `feat:`
+
+### Fixed
+
+- Package build and CLI command names
+
+## [6.0.0] - 2026-01-19
+
+### Added
+
+- **Standalone CLI** (`@semanticversion/cli` on npm) exposing the same versioning logic as the action, installed as `sv` and `semver`
+- `ignore_commits_pattern` input to exclude matching commits from version calculation
+- Major and minor patterns can be disabled by setting them to an empty string
+
+### Changed
+
+- **Breaking:** default `major_pattern` and `minor_pattern` now follow Conventional Commits (`/!:|BREAKING CHANGE:/` and `/feat:/`) instead of `(MAJOR)` and `(MINOR)`. Set the inputs explicitly to keep the previous behaviour
+- Dropped ESLint and updated dependencies
+
 ## [5.4.0] - 2024-01-31
 
 ### Changed
@@ -253,6 +318,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Increment counter for commits since last version tag
 - No manual version maintenance required - fully automated from git history
 
+[6.0.7]: https://github.com/PaulHatch/semantic-version/compare/v6.0.6...v6.0.7
+[6.0.6]: https://github.com/PaulHatch/semantic-version/compare/v6.0.5...v6.0.6
+[6.0.5]: https://github.com/PaulHatch/semantic-version/compare/v6.0.4...v6.0.5
+[6.0.4]: https://github.com/PaulHatch/semantic-version/compare/v6.0.3...v6.0.4
+[6.0.3]: https://github.com/PaulHatch/semantic-version/compare/v6.0.2...v6.0.3
+[6.0.2]: https://github.com/PaulHatch/semantic-version/compare/v6.0.1...v6.0.2
+[6.0.1]: https://github.com/PaulHatch/semantic-version/compare/v6.0.0...v6.0.1
+[6.0.0]: https://github.com/PaulHatch/semantic-version/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/PaulHatch/semantic-version/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/PaulHatch/semantic-version/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/PaulHatch/semantic-version/compare/v5.2.0...v5.2.1

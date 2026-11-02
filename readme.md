@@ -75,7 +75,7 @@ it will be given the new version if the build were to be retriggered, for exampl
 <!-- start usage -->
 
 ```yaml
-- uses: paulhatch/semantic-version@v5.4.0
+- uses: paulhatch/semantic-version@v6
   with:
     # The prefix to use to identify tags
     tag_prefix: "v"
@@ -129,6 +129,28 @@ it will be given the new version if the build were to be retriggered, for exampl
 
 There are two types of "version" string, one is the semantic version output that can be used to identify a build and can include prerelease data and metadata specific to the commit such as `v2.0.1-pre001+cf6e75` (you would produce this string yourself using the version information from this action plus whatever metadata you wanted to add), the other is the tag version string, which identifies a specific commit as being a specific version.
 
+## Command Line Interface
+
+The same versioning logic is available as a standalone CLI, published to npm as
+`@semanticversion/cli`. It installs two equivalent commands, `sv` and `semver`.
+
+```bash
+npm install -g @semanticversion/cli
+
+# Print the next version for the current repository
+sv
+
+# Pass the same options as the action, as flags
+sv --tag-prefix v --path src/service --ignore-commits-pattern "/^chore/"
+
+# Emit the full result as JSON
+sv --format json
+```
+
+Run `sv --help` for the full list of options. Each action input has a matching
+flag, for example `--major-pattern`, `--ignore-commits-pattern`, `--bump-each-commit`,
+`--version-from-branch` and `--enable-prerelease-mode`.
+
 ## Using Multiple Versions in the Same Repository
 
 It is possible to create additional versions for multiple project co-existing
@@ -158,12 +180,12 @@ like `v1.2.3+0-db` could be configured like this:
 ```yaml
 - name: Application Version
   id: version
-  uses: paulhatch/semantic-version@v5.4.0
+  uses: paulhatch/semantic-version@v6
   with:
     change_path: "src/service"
 - name: Database Version
   id: db-version
-  uses: paulhatch/semantic-version@v5.4.0
+  uses: paulhatch/semantic-version@v6
   with:
     major_pattern: "(MAJOR-DB)"
     minor_pattern: "(MINOR-DB)"
