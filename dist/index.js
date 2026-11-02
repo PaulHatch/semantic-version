@@ -1063,31 +1063,24 @@ class DefaultLastReleaseResolver {
         let tag = "";
         try {
             const refPrefixPattern = this.useBranches ? "refs/heads/" : "refs/tags/";
-            if (currentTag) {
-                // If we already have the current branch tagged, we are checking for the previous one
-                // so that we will have an accurate increment (assuming the new tag is the expected one)
-                const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
-                const tags = (await (0, CommandRunner_1.cmd)(command)).split("\n");
-                tagsCount = tags.length;
-                tag =
-                    tags.find((t) => tagFormatter.IsValid(t) && t !== currentTag) || "";
-            }
-            else {
-                const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
-                const tags = (await (0, CommandRunner_1.cmd)(command)).split("\n");
-                tagsCount = tags.length;
-                tag = tags.find((t) => tagFormatter.IsValid(t)) || "";
-            }
-            tag = tag.trim();
+            // If the current commit is already tagged we look for the release before it so that
+            // the increment is accurate (assuming the new tag is the expected one)
+            const command = `git for-each-ref --sort=-v:*refname --format=%(refname:short) --merged=${current} ${refPrefixPattern}${releasePattern}`;
+            const tags = (await (0, CommandRunner_1.cmd)(command))
+                .split("\n")
+                .map((t) => t.trim())
+                .filter((t) => t !== "");
+            tagsCount = tags.length;
+            tag = tags.find((t) => tagFormatter.IsValid(t) && t !== currentTag) || "";
         }
         catch (err) {
             tag = "";
         }
         if (tag === "") {
-            if ((await (0, CommandRunner_1.cmd)("git", "remote")) !== "") {
-                // Since there is no remote, we assume that there are no other tags to pull. In
-                // practice this isn't likely to happen, but it keeps the test output from being
-                // polluted with a bunch of warnings.
+            // When the current commit carries the only release tag there is no previous release
+            // and nothing to warn about. Without a remote we assume there are no other tags to
+            // pull, which also keeps the test output from being polluted with warnings.
+            if (!isTagged && (await (0, CommandRunner_1.cmd)("git", "remote")) !== "") {
                 if (tagsCount > 0) {
                     core.warning(`None of the ${tagsCount} tags(s) found were valid version tags for the present configuration. If this is unexpected, check to ensure that the configuration is correct and matches the tag format you are using. If you have not yet tagged this repo with a version tag, this can be ignored.`);
                 }
