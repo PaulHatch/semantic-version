@@ -85,6 +85,7 @@ export async function run() {
     enablePrereleaseMode: toBool(core.getInput("enable_prerelease_mode")),
     bumpEachCommitPatchPattern: core.getInput("bump_each_commit_patch_pattern"),
     ignoreCommitsPattern: core.getInput("ignore_commits_pattern"),
+    includeUnmergedTags: toBool(core.getInput("include_unmerged_tags")),
     debug: toBool(core.getInput("debug")),
     replay: "",
   };

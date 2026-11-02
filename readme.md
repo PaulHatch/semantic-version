@@ -110,6 +110,9 @@ it will be given the new version if the build were to be retriggered, for exampl
     debug: false
     # If true, the branch will be used to select the maximum version.
     version_from_branch: false
+    # If true, version tags on commits outside the current commit's history (other branches, or commits
+    # dropped by a force-push) also count when choosing the next version.
+    include_unmerged_tags: false
 ```
 
 ## Outputs 

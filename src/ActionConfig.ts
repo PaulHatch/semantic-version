@@ -34,6 +34,8 @@ export class ActionConfig {
   public bumpEachCommitPatchPattern: string = "";
   /** A pattern to match commits that should be ignored when calculating the version. Commits matching this pattern will not trigger any version bump. Wrap with '/' to use a regular expression. */
   public ignoreCommitsPattern: string = "";
+  /** If true, version tags on commits outside the current commit's history also count when choosing the next version, so a version already tagged elsewhere is not resolved again. */
+  public includeUnmergedTags: boolean = false;
   /** If enabled, diagnostic information will be added to the action output. */
   public debug: boolean = false;
   /** Diagnostics to replay */
