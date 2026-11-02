@@ -25,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paulhatch/semantic-version.git"
+    "url": "git+https://github.com/PaulHatch/semantic-version.git"
   },
   "keywords": [
     "semantic-version",
@@ -38,9 +38,9 @@
   "author": "Paul Hatcherian",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/paulhatch/semantic-version/issues"
+    "url": "https://github.com/PaulHatch/semantic-version/issues"
   },
-  "homepage": "https://github.com/paulhatch/semantic-version#readme",
+  "homepage": "https://github.com/PaulHatch/semantic-version#readme",
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
