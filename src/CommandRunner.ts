@@ -1,6 +1,6 @@
 // Using require instead of import to support integration testing
 import * as exec from "@actions/exec";
-import { DebugManager } from "./DebugManager";
+import { DebugManager } from "./DebugManager.js";
 
 export const cmd = async (command: string, ...args: any): Promise<string> => {
   const debugManager = DebugManager.getInstance();

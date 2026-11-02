@@ -1,8 +1,8 @@
-import { ActionConfig } from "../ActionConfig";
-import { cmd } from "../CommandRunner";
-import { CommitInfo } from "./CommitInfo";
-import { CommitInfoSet } from "./CommitInfoSet";
-import { CommitsProvider } from "./CommitsProvider";
+import { ActionConfig } from "../ActionConfig.js";
+import { cmd } from "../CommandRunner.js";
+import { CommitInfo } from "./CommitInfo.js";
+import { CommitInfoSet } from "./CommitInfoSet.js";
+import { CommitsProvider } from "./CommitsProvider.js";
 
 export class DefaultCommitsProvider implements CommitsProvider {
   private changePath: string;

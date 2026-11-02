@@ -1,4 +1,4 @@
-import { VersionInformation } from "../providers/VersionInformation";
+import { VersionInformation } from "../providers/VersionInformation.js";
 
 export interface TagFormatter {
   Format(versionInfo: VersionInformation): string;

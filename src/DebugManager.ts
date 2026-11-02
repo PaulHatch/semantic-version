@@ -1,4 +1,4 @@
-import { ActionConfig } from "./ActionConfig";
+import { ActionConfig } from "./ActionConfig.js";
 
 /** Utility class for managing debug mode and diagnostic information */
 export class DebugManager {

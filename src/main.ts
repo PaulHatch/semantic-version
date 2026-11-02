@@ -1,9 +1,9 @@
-import { runAction } from "./action";
-import { ActionConfig } from "./ActionConfig";
-import { ConfigurationProvider } from "./ConfigurationProvider";
-import { VersionResult } from "./VersionResult";
+import { runAction } from "./action.js";
+import { ActionConfig } from "./ActionConfig.js";
+import { ConfigurationProvider } from "./ConfigurationProvider.js";
+import { VersionResult } from "./VersionResult.js";
 import * as core from "@actions/core";
-import { VersionType } from "./providers/VersionType";
+import { VersionType } from "./providers/VersionType.js";
 
 function setOutput(versionResult: VersionResult) {
   const {

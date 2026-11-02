@@ -1,5 +1,5 @@
-import { CommitInfo } from "./CommitInfo";
-import { VersionType } from "./VersionType";
+import { CommitInfo } from "./CommitInfo.js";
+import { VersionType } from "./VersionType.js";
 
 /**
  * Represents the "resolved" information about a version change, serves

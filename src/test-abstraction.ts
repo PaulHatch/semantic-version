@@ -1,10 +1,10 @@
 import * as cp from "child_process";
 import * as path from "path";
-import { runAction } from "./action";
-import { ConfigurationProvider } from "./ConfigurationProvider";
-import { ActionConfig } from "./ActionConfig";
-import { DebugManager } from "./DebugManager";
-import { VersionResult } from "./VersionResult";
+import { runAction } from "./action.js";
+import { ConfigurationProvider } from "./ConfigurationProvider.js";
+import { ActionConfig } from "./ActionConfig.js";
+import { DebugManager } from "./DebugManager.js";
+import { VersionResult } from "./VersionResult.js";
 
 export type TestInterface = "action" | "cli";
 
@@ -38,7 +38,7 @@ export class CLITestRunner implements TestRunner {
   private cliPath: string;
 
   constructor() {
-    this.cliPath = path.join(__dirname, "..", "lib", "cli.js");
+    this.cliPath = path.join(import.meta.dirname, "..", "lib", "cli.js");
   }
 
   private toKebabCase(str: string): string {

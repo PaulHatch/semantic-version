@@ -1,4 +1,4 @@
-import { CommitInfoSet } from "./CommitInfoSet";
+import { CommitInfoSet } from "./CommitInfoSet.js";
 
 /**
  * Defines a provider to retrieve commit information for a range of commits

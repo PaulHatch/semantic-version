@@ -1,19 +1,26 @@
 import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
-import * as core from "@actions/core";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { ActionConfig } from "../ActionConfig";
-import { DebugManager } from "../DebugManager";
-import { DefaultTagFormatter } from "../formatting/DefaultTagFormatter";
-import { DefaultLastReleaseResolver } from "./DefaultLastReleaseResolver";
+import { ActionConfig } from "../ActionConfig.js";
+import { DebugManager } from "../DebugManager.js";
+import { DefaultTagFormatter } from "../formatting/DefaultTagFormatter.js";
 
 const timeout = 30000;
 
 let repoDirectory: string;
 let originalCwd: string;
 let warnings: string[];
+
+// ESM namespaces are immutable, so @actions/core is replaced before the resolver imports it.
+jest.unstable_mockModule("@actions/core", () => ({
+  warning: (message: string | Error) => {
+    warnings.push(message.toString());
+  },
+}));
+const { DefaultLastReleaseResolver } =
+  await import("./DefaultLastReleaseResolver.js");
 
 const run = (command: string) =>
   cp.execSync(command, { cwd: repoDirectory, stdio: "pipe" }).toString().trim();
@@ -44,9 +51,6 @@ beforeEach(() => {
   run("git remote add origin https://example.invalid/repo.git");
 
   warnings = [];
-  jest.spyOn(core, "warning").mockImplementation((message) => {
-    warnings.push(message.toString());
-  });
 
   originalCwd = process.cwd();
   process.chdir(repoDirectory);
@@ -54,7 +58,6 @@ beforeEach(() => {
 
 afterEach(() => {
   process.chdir(originalCwd);
-  jest.restoreAllMocks();
   fs.rmSync(repoDirectory, { recursive: true, force: true });
 });
 

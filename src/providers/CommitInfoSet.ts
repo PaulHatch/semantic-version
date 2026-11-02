@@ -1,4 +1,4 @@
-import { CommitInfo } from "./CommitInfo";
+import { CommitInfo } from "./CommitInfo.js";
 
 /** Represents information about a set of commits */
 export class CommitInfoSet {

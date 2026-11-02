@@ -1,6 +1,6 @@
-import { ActionConfig } from "../ActionConfig";
-import { UserInfo } from "../providers/UserInfo";
-import { UserFormatter } from "./UserFormatter";
+import { ActionConfig } from "../ActionConfig.js";
+import { UserInfo } from "../providers/UserInfo.js";
+import { UserFormatter } from "./UserFormatter.js";
 
 export class CsvUserFormatter implements UserFormatter {
   constructor(config: ActionConfig) {

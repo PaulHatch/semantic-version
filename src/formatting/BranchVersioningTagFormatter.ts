@@ -1,5 +1,5 @@
-import { ActionConfig } from "../ActionConfig";
-import { DefaultTagFormatter } from "./DefaultTagFormatter";
+import { ActionConfig } from "../ActionConfig.js";
+import { DefaultTagFormatter } from "./DefaultTagFormatter.js";
 
 /** Default tag formatter which allows a prefix to be specified */
 export class BranchVersioningTagFormatter extends DefaultTagFormatter {

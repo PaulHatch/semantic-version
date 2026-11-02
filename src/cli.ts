@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { runAction } from "./action";
-import { ConfigurationProvider } from "./ConfigurationProvider";
-import { ActionConfig } from "./ActionConfig";
+import { runAction } from "./action.js";
+import { ConfigurationProvider } from "./ConfigurationProvider.js";
+import { ActionConfig } from "./ActionConfig.js";
 import * as process from "process";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 const program = new Command();
 

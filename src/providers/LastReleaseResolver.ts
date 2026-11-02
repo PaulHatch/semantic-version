@@ -1,5 +1,5 @@
-import { TagFormatter } from "../formatting/TagFormatter";
-import { ReleaseInformation } from "./ReleaseInformation";
+import { TagFormatter } from "../formatting/TagFormatter.js";
+import { ReleaseInformation } from "./ReleaseInformation.js";
 
 export interface LastReleaseResolver {
   ResolveAsync(

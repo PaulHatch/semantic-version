@@ -2,6 +2,7 @@
   "name": "@semanticversion/cli",
   "description": "Automated semantic versioning based on git history - CLI tool and GitHub Action",
   "main": "lib/main.js",
+  "type": "module",
   "bin": {
     "sv": "lib/cli.js",
     "semver": "lib/cli.js"
@@ -19,7 +20,7 @@
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "jest --runInBand --config ./jest.config.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --config ./jest.config.js",
     "all": "npm run build && npm run format-check && npm run package && npm test"
   },
   "repository": {
@@ -41,16 +42,16 @@
   },
   "homepage": "https://github.com/paulhatch/semantic-version#readme",
   "dependencies": {
-    "@actions/core": "^2.0.3",
-    "@actions/exec": "^2.0.0",
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0",
     "commander": "^15.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.19.2",
     "@vercel/ncc": "^0.45.0",
-    "jest": "^30.5.1",
-    "prettier": "^3.9.6",
-    "ts-jest": "^29.4.12",
+    "jest": "^30.5.2",
+    "prettier": "^3.9.10",
+    "ts-jest": "^29.4.15",
     "typescript": "^6.0.3"
   }
 }

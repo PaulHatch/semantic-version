@@ -1,10 +1,10 @@
-import { ActionConfig } from "../ActionConfig";
-import { CommitInfo } from "./CommitInfo";
-import { CommitInfoSet } from "./CommitInfoSet";
-import { ReleaseInformation } from "./ReleaseInformation";
-import { VersionClassification } from "./VersionClassification";
-import { VersionClassifier } from "./VersionClassifier";
-import { VersionType } from "./VersionType";
+import { ActionConfig } from "../ActionConfig.js";
+import { CommitInfo } from "./CommitInfo.js";
+import { CommitInfoSet } from "./CommitInfoSet.js";
+import { ReleaseInformation } from "./ReleaseInformation.js";
+import { VersionClassification } from "./VersionClassification.js";
+import { VersionClassifier } from "./VersionClassifier.js";
+import { VersionType } from "./VersionType.js";
 
 export class DefaultVersionClassifier implements VersionClassifier {
   protected majorPattern: (commit: CommitInfo) => boolean;

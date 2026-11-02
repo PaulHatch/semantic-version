@@ -1,6 +1,6 @@
-import { TagFormatter } from "./TagFormatter";
-import { VersionInformation } from "../providers/VersionInformation";
-import { ActionConfig } from "../ActionConfig";
+import { TagFormatter } from "./TagFormatter.js";
+import { VersionInformation } from "../providers/VersionInformation.js";
+import { ActionConfig } from "../ActionConfig.js";
 
 /** Default tag formatter which allows a prefix to be specified */
 export class DefaultTagFormatter implements TagFormatter {

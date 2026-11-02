@@ -1,4 +1,4 @@
-import { UserInfo } from "../providers/UserInfo";
+import { UserInfo } from "../providers/UserInfo.js";
 
 /** Formats a list of users as a string (e.g. JSON, YAML, CSV, etc) */
 export interface UserFormatter {

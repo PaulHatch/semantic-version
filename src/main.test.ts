@@ -3,12 +3,12 @@ import * as cp from "child_process";
 import * as path from "path";
 import * as os from "os";
 import { expect, test, describe } from "@jest/globals";
-import { ActionConfig } from "./ActionConfig";
+import { ActionConfig } from "./ActionConfig.js";
 import {
   createTestRunner,
   TestInterface,
   TestRunner,
-} from "./test-abstraction";
+} from "./test-abstraction.js";
 
 const windows = process.platform === "win32";
 const timeout = 30000;

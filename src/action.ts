@@ -1,9 +1,9 @@
-import { ConfigurationProvider } from "./ConfigurationProvider";
-import { VersionResult } from "./VersionResult";
-import { VersionType } from "./providers/VersionType";
-import { UserInfo } from "./providers/UserInfo";
-import { VersionInformation } from "./providers/VersionInformation";
-import { DebugManager } from "./DebugManager";
+import { ConfigurationProvider } from "./ConfigurationProvider.js";
+import { VersionResult } from "./VersionResult.js";
+import { VersionType } from "./providers/VersionType.js";
+import { UserInfo } from "./providers/UserInfo.js";
+import { VersionInformation } from "./providers/VersionInformation.js";
+import { DebugManager } from "./DebugManager.js";
 
 export async function runAction(
   configurationProvider: ConfigurationProvider,

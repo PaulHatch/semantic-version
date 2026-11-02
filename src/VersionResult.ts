@@ -1,5 +1,5 @@
-import { UserInfo } from "./providers/UserInfo";
-import { VersionType } from "./providers/VersionType";
+import { UserInfo } from "./providers/UserInfo.js";
+import { VersionType } from "./providers/VersionType.js";
 
 /** Represents the total output for the action */
 export class VersionResult {

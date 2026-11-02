@@ -1,22 +1,22 @@
-import { CsvUserFormatter } from "./formatting/CsvUserFormatter";
-import { BranchVersioningTagFormatter } from "./formatting/BranchVersioningTagFormatter";
-import { DefaultTagFormatter } from "./formatting/DefaultTagFormatter";
-import { DefaultVersionFormatter } from "./formatting/DefaultVersionFormatter";
-import { JsonUserFormatter } from "./formatting/JsonUserFormatter";
-import { TagFormatter } from "./formatting/TagFormatter";
-import { UserFormatter } from "./formatting/UserFormatter";
-import { VersionFormatter } from "./formatting/VersionFormatter";
-import { CommitsProvider } from "./providers/CommitsProvider";
-import { CurrentCommitResolver } from "./providers/CurrentCommitResolver";
-import { DefaultCommitsProvider } from "./providers/DefaultCommitsProvider";
-import { DefaultCurrentCommitResolver } from "./providers/DefaultCurrentCommitResolver";
-import { DefaultVersionClassifier } from "./providers/DefaultVersionClassifier";
-import { LastReleaseResolver } from "./providers/LastReleaseResolver";
-import { DefaultLastReleaseResolver } from "./providers/DefaultLastReleaseResolver";
-import { VersionClassifier } from "./providers/VersionClassifier";
-import { BumpAlwaysVersionClassifier } from "./providers/BumpAlwaysVersionClassifier";
-import { ActionConfig } from "./ActionConfig";
-import { DebugManager } from "./DebugManager";
+import { CsvUserFormatter } from "./formatting/CsvUserFormatter.js";
+import { BranchVersioningTagFormatter } from "./formatting/BranchVersioningTagFormatter.js";
+import { DefaultTagFormatter } from "./formatting/DefaultTagFormatter.js";
+import { DefaultVersionFormatter } from "./formatting/DefaultVersionFormatter.js";
+import { JsonUserFormatter } from "./formatting/JsonUserFormatter.js";
+import { TagFormatter } from "./formatting/TagFormatter.js";
+import { UserFormatter } from "./formatting/UserFormatter.js";
+import { VersionFormatter } from "./formatting/VersionFormatter.js";
+import { CommitsProvider } from "./providers/CommitsProvider.js";
+import { CurrentCommitResolver } from "./providers/CurrentCommitResolver.js";
+import { DefaultCommitsProvider } from "./providers/DefaultCommitsProvider.js";
+import { DefaultCurrentCommitResolver } from "./providers/DefaultCurrentCommitResolver.js";
+import { DefaultVersionClassifier } from "./providers/DefaultVersionClassifier.js";
+import { LastReleaseResolver } from "./providers/LastReleaseResolver.js";
+import { DefaultLastReleaseResolver } from "./providers/DefaultLastReleaseResolver.js";
+import { VersionClassifier } from "./providers/VersionClassifier.js";
+import { BumpAlwaysVersionClassifier } from "./providers/BumpAlwaysVersionClassifier.js";
+import { ActionConfig } from "./ActionConfig.js";
+import { DebugManager } from "./DebugManager.js";
 
 export class ConfigurationProvider {
   constructor(config: ActionConfig) {

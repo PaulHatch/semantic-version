@@ -1,4 +1,4 @@
-import { VersionType } from "./VersionType";
+import { VersionType } from "./VersionType.js";
 
 /** The result of a version classification */
 export class VersionClassification {

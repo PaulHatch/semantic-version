@@ -1,6 +1,6 @@
-import { CommitInfoSet } from "./CommitInfoSet";
-import { ReleaseInformation } from "./ReleaseInformation";
-import { VersionClassification } from "./VersionClassification";
+import { CommitInfoSet } from "./CommitInfoSet.js";
+import { ReleaseInformation } from "./ReleaseInformation.js";
+import { VersionClassification } from "./VersionClassification.js";
 
 /**
  * Defines the 'business logic' to turn commits into parameters for creating

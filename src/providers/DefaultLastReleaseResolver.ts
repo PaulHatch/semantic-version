@@ -1,8 +1,8 @@
-import { cmd } from "../CommandRunner";
-import { TagFormatter } from "../formatting/TagFormatter";
-import { LastReleaseResolver } from "./LastReleaseResolver";
-import { ReleaseInformation } from "./ReleaseInformation";
-import { ActionConfig } from "../ActionConfig";
+import { cmd } from "../CommandRunner.js";
+import { TagFormatter } from "../formatting/TagFormatter.js";
+import { LastReleaseResolver } from "./LastReleaseResolver.js";
+import { ReleaseInformation } from "./ReleaseInformation.js";
+import { ActionConfig } from "../ActionConfig.js";
 import * as core from "@actions/core";
 
 export class DefaultLastReleaseResolver implements LastReleaseResolver {

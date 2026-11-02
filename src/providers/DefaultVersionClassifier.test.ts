@@ -1,9 +1,9 @@
 import { expect, test } from "@jest/globals";
-import { ActionConfig } from "../ActionConfig";
-import { CommitInfo } from "./CommitInfo";
-import { CommitInfoSet } from "./CommitInfoSet";
-import { DefaultVersionClassifier } from "./DefaultVersionClassifier";
-import { ReleaseInformation } from "./ReleaseInformation";
+import { ActionConfig } from "../ActionConfig.js";
+import { CommitInfo } from "./CommitInfo.js";
+import { CommitInfoSet } from "./CommitInfoSet.js";
+import { DefaultVersionClassifier } from "./DefaultVersionClassifier.js";
+import { ReleaseInformation } from "./ReleaseInformation.js";
 
 test("Regular expressions can be used as minor tag direct", async () => {
   const classifier = new DefaultVersionClassifier({

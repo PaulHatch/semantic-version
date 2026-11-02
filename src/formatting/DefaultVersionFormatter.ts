@@ -1,6 +1,6 @@
-import { VersionFormatter } from "./VersionFormatter";
-import { VersionInformation } from "../providers/VersionInformation";
-import { ActionConfig } from "../ActionConfig";
+import { VersionFormatter } from "./VersionFormatter.js";
+import { VersionInformation } from "../providers/VersionInformation.js";
+import { ActionConfig } from "../ActionConfig.js";
 
 export class DefaultVersionFormatter implements VersionFormatter {
   private formatString: string;

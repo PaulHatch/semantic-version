@@ -1,6 +1,6 @@
-import { ActionConfig } from "../ActionConfig";
-import { cmd } from "../CommandRunner";
-import { CurrentCommitResolver } from "./CurrentCommitResolver";
+import { ActionConfig } from "../ActionConfig.js";
+import { cmd } from "../CommandRunner.js";
+import { CurrentCommitResolver } from "./CurrentCommitResolver.js";
 
 export class DefaultCurrentCommitResolver implements CurrentCommitResolver {
   private branch: string;
